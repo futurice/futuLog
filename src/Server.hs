@@ -17,7 +17,8 @@ workmodeHandler MkRegisterWorkmode {site, date, workmode} = do
   liftIO $ print workmode
   pure NoContent
 
-siteHandler :: Server SiteAPI
-siteHandler site = do
-  liftIO $ print site
-  pure [MkRoom {location = Munich, name = "Marienplatz", maxPeople = 2}]
+siteHandler :: Site -> Server RoomAPI
+siteHandler site = getRooms site :<|> addRoom
+  where
+    getRooms _ = pure [MkRoom {location = Munich, name = "Marienplatz", maxPeople = 2}]
+    addRoom = undefined

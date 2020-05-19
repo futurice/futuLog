@@ -13,7 +13,9 @@ type OfficeAPI =
 
 type SiteAPI = Capture "name" Site :> "rooms" :> RoomAPI
 
-type RoomAPI = Get '[JSON] [Room]
+type RoomAPI =
+  Get '[JSON] [Room]
+    :<|> ReqBody '[JSON] Room :> Post '[JSON] NoContent
 
 type WorkmodeAPI = "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent
 

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 099a383f88a5ee24f56324c4fe0172e37d0f1a11c157ab0e49e2af13a5a6ba6d
+-- hash: ba928d7d06f2923fe7e7f9ec6d5087083b58590d9f1c86f421aeb1e48994bcee
 
 name:           office-tracker
 version:        0.1.0.0
@@ -16,8 +16,6 @@ copyright:      2020 Jan van Brügge
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
-extra-source-files:
-    README.md
 
 executable office-tracker
   main-is: Main.hs

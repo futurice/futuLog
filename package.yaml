@@ -6,8 +6,6 @@ author: Jan van Brügge
 maintainer: jan.van.brugge@futurice.com
 copyright: 2020 Jan van Brügge
 category: Web
-extra-source-files:
-    - README.md
 
 default-extensions:
     - DataKinds

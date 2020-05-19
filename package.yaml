@@ -12,6 +12,7 @@ default-extensions:
     - DeriveAnyClass
     - DeriveGeneric
     - DerivingStrategies
+    - FlexibleContexts
     - LambdaCase
     - NamedFieldPuns
     - OverloadedStrings
@@ -20,12 +21,14 @@ default-extensions:
 dependencies:
     - base >= 4.7 && < 5
     - aeson
+    - mtl
     - servant
     - servant-server
     - text
     - time
     - wai
     - warp
+    - yaml
 
 executables:
     office-tracker:

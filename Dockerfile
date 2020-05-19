@@ -10,5 +10,6 @@ RUN cp "$(stack path --dist-dir)/build/office-tracker/office-tracker" .
 
 FROM debian:buster
 COPY --from=0 office-tracker .
+COPY rooms.yaml .
 EXPOSE 3000
 CMD ["./office-tracker"]

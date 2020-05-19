@@ -1,0 +1,19 @@
+name: office-tracker
+version: 0.1.0.0
+homepage: https://github.com/futurice/office-tracker#readme
+license: MIT
+author: Jan van Brügge
+maintainer: jan.van.brugge@futurice.com
+copyright: 2020 Jan van Brügge
+category: Web
+extra-source-files:
+    - README.md
+
+dependencies:
+    - base >= 4.7 && < 5
+    - servant
+
+executables:
+    office-tracker:
+        source-dirs: src
+        main: Main.hs

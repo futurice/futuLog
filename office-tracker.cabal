@@ -1,0 +1,31 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 2dd1c7a30cc97e72305821f9766e40a336b1043adf571e88ee660c0619bdbecd
+
+name:           office-tracker
+version:        0.1.0.0
+category:       Web
+homepage:       https://github.com/futurice/office-tracker#readme
+author:         Jan van Brügge
+maintainer:     jan.van.brugge@futurice.com
+copyright:      2020 Jan van Brügge
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+executable office-tracker
+  main-is: Main.hs
+  other-modules:
+      Paths_office_tracker
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , servant
+  default-language: Haskell2010

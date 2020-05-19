@@ -1,18 +1,15 @@
-module Server (officeHandler, Env (..), Server) where
+module Server (officeHandler, Server) where
 
 import API
+import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data
 import Data.Aeson (ToJSON (..))
+import Data.Functor (($>))
+import Database (getAllWorkmodes, saveWorkmode)
 import Servant.API ((:<|>) (..), NoContent (..))
-import Servant.Server (Handler, ServerT)
-
-data Env
-  = MkEnv
-      { rooms :: [Room]
-      }
-  deriving stock (Show, Eq)
+import Servant.Server (Handler, ServerT, err404, err500)
 
 type Server api = ServerT api (ReaderT Env Handler)
 
@@ -20,14 +17,17 @@ officeHandler :: Server OfficeAPI
 officeHandler = workmodeHandler :<|> siteHandler
 
 workmodeHandler :: Server WorkmodeAPI
-workmodeHandler MkRegisterWorkmode {site, date, workmode} = do
-  liftIO $ print site
-  liftIO $ print date
-  liftIO $ print workmode
-  pure NoContent
+workmodeHandler = registerWorkmode :<|> getAllWorkmodes
+  where
+    registerWorkmode m = saveWorkmode m $> NoContent
 
 siteHandler :: Site -> Server RoomAPI
-siteHandler site = getRooms site :<|> addRoom
+siteHandler site = getRooms site :<|> getRoom site
   where
     getRooms site = filter ((==) site . location) . rooms <$> ask
-    addRoom = undefined
+    getRoom site room = do
+      rooms <- getRooms site
+      case filter ((==) room . name) rooms of
+        [] -> throwError err404
+        [x] -> pure x
+        _ -> throwError err500

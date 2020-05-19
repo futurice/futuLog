@@ -16,12 +16,17 @@ default-extensions:
     - LambdaCase
     - NamedFieldPuns
     - OverloadedStrings
+    - ScopedTypeVariables
     - TypeOperators
 
 dependencies:
     - base >= 4.7 && < 5
     - aeson
+    - binary
+    - bytestring
     - mtl
+    - postgresql-simple
+    - resource-pool
     - servant
     - servant-server
     - text

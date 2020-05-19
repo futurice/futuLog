@@ -1,10 +1,23 @@
 module Data where
 
 import Data.Aeson ((.:), (.=), FromJSON (..), ToJSON (..), object, withObject)
+import Data.Binary.Builder (fromByteString)
+import Data.ByteString.Char8 (pack, unpack)
+import Data.Pool (Pool)
 import Data.Text (Text, toLower)
-import Data.Time.Clock (UTCTime)
+import Data.Time.LocalTime (TimeOfDay)
+import Database.PostgreSQL.Simple (Connection)
+import Database.PostgreSQL.Simple.FromField (FromField (..))
+import Database.PostgreSQL.Simple.ToField (Action (Plain), ToField (..))
 import GHC.Generics (Generic)
 import Servant.API (FromHttpApiData (..))
+
+data Env
+  = MkEnv
+      { rooms :: [Room],
+        pool :: Pool Connection
+      }
+  deriving stock (Show)
 
 data Site = Munich | Berlin | Stuttgart
   deriving stock (Generic, Show, Eq, Enum)
@@ -24,8 +37,8 @@ data Room
 
 data Timeslot
   = MkTimeslot
-      { startTime :: UTCTime,
-        endTime :: UTCTime
+      { startTime :: TimeOfDay,
+        endTime :: TimeOfDay
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
@@ -37,6 +50,15 @@ instance FromHttpApiData Site where
     | toLower s == "berlin" = Right Berlin
     | toLower s == "stuttgart" = Right Stuttgart
     | otherwise = Left $ "Unknown site: " <> s
+
+instance ToField Site where
+  toField s = Plain . fromByteString . pack $ "'" <> show s <> "'"
+
+instance FromField Site where
+  fromField f dat = fromField f dat >>= \case
+    ("Munich" :: String) -> pure Munich
+    "Berlin" -> pure Berlin
+    "Stuttgart" -> pure Stuttgart
 
 instance ToJSON Workmode where
   toJSON (Office name slot) = object ["type" .= ("Office" :: Text), "timeslot" .= slot, "roomName" .= name]

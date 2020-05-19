@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5f2b9adcc03360e1f20e12e6fea46571c732d2d57b507a45b96fd2afd1aea2ab
+-- hash: 01d8437a3401d0c0b4543f08d162479be9e44ffeb4a9843835d8193ac1f93366
 
 name:           office-tracker
 version:        0.1.0.0
@@ -22,15 +22,20 @@ executable office-tracker
   other-modules:
       API
       Data
+      Database
       Server
       Paths_office_tracker
   hs-source-dirs:
       src
-  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings TypeOperators
+  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeOperators
   build-depends:
       aeson
     , base >=4.7 && <5
+    , binary
+    , bytestring
     , mtl
+    , postgresql-simple
+    , resource-pool
     , servant
     , servant-server
     , text

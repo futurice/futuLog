@@ -9,9 +9,25 @@ category: Web
 extra-source-files:
     - README.md
 
+default-extensions:
+    - DataKinds
+    - DeriveAnyClass
+    - DeriveGeneric
+    - DerivingStrategies
+    - LambdaCase
+    - NamedFieldPuns
+    - OverloadedStrings
+    - TypeOperators
+
 dependencies:
     - base >= 4.7 && < 5
+    - aeson
     - servant
+    - servant-server
+    - text
+    - time
+    - wai
+    - warp
 
 executables:
     office-tracker:

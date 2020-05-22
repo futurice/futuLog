@@ -1,10 +1,11 @@
 module Database where
 
 import API (RegisterWorkmode (..))
+import Control.Monad (when)
 import Control.Monad.Catch (Exception, MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
-import Control.Retry (exponentialBackoff, recoverAll)
+import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data (Env (..), Timeslot (..), Workmode (..))
 import Data.ByteString (ByteString)
 import Data.Functor (($>))
@@ -16,7 +17,9 @@ connectionString :: ByteString
 connectionString = "postgresql://postgres:example_password@db:5432/office"
 
 retry :: (MonadIO m, MonadMask m) => m a -> m a
-retry x = recoverAll (exponentialBackoff 100) $ const (liftIO (putStrLn "failed to connect to database, retrying") *> x)
+retry x = recoverAll (exponentialBackoff 100) $ \RetryStatus {rsIterNumber} ->
+  when (rsIterNumber > 0) (liftIO $ putStrLn "failed to connect to database, retrying")
+    *> x
 
 initDatabase :: (MonadIO m, MonadMask m) => m (Pool Connection)
 initDatabase = do

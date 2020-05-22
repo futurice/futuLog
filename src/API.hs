@@ -27,6 +27,7 @@ type WorkmodeAPI =
 data RegisterWorkmode
   = MkRegisterWorkmode
       { userEmail :: Text,
+        fullName :: Text,
         site :: Site,
         date :: Day,
         workmode :: Workmode
@@ -36,7 +37,7 @@ data RegisterWorkmode
 
 instance FromRow RegisterWorkmode where
   fromRow = do
-    common <- MkRegisterWorkmode <$> field <*> field <*> field
+    common <- MkRegisterWorkmode <$> field <*> field <*> field <*> field
     mode <- field
     case (mode :: String) of
       "Home" -> replicateNull 4 $> common Home

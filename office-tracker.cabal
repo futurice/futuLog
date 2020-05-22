@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 01d8437a3401d0c0b4543f08d162479be9e44ffeb4a9843835d8193ac1f93366
+-- hash: 51115b3d0cea5da4cbaa9bd66fb436c73bce25904fc5ccc18074f35f94f3395f
 
 name:           office-tracker
 version:        0.1.0.0
@@ -33,9 +33,11 @@ executable office-tracker
     , base >=4.7 && <5
     , binary
     , bytestring
+    , exceptions
     , mtl
     , postgresql-simple
     , resource-pool
+    , retry
     , servant
     , servant-server
     , text

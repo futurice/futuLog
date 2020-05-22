@@ -24,9 +24,11 @@ dependencies:
     - aeson
     - binary
     - bytestring
+    - exceptions
     - mtl
     - postgresql-simple
     - resource-pool
+    - retry
     - servant
     - servant-server
     - text

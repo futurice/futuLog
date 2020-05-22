@@ -64,7 +64,7 @@ saveWorkmode MkRegisterWorkmode {userEmail, fullName, site, date, workmode} = do
         (userEmail, fullName, site, date, "Client" :: String, name)
     (Office name MkTimeslot {startTime, endTime}) ->
       exec
-        "INSERT INTO workmodes (userEmail, fullName site, date, workmode, roomName, startTime, endTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO workmodes (userEmail, fullName, site, date, workmode, roomName, startTime, endTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         (userEmail, fullName, site, date, "Office" :: String, name, startTime, endTime)
   where
     mkSimpleQuery s =

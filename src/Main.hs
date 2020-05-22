@@ -8,10 +8,11 @@ import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
 import Network.Wai (Application)
 import Network.Wai.Handler.Warp (run)
+import Servant.API ((:>))
 import Servant.Server (hoistServer, serve)
 import Server (officeHandler)
 
-api :: Proxy OfficeAPI
+api :: Proxy ("api" :> OfficeAPI)
 api = Proxy
 
 mkApp :: Env -> Application

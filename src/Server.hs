@@ -5,13 +5,15 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.Aeson (ToJSON (..))
-import Data.Config (OfficeSpace (..), Shift (..))
+import Data.ByteString.Lazy.Char8 (pack)
+import Data.Config (OfficeSpace (..), Shift (..), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
 import Data.Text (Text)
-import Database (getAllWorkmodes, saveWorkmode)
+import Database (getAllWorkmodes, getOfficeCapacityOn, saveShift)
+import Logic (registerWorkmode)
 import Servant.API ((:<|>) (..), NoContent (..))
-import Servant.Server (Handler, ServerT, err404, err500)
+import Servant.Server (Handler, ServerT, err400, errBody)
 
 type Server api = ServerT api (ReaderT Env Handler)
 
@@ -19,19 +21,17 @@ handler :: Server API
 handler = workmodeHandler :<|> shiftHandler :<|> officeHandler
 
 workmodeHandler :: Server WorkmodeAPI
-workmodeHandler = registerWorkmode :<|> getAllWorkmodes
+workmodeHandler = regWorkmode :<|> getAllWorkmodes
   where
-    registerWorkmode m = saveWorkmode m $> NoContent
+    regWorkmode m = registerWorkmode m >>= \case
+      Right _ -> pure NoContent
+      Left err -> throwError $ err400 {errBody = pack err}
 
 shiftHandler :: Server ShiftAPI
 shiftHandler = setShift :<|> getShifts
   where
-    setShift x = pure NoContent --TODO: Implement properly
-    getShifts office = filter ((==) office . getSite) . shifts <$> ask
-    getSite = site :: Shift -> Text
+    setShift x = saveShift x $> NoContent
+    getShifts office = filter ((==) office . shiftSite) . shifts <$> ask
 
 officeHandler :: Server OfficeAPI
-officeHandler office = getCapacity
-  where
-    getCapacity day = maxPeople . head . filter ((==) office . getSite) . offices <$> ask --TODO: Call database
-    getSite = site :: OfficeSpace -> Text
+officeHandler = getOfficeCapacityOn

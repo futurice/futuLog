@@ -9,7 +9,11 @@ import Database.PostgreSQL.Simple.FromRow (FromRow (..), RowParser, field)
 import Database.PostgreSQL.Simple.Types (Null)
 import GHC.Generics (Generic)
 
-data SetShift = MkSetShift {userEmail :: Text, shiftName :: Text}
+data SetShift
+  = MkSetShift
+      { userEmail :: Text,
+        shiftName :: Text
+      }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
@@ -22,6 +26,9 @@ data RegisterWorkmode
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
+
+workmodeSite :: RegisterWorkmode -> Text
+workmodeSite = site
 
 instance FromRow RegisterWorkmode where
   fromRow = do

@@ -6,15 +6,26 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (RegisterWorkmode (..))
-import Data.Env (Env (..))
+import Data.ClientRequest (RegisterWorkmode (..), SetShift (..))
+import Data.Env (Env (..), ShiftAssignment)
 import Data.Maybe (fromMaybe)
 import Data.Pool (Pool, createPool, withResource)
+import Data.Text (Text)
+import Data.Time.Calendar (Day)
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple (Connection, FromRow, Query, ToRow, close, connectPostgreSQL, execute, execute_, query_)
+import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 
 getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [RegisterWorkmode]
 getAllWorkmodes = query'_ "SELECT * FROM workmodes"
+
+getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
+getLastShiftsFor user = query' "SELECT * FROM shift_assignments WHERE user_email = ?" (Only user)
+
+getOfficeCapacityOn :: (MonadIO m, MonadReader Env m) => Text -> Day -> m Int
+getOfficeCapacityOn _ _ = pure 10 --TODO: Call database
+
+saveShift :: (MonadIO m, MonadReader Env m) => SetShift -> m ()
+saveShift MkSetShift {userEmail, shiftName} = pure () --TODO: Call database
 
 saveWorkmode :: (MonadIO m, MonadReader Env m) => RegisterWorkmode -> m ()
 saveWorkmode MkRegisterWorkmode {userEmail, site, date, workmode} = do
@@ -54,9 +65,9 @@ initDatabase pass = do
     execute_
       conn
       ( "CREATE TABLE IF NOT EXISTS shift_assignments ("
-          <> "shift_name text not null, "
+          <> "user_email text not null, "
           <> "assignment_date date not null, "
-          <> "user_email text not null"
+          <> "shift_name text not null"
           <> ")"
       )
   pure pool
@@ -74,6 +85,11 @@ query'_ :: (MonadIO m, MonadReader Env m, FromRow r) => Query -> m [r]
 query'_ q = do
   conns <- pool <$> ask
   liftIO . withResource conns $ \conn -> query_ conn q
+
+query' :: (MonadIO m, MonadReader Env m, ToRow x, FromRow r) => Query -> x -> m [r]
+query' q x = do
+  conns <- pool <$> ask
+  liftIO . withResource conns $ \conn -> query conn q x
 
 retry :: (MonadIO m, MonadMask m) => m a -> m a
 retry x = recoverAll (exponentialBackoff 100) $ \RetryStatus {rsIterNumber} ->

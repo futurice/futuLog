@@ -13,6 +13,9 @@ data Shift
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
+shiftSite :: Shift -> Text
+shiftSite = site
+
 data OfficeSpace
   = MkOfficeSpace
       { site :: Text,
@@ -20,3 +23,6 @@ data OfficeSpace
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
+
+officeSite :: OfficeSpace -> Text
+officeSite = site

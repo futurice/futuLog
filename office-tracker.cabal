@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d1c7a70ff010d30027f7a5de165ce63c0b78d6ade126768136151fdd83b14704
+-- hash: 18e476ca0a73b0e6a347b9758dfa0d799815d47c9c5f2d87f9edea81e525eb80
 
 name:           office-tracker
 version:        0.1.0.0
@@ -26,6 +26,7 @@ executable office-tracker
       Data.Env
       Data.Workmode
       Database
+      Logic
       Server
       Paths_office_tracker
   hs-source-dirs:

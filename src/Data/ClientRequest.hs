@@ -30,6 +30,9 @@ data RegisterWorkmode
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site
 
+workmodeDate :: RegisterWorkmode -> Day
+workmodeDate = date
+
 instance FromRow RegisterWorkmode where
   fromRow = do
     common <- MkRegisterWorkmode <$> field <*> field <*> field

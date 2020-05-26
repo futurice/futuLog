@@ -26,5 +26,8 @@ data ShiftAssignment
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
+shiftAssignmentName :: ShiftAssignment -> Text
+shiftAssignmentName = shiftName
+
 instance FromRow ShiftAssignment where
   fromRow = MkShiftAssignment <$> field <*> field <*> field

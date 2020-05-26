@@ -7,7 +7,7 @@ import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (RegisterWorkmode (..), SetShift (..))
-import Data.Env (Env (..), ShiftAssignment)
+import Data.Env (Env (..), ShiftAssignment, shiftAssignmentName)
 import Data.Maybe (fromMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
@@ -19,13 +19,25 @@ getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [RegisterWorkmode]
 getAllWorkmodes = query'_ "SELECT * FROM workmodes"
 
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
-getLastShiftsFor user = query' "SELECT * FROM shift_assignments WHERE user_email = ?" (Only user)
+getLastShiftsFor user =
+  query'
+    ( "(SELECT * FROM shift_assignments WHERE user_email = ? AND assignment_date > current_date - integer '14')"
+        <> " UNION "
+        <> "("
+        <> lastShiftQuery
+        <> ")"
+    )
+    (user, user)
 
 getOfficeCapacityOn :: (MonadIO m, MonadReader Env m) => Text -> Day -> m Int
-getOfficeCapacityOn _ _ = pure 10 --TODO: Call database
+getOfficeCapacityOn office day = fromOnly . head <$> query' "SELECT COUNT(*) FROM workmodes WHERE date = ? AND site = ?" (day, office)
 
 saveShift :: (MonadIO m, MonadReader Env m) => SetShift -> m ()
-saveShift MkSetShift {userEmail, shiftName} = pure () --TODO: Call database
+saveShift MkSetShift {userEmail, shiftName = name} = do
+  lastShift <- head <$> query' lastShiftQuery (Only userEmail)
+  if shiftAssignmentName lastShift == name
+    then pure ()
+    else exec "INSERT INTO shift_assignments (user_email, assignment_date, shift_name) VALUES (?, current_date, ?)" (userEmail, name)
 
 saveWorkmode :: (MonadIO m, MonadReader Env m) => RegisterWorkmode -> m ()
 saveWorkmode MkRegisterWorkmode {userEmail, site, date, workmode} = do
@@ -45,6 +57,9 @@ saveWorkmode MkRegisterWorkmode {userEmail, site, date, workmode} = do
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
         (userEmail, site, date, s :: String)
+
+lastShiftQuery :: Query
+lastShiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? AND assignment_date <= current_date - integer '14' ORDER BY assignment_date DESC LIMIT 1"
 
 initDatabase :: (MonadIO m, MonadMask m) => ByteString -> m (Pool Connection)
 initDatabase pass = do

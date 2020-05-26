@@ -5,7 +5,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.Aeson (ToJSON (..))
-import Data.Config (OfficeSpace (..))
+import Data.Config (OfficeSpace (..), Shift (..))
 import Data.Env (Env (..))
 import Data.Functor (($>))
 import Data.Text (Text)
@@ -24,9 +24,14 @@ workmodeHandler = registerWorkmode :<|> getAllWorkmodes
     registerWorkmode m = saveWorkmode m $> NoContent
 
 shiftHandler :: Server ShiftAPI
-shiftHandler setShift = pure NoContent
+shiftHandler = setShift :<|> getShifts
+  where
+    setShift x = pure NoContent --TODO: Implement properly
+    getShifts office = filter ((==) office . getSite) . shifts <$> ask
+    getSite = site :: Shift -> Text
 
 officeHandler :: Server OfficeAPI
-officeHandler office = getCapacity office
+officeHandler office = getCapacity
   where
-    getCapacity office = maxPeople . head . filter ((==) office . site) . offices <$> ask
+    getCapacity day = maxPeople . head . filter ((==) office . getSite) . offices <$> ask --TODO: Call database
+    getSite = site :: OfficeSpace -> Text

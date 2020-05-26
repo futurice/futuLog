@@ -1,8 +1,8 @@
 module Main where
 
-import API (OfficeAPI)
+import API (API)
 import Control.Monad.Reader (runReaderT)
-import Data (Env (..))
+import Data.Env (Env (..))
 import Data.Proxy (Proxy (..))
 import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
@@ -10,20 +10,21 @@ import Network.Wai (Application)
 import Network.Wai.Handler.Warp (run)
 import Servant.API ((:>))
 import Servant.Server (hoistServer, serve)
-import Server (officeHandler)
+import Server (handler)
 
-api :: Proxy ("api" :> OfficeAPI)
+api :: Proxy ("api" :> API)
 api = Proxy
 
 mkApp :: Env -> Application
-mkApp env = serve api (hoistServer api (flip runReaderT env) officeHandler)
+mkApp env = serve api (hoistServer api (flip runReaderT env) handler)
 
 port :: Int
 port = 3000
 
 main :: IO ()
 main = do
-  rooms <- decodeFileThrow "./rooms.yaml"
-  pool <- initDatabase
+  offices <- decodeFileThrow "./offices.yaml"
+  shifts <- decodeFileThrow "./shifts.yaml"
+  pool <- initDatabase "example_password"
   putStrLn $ "Running server on port " <> show port
-  run port $ mkApp MkEnv {rooms, pool}
+  run port $ mkApp MkEnv {offices, shifts, pool}

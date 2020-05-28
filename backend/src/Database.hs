@@ -75,8 +75,8 @@ saveWorkmode MkRegisterWorkmode {userEmail, site, date, workmode} = do
         (userEmail, site, date, s :: String)
 
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
-initDatabase pass = do
-  pool <- liftIO $ createPool (retry . connectPostgreSQL $ mkConnectionString pass) close 2 60 10
+initDatabase connectionString = do
+  pool <- liftIO $ createPool (retry $ connectPostgreSQL connectionString) close 2 60 10
   _ <- liftIO . withResource pool $ \conn ->
     execute_
       conn
@@ -100,9 +100,6 @@ initDatabase pass = do
           <> ")"
       )
   pure pool
-
-mkConnectionString :: ByteString -> ByteString
-mkConnectionString pass = "postgresql://postgres:" <> pass <> "@db:5432/office"
 
 exec :: (MonadIO m, MonadReader Env m, ToRow r) => Query -> r -> m ()
 exec q r = do

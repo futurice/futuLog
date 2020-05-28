@@ -1,9 +1,9 @@
-.stack-work/
-node_modules/
+**/.stack-work/
+**/node_modules/
 .git/
-.pnp/
-coverage/
-build/
+**/.pnp/
+**/coverage/
+**/build/
 
 .pnp.js
 .DS_Store

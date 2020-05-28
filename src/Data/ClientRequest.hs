@@ -1,7 +1,6 @@
 module Data.ClientRequest where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Functor ((<$))
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Workmode (Workmode (..))
@@ -37,10 +36,11 @@ instance FromRow RegisterWorkmode where
   fromRow = do
     common <- MkRegisterWorkmode <$> field <*> field <*> field
     mode <- field
-    common <$> case (mode :: Text) of
+    common <$> case mode of
       "Office" -> Office <$> field <* nullField
       "Client" -> Client <$> (nullField *> field)
       "Leave" -> Leave <$ nullField <* nullField
       "Home" -> Home <$ nullField <* nullField
+      _ -> error $ "Could not deserialize working mode type: " <> mode
     where
       nullField = field :: RowParser Null

@@ -6,7 +6,7 @@ import Data.Pool (Pool)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Database.PostgreSQL.Simple (Connection)
-import Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
+import Database.PostgreSQL.Simple.FromRow (FromRow (..))
 import GHC.Generics (Generic)
 
 data Env
@@ -21,13 +21,11 @@ data ShiftAssignment
   = MkShiftAssignment
       { userEmail :: Text,
         assignmentDate :: Day,
+        site :: Text,
         shiftName :: Text
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+  deriving anyclass (ToJSON, FromJSON, FromRow)
 
 shiftAssignmentName :: ShiftAssignment -> Text
 shiftAssignmentName = shiftName
-
-instance FromRow ShiftAssignment where
-  fromRow = MkShiftAssignment <$> field <*> field <*> field

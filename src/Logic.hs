@@ -18,7 +18,7 @@ registerWorkmode mode@(MkRegisterWorkmode {userEmail, workmode}) =
       case shifts of
         [] -> pure $ Left "You are not signed into any shift, please set a shift first"
         [shift] -> checkShift mode shift
-        _ -> pure $ Left "You cannot visit the office, you have to stay home two weeks after changing shifts"
+        _ -> pure $ Left "You cannot visit the office, you have to stay home two weeks after changing shifts" --TODO: Check if person was in the office in the last two weeks
   where
     isOffice (Office _) = True
     isOffice _ = False

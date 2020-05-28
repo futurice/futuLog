@@ -15,8 +15,9 @@ instance ToJSON Workmode where
 instance FromJSON Workmode where
   parseJSON = withObject "Workmode" $ \obj -> do
     ty <- obj .: "type"
-    case (ty :: Text) of
+    case ty of
       "Home" -> pure Home
       "Leave" -> pure Leave
-      "Office" -> Office <$> obj .: "confirmed"
+      "Office" -> pure $ Office Nothing
       "Client" -> Client <$> obj .: "name"
+      _ -> fail $ "Wrong workmode specified: " <> ty

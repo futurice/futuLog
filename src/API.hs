@@ -16,7 +16,9 @@ type WorkmodeAPI =
     :<|> "all" :> Get '[JSON] [RegisterWorkmode] -- DEVELOPMENT ONLY
 
 type ShiftAPI =
-  "set" :> ReqBody '[JSON] SetShift :> Post '[JSON] NoContent
-    :<|> "all" :> Capture "site" Text :> Get '[JSON] [Shift]
+  Capture "site" Text
+    :> ( "set" :> ReqBody '[JSON] SetShift :> Post '[JSON] NoContent
+           :<|> "all" :> Get '[JSON] [Shift]
+       )
 
 type OfficeAPI = Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int

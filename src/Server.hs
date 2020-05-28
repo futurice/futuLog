@@ -2,14 +2,12 @@ module Server (handler, Server) where
 
 import API
 import Control.Monad.Except (throwError)
-import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
-import Data.Aeson (ToJSON (..))
 import Data.ByteString.Lazy.Char8 (pack)
-import Data.Config (OfficeSpace (..), Shift (..), shiftSite)
+import Data.ClientRequest (shiftName)
+import Data.Config (name, shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
-import Data.Text (Text)
 import Database (getAllWorkmodes, getOfficeCapacityOn, saveShift)
 import Logic (registerWorkmode)
 import Servant.API ((:<|>) (..), NoContent (..))
@@ -28,10 +26,14 @@ workmodeHandler = regWorkmode :<|> getAllWorkmodes
       Left err -> throwError $ err400 {errBody = pack err}
 
 shiftHandler :: Server ShiftAPI
-shiftHandler = setShift :<|> getShifts
+shiftHandler office = setShift :<|> getShifts
   where
-    setShift x = saveShift x $> NoContent
-    getShifts office = filter ((==) office . shiftSite) . shifts <$> ask
+    getShifts = filter ((==) office . shiftSite) . shifts <$> ask
+    setShift x = do
+      shiftNames <- fmap name <$> getShifts
+      if shiftName x `elem` shiftNames
+        then saveShift office x $> NoContent
+        else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: Server OfficeAPI
 officeHandler = getOfficeCapacityOn

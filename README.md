@@ -4,11 +4,14 @@ A website used to save how many people are using a certain office/room at some t
 
 ## Configuration
 
-All the available rooms are defined in the [`rooms.yaml`](./rooms.yaml). This file is read on startup and defines the name, site and maximum amount of people per room
+There are two config files:
+
+-   [`offices.yaml`](./offices.yaml): This defines the maximum number of people per site
+-   [`shifts.yaml`](./shifts.yaml): This defines which shifts exist for a given site and on which days of the week a shift is
 
 ## Build this
 
-The easiest way is to use docker-compose, just run `docker-compose build` and wait until everything is done
+The easiest way is to use docker-compose, just run `docker-compose build` and wait until everything is done. Note that the first clean build will take roughly 15min. After that however the dependencies are cached and the rebuilds are fast.
 
 ## Run this
 

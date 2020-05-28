@@ -4,6 +4,7 @@ import API (API)
 import Control.Monad.Reader (runReaderT)
 import Data.Env (Env (..))
 import Data.Proxy (Proxy (..))
+import Data.String (fromString)
 import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
 import Network.Wai (Application)
@@ -11,6 +12,7 @@ import Network.Wai.Handler.Warp (run)
 import Servant.API ((:>))
 import Servant.Server (hoistServer, serve)
 import Server (handler)
+import System.Environment (getEnv)
 
 api :: Proxy ("api" :> API)
 api = Proxy
@@ -25,6 +27,6 @@ main :: IO ()
 main = do
   offices <- decodeFileThrow "./offices.yaml"
   shifts <- decodeFileThrow "./shifts.yaml"
-  pool <- initDatabase "example_password"
+  pool <- initDatabase . fromString =<< getEnv "DB_CONNECTION"
   putStrLn $ "Running server on port " <> show port
   run port $ mkApp MkEnv {offices, shifts, pool}

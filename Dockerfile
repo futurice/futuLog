@@ -2,11 +2,11 @@ FROM haskell:8.8.3
 
 RUN apt-get update && apt-get install -y libpq-dev
 
-COPY package.yaml stack.yaml stack.yaml.lock Setup.hs ./
+COPY backend/package.yaml backend/stack.yaml backend/stack.yaml.lock backend/Setup.hs ./
 RUN mkdir -p src
 RUN stack build --only-dependencies
 
-COPY src/ src/
+COPY backend/src/ src/
 RUN stack build
 RUN cp "$(stack path --dist-dir)/build/office-tracker/office-tracker" .
 

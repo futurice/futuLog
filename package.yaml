@@ -17,7 +17,19 @@ default-extensions:
     - NamedFieldPuns
     - OverloadedStrings
     - ScopedTypeVariables
+    - DuplicateRecordFields
     - TypeOperators
+
+ghc-options:
+    - -O2
+    - -Wall
+    - -Wcompat
+    - -Widentities
+    - -Wincomplete-record-updates
+    - -Wincomplete-uni-patterns
+    - -Wpartial-fields
+    - -Wredundant-constraints
+    - -Werror
 
 dependencies:
     - base >= 4.7 && < 5

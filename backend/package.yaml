@@ -37,15 +37,21 @@ dependencies:
     - binary
     - bytestring
     - exceptions
+    - http-types
+    - insert-ordered-containers
+    - lens
     - mtl
     - postgresql-simple
     - resource-pool
     - retry
     - servant
     - servant-server
+    - servant-swagger
+    - swagger2
     - text
     - time
     - wai
+    - wai-cors
     - warp
     - yaml
 

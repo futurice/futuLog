@@ -1,6 +1,7 @@
 module Data.Config where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
@@ -11,7 +12,7 @@ data Shift
         site :: Text
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+  deriving anyclass (ToJSON, FromJSON, ToSchema)
 
 shiftSite :: Shift -> Text
 shiftSite = site
@@ -22,7 +23,7 @@ data OfficeSpace
         maxPeople :: Int
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+  deriving anyclass (ToJSON, FromJSON, ToSchema)
 
 officeSite :: OfficeSpace -> Text
 officeSite = site

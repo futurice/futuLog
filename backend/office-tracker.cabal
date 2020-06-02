@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a2efb24dd327333d61138c5411d86567b59367c7bcf73fd92014af0c821f9a91
+-- hash: afbaf525106e8c5c114a8c11b5661bfeb0950f06b76934add1a0c7681c9c915f
 
 name:           office-tracker
 version:        0.1.0.0
@@ -38,15 +38,21 @@ executable office-tracker
     , binary
     , bytestring
     , exceptions
+    , http-types
+    , insert-ordered-containers
+    , lens
     , mtl
     , postgresql-simple
     , resource-pool
     , retry
     , servant
     , servant-server
+    , servant-swagger
+    , swagger2
     , text
     , time
     , wai
+    , wai-cors
     , warp
     , yaml
   default-language: Haskell2010

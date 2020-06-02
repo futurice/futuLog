@@ -1,6 +1,10 @@
 module Data.Workmode where
 
+import Control.Lens ((&), (.~), (?~))
 import Data.Aeson ((.:), (.=), FromJSON (..), ToJSON (..), object, withObject)
+import Data.HashMap.Strict.InsOrd (fromList)
+import Data.Proxy (Proxy (..))
+import Data.Swagger (NamedSchema (..), SwaggerType (..), ToSchema (..), declareSchemaRef, properties, required, type_)
 import Data.Text (Text)
 
 data Workmode = Office (Maybe Bool) | Leave | Home | Client Text
@@ -21,3 +25,18 @@ instance FromJSON Workmode where
       "Office" -> pure $ Office Nothing
       "Client" -> Client <$> obj .: "name"
       _ -> fail $ "Wrong workmode specified: " <> ty
+
+instance ToSchema Workmode where
+  declareNamedSchema _ = do
+    stringSchema <- declareSchemaRef (Proxy :: Proxy Text)
+    boolSchema <- declareSchemaRef (Proxy :: Proxy (Maybe Bool))
+    pure $ NamedSchema (Just "Workmode") $
+      mempty
+        & type_ ?~ SwaggerObject
+        & properties
+          .~ fromList
+            [ ("type", stringSchema),
+              ("confirmed", boolSchema),
+              ("name", stringSchema)
+            ]
+        & required .~ ["type"]

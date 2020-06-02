@@ -1,6 +1,7 @@
 module Data.ClientRequest where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Workmode (Workmode (..))
@@ -14,7 +15,7 @@ data SetShift
         shiftName :: Text
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+  deriving anyclass (ToJSON, FromJSON, ToSchema)
 
 data RegisterWorkmode
   = MkRegisterWorkmode
@@ -24,7 +25,7 @@ data RegisterWorkmode
         workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+  deriving anyclass (ToJSON, FromJSON, ToSchema)
 
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site

@@ -1,24 +1,26 @@
 module Main where
 
-import API (API)
+import API (api)
 import Control.Monad.Reader (runReaderT)
 import Data.Env (Env (..))
-import Data.Proxy (Proxy (..))
 import Data.String (fromString)
 import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
-import Network.Wai (Application)
+import Network.HTTP.Types.Header (hOrigin)
+import Network.Wai (Application, Middleware, requestHeaders)
 import Network.Wai.Handler.Warp (run)
-import Servant.API ((:>))
+import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsResourcePolicy)
 import Servant.Server (hoistServer, serve)
 import Server (handler)
 import System.Environment (getEnv)
 
-api :: Proxy ("api" :> API)
-api = Proxy
+applyCors :: Middleware
+applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHeaders req)) of
+  [] -> Just simpleCorsResourcePolicy
+  (x : _) -> Just simpleCorsResourcePolicy {corsOrigins = Just ([x], True)}
 
 mkApp :: Env -> Application
-mkApp env = serve api (hoistServer api (flip runReaderT env) handler)
+mkApp env = applyCors $ serve api (hoistServer api (flip runReaderT env) handler)
 
 port :: Int
 port = 3000

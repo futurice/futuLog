@@ -14,7 +14,7 @@ api = Proxy
 
 type RootAPI =
   "swagger.json" :> Get '[JSON] Swagger
-    :<|> "api" :> API
+    :<|> "api" :> AuthProtect "fum-cookie" :> API
 
 type API =
   "workmode" :> WorkmodeAPI

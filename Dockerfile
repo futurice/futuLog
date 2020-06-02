@@ -11,8 +11,8 @@ RUN stack build
 RUN cp "$(stack path --dist-dir)/build/office-tracker/office-tracker" .
 
 FROM debian:buster
-RUN apt-get update && apt-get install -y libpq5
+RUN apt-get update && apt-get install -y libpq5 ca-certificates
 COPY --from=0 office-tracker .
 COPY offices.yaml shifts.yaml ./
-EXPOSE 3000
+EXPOSE 8000
 CMD ["./office-tracker"]

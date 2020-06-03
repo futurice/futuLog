@@ -3,11 +3,14 @@ import "app/styles.scss";
 import React from "react";
 import ReactDOM from "react-dom";
 import { App } from "app/ui/app/App";
+import { createServices } from "app/services/services";
 // import * as serviceWorker from "./serviceWorker";
+
+const services = createServices();
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <App services={services} />
   </React.StrictMode>,
   document.getElementById("root")
 );

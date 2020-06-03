@@ -1,7 +1,8 @@
+import "app/styles.scss";
+
 import React from "react";
 import ReactDOM from "react-dom";
-import "app/styles.scss";
-import { App } from "app/App";
+import { App } from "app/ui/app/App";
 // import * as serviceWorker from "./serviceWorker";
 
 ReactDOM.render(

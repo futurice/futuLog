@@ -49,19 +49,16 @@ apiHandler :: Text -> Server API
 apiHandler userEmail = workmodeHandler userEmail :<|> shiftHandler userEmail :<|> officeHandler
 
 workmodeHandler :: Text -> Server WorkmodeAPI
-workmodeHandler _ = regWorkmode :<|> getWorkmode :<|> getAllWorkmodes
+workmodeHandler email = regWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
   where
-    getWorkmode day (Just userEmail) = queryWorkmode day userEmail
-    getWorkmode _ Nothing = throwError $ err400 {errBody = "No email specified"}
     regWorkmode m = registerWorkmode m >>= \case
       Right _ -> pure NoContent
       Left err -> throwError $ err400 {errBody = pack err}
 
 shiftHandler :: Text -> Server ShiftAPI
-shiftHandler _ = getShift :<|> (\office -> setShift office :<|> getShifts office)
+shiftHandler email = getShift :<|> (\office -> setShift office :<|> getShifts office)
   where
-    getShift (Just user) = listToMaybe <$> getLastShiftsFor user
-    getShift Nothing = pure Nothing
+    getShift = listToMaybe <$> getLastShiftsFor email
     getShifts office = filter ((==) office . shiftSite) . shifts <$> ask
     setShift office x = do
       shiftNames <- fmap name <$> getShifts office
@@ -77,14 +74,15 @@ officeHandler = getOffices :<|> getOfficeCapacityOn
 context :: Proxy '[AuthHandler Request Text]
 context = Proxy
 
-authServerContext :: Manager -> Context '[AuthHandler Request Text]
-authServerContext m = authHandler m :. EmptyContext
+authServerContext :: Manager -> Maybe Text -> Context '[AuthHandler Request Text]
+authServerContext m email = authHandler m email :. EmptyContext
 
-authHandler :: Manager -> AuthHandler Request Text
-authHandler m = mkAuthHandler handleLogin
+authHandler :: Manager -> Maybe Text -> AuthHandler Request Text
+authHandler m email = mkAuthHandler checkDev
   where
     maybeToEither e = maybe (Left e) Right
     throw401 msg = throwError $ err401 {errBody = msg}
+    checkDev req = maybe (handleLogin req) pure email
     handleLogin req = either throw401 (verifyLogin m) $ do
       cookie <- maybeToEither "Missing cookie header" $ lookup "cookie" $ requestHeaders req
       maybeToEither "Missing token in cookie" $ lookup "auth_pubtkt" $ parseCookiesText cookie

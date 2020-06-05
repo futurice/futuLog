@@ -19,8 +19,8 @@ import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow,
 getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [RegisterWorkmode]
 getAllWorkmodes = query'_ "SELECT * FROM workmodes"
 
-queryWorkmode :: (MonadIO m, MonadReader Env m) => Day -> Text -> m (Maybe RegisterWorkmode)
-queryWorkmode day email = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
+queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe RegisterWorkmode)
+queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
 
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
 getLastShiftsFor user =

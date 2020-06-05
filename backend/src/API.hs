@@ -1,7 +1,7 @@
 module API where
 
 import Data.ClientRequest (RegisterWorkmode, SetShift)
-import Data.Config (Shift)
+import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Swagger)
@@ -32,4 +32,6 @@ type ShiftAPI =
              :<|> "all" :> Get '[JSON] [Shift]
          )
 
-type OfficeAPI = Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int
+type OfficeAPI =
+  "all" :> Get '[JSON] [OfficeSpace]
+    :<|> Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int

@@ -53,4 +53,6 @@ shiftHandler = getShift :<|> (\office -> setShift office :<|> getShifts office)
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: Server OfficeAPI
-officeHandler = getOfficeCapacityOn
+officeHandler = getOffices :<|> getOfficeCapacityOn
+  where
+    getOffices = offices <$> ask

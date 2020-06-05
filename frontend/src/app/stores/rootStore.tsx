@@ -1,9 +1,11 @@
 import { combineReducers, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { userStore } from "app/stores/userStore";
 import { useSelector as _useSelector, useDispatch } from "react-redux";
+import { remoteStore } from "app/stores/remoteStore";
 
 const reducers = {
   [userStore.name]: userStore.reducer,
+  [remoteStore.name]: remoteStore.reducer,
 };
 
 export type IRootStore = StateFromReducersMapObject<typeof reducers>;
@@ -11,7 +13,7 @@ export type IRootStore = StateFromReducersMapObject<typeof reducers>;
 export const rootStore = combineReducers(reducers);
 
 //
-// Pre-typed react-redux hooks
+// Pre-typed react-redux hooks for `IRootStore`
 
 export function useSelector<TSelected = unknown>(
   selector: (state: IRootStore) => TSelected,

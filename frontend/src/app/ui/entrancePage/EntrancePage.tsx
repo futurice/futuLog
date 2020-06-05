@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
-import { useDispatch } from "app/stores/rootStore";
+import { useDispatch, useSelector } from "app/stores/rootStore";
 import { Workmode, IWorkmode } from "app/stores/workmodeStore";
 import { fetchUserWorkmode, pushUserWorkmode } from "app/stores/userStore";
+import {
+  useRemoteDataFetch,
+  RenderRemoteData,
+} from "app/utils/remoteDataUtils";
+import { useServices } from "app/services/services";
+import { IAPIClientService } from "app/services/apiClientService";
+import { RemoteData } from "app/stores/remoteStore";
 
 const workmodes = [
   Workmode.Home,
@@ -27,15 +34,48 @@ function hackWorkmode(workmodeStr: string): IWorkmode {
   return { type: Workmode.Home };
 }
 
+async function hackFetchWorkmode(
+  userEmail: string,
+  date: string,
+  apiClientService: IAPIClientService
+) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  //
+  // TODO: This is a temporary hack to get the current workmode for the user
+  // using the development endpoint that gives all registered workmodes.
+  // Actual implementation should use an endpoint that delivers the current
+  // workmode for the authorized user, which doesn't exist yet
+
+  const workmodes = await apiClientService.getWorkmodes();
+  const workmode = workmodes.find(
+    (workmode) => workmode.date === date && workmode.userEmail === userEmail
+  );
+
+  if (!workmode) {
+    throw Error("Not found");
+  }
+
+  return workmode;
+}
+
 export const EntrancePage: React.FC = () => {
+  const { apiClientService } = useServices();
   const [testDate, setTestDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
+  const user = useSelector((state) => state.userStore.user);
   const dispatch = useDispatch();
 
   const onSelectWorkmode = (workmodeStr: string) => {
     dispatch(pushUserWorkmode(testDate, hackWorkmode(workmodeStr)));
   };
+
+  const workmodeRes = useRemoteDataFetch(
+    "userWorkmodesByDay",
+    user && testDate,
+    () => hackFetchWorkmode(user!.email, testDate, apiClientService),
+    [user]
+  );
 
   useEffect(() => {
     dispatch(fetchUserWorkmode(testDate));
@@ -65,6 +105,20 @@ export const EntrancePage: React.FC = () => {
             onChange={(ev) => setTestDate(ev.currentTarget.value)}
           />
         </label>
+      </section>
+
+      <section>
+        <h2>Workmode</h2>
+        <RenderRemoteData
+          remoteData={workmodeRes}
+          onLoading={() => <h3>Loading...</h3>}
+          onError={(error) => (
+            <h3 style={{ color: "red" }}>Error: {error.message}</h3>
+          )}
+          onLoaded={(workmode) => (
+            <pre>{JSON.stringify(workmode, null, 2)}</pre>
+          )}
+        />
       </section>
 
       <section>

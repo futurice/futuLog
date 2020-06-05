@@ -6,7 +6,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (RegisterWorkmode (..), SetShift (..))
+import Data.ClientRequest (RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -16,10 +16,10 @@ import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 
-getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [RegisterWorkmode]
+getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [UserWorkmode]
 getAllWorkmodes = query'_ "SELECT * FROM workmodes"
 
-queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe RegisterWorkmode)
+queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe UserWorkmode)
 queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
 
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
@@ -40,12 +40,12 @@ shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assi
 getOfficeCapacityOn :: (MonadIO m, MonadReader Env m) => Text -> Day -> m Int
 getOfficeCapacityOn office day = fromOnly . head <$> query' "SELECT COUNT(*) FROM workmodes WHERE date = ? AND site = ?" (day, office)
 
-saveShift :: (MonadIO m, MonadReader Env m) => Text -> SetShift -> m ()
-saveShift office MkSetShift {userEmail, shiftName = name} = do
+saveShift :: (MonadIO m, MonadReader Env m) => Text -> Text -> SetShift -> m ()
+saveShift email office MkSetShift {shiftName = name} = do
   lastShift <-
     query'
       shiftQuery
-      (Only userEmail)
+      (Only email)
   today <- liftIO $ utctDay <$> getCurrentTime
   case lastShift of
     [s]
@@ -53,30 +53,30 @@ saveShift office MkSetShift {userEmail, shiftName = name} = do
       | assignmentDate s == today ->
         exec
           "UPDATE shift_assignments SET user_email = ?, site = ?, shift_name = ? WHERE assignment_date = current_date"
-          (userEmail, office, name)
+          (email, office, name)
     _ ->
       exec
         "INSERT INTO shift_assignments (user_email, assignment_date, site, shift_name) VALUES (?, current_date, ?, ?)"
-        (userEmail, office, name)
+        (email, office, name)
 
-saveWorkmode :: (MonadIO m, MonadReader Env m) => RegisterWorkmode -> m ()
-saveWorkmode MkRegisterWorkmode {userEmail, site, date, workmode} = do
+saveWorkmode :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m ()
+saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
   case workmode of
     Home -> mkSimpleQuery "Home"
     Leave -> mkSimpleQuery "Leave"
     (Client name) ->
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode, client_name) VALUES (?, ?, ?, ?, ?)"
-        (userEmail, site, date, "Client" :: String, name)
+        (email, site, date, "Client" :: String, name)
     (Office confirmed) ->
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
-        (userEmail, site, date, "Office" :: String, confirmed)
+        (email, site, date, "Office" :: String, confirmed)
   where
     mkSimpleQuery s =
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
-        (userEmail, site, date, s :: String)
+        (email, site, date, s :: String)
 
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
 initDatabase connectionString = do

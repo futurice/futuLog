@@ -52,7 +52,7 @@ apiHandler userEmail = workmodeHandler userEmail :<|> shiftHandler userEmail :<|
 workmodeHandler :: Text -> Server WorkmodeAPI
 workmodeHandler email = regWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
   where
-    regWorkmode m = registerWorkmode m >>= \case
+    regWorkmode m = registerWorkmode email m >>= \case
       Right _ -> pure NoContent
       Left err -> throwError $ err400 {errBody = pack err}
 
@@ -64,7 +64,7 @@ shiftHandler email = getShift :<|> (\office -> setShift office :<|> getShifts of
     setShift office x = do
       shiftNames <- fmap name <$> getShifts office
       if shiftName x `elem` shiftNames
-        then saveShift office x $> NoContent
+        then saveShift email office x $> NoContent
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: Server OfficeAPI

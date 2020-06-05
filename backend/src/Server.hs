@@ -12,7 +12,7 @@ import Data.Functor (($>))
 import Data.Maybe (listToMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http), Swagger, info, schemes, title, version)
-import Database (getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, saveShift)
+import Database (getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
 import Logic (registerWorkmode)
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
 import Servant.Server (Handler, ServerT, err400, errBody)
@@ -34,8 +34,10 @@ apiHandler :: Server API
 apiHandler = workmodeHandler :<|> shiftHandler :<|> officeHandler
 
 workmodeHandler :: Server WorkmodeAPI
-workmodeHandler = regWorkmode :<|> getAllWorkmodes
+workmodeHandler = regWorkmode :<|> getWorkmode :<|> getAllWorkmodes
   where
+    getWorkmode day (Just userEmail) = queryWorkmode day userEmail
+    getWorkmode _ Nothing = throwError $ err400 {errBody = "No email specified"}
     regWorkmode m = registerWorkmode m >>= \case
       Right _ -> pure NoContent
       Left err -> throwError $ err400 {errBody = pack err}

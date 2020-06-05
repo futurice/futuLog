@@ -1,11 +1,6 @@
 import { generatePath } from "react-router";
 import { stringify } from "query-string";
 
-export const routes = {
-  BOOKING: "/booking",
-  TRACKING: "/tracking",
-};
-
 interface IUrlParams {
   [paramName: string]: string | number | boolean;
 }

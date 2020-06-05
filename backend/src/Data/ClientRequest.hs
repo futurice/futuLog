@@ -11,21 +11,28 @@ import GHC.Generics (Generic)
 
 data SetShift
   = MkSetShift
-      { userEmail :: Text,
-        shiftName :: Text
-      }
+      {shiftName :: Text}
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema)
 
 data RegisterWorkmode
   = MkRegisterWorkmode
+      { site :: Text,
+        date :: Day,
+        workmode :: Workmode
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
+
+data UserWorkmode
+  = MkUserWorkmode
       { userEmail :: Text,
         site :: Text,
         date :: Day,
         workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON, ToSchema)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site
@@ -33,9 +40,9 @@ workmodeSite = site
 workmodeDate :: RegisterWorkmode -> Day
 workmodeDate = date
 
-instance FromRow RegisterWorkmode where
+instance FromRow UserWorkmode where
   fromRow = do
-    common <- MkRegisterWorkmode <$> field <*> field <*> field
+    common <- MkUserWorkmode <$> field <*> field <*> field
     mode <- field
     common <$> case mode of
       "Office" -> Office <$> field <* nullField

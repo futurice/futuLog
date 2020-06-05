@@ -15,7 +15,7 @@ import Data.Maybe (listToMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), Swagger, info, schemes, title, version)
 import qualified Data.Text as T
-import Data.Text (Text, breakOn, isPrefixOf, unpack)
+import Data.Text (Text, breakOn, isPrefixOf, replace, unpack)
 import Data.Text.Encoding (encodeUtf8)
 import Database (getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
 import GHC.Generics (Generic)
@@ -97,10 +97,11 @@ verifyLogin manager cookie = do
     Just (MkFumResponse {email}) -> pure email
     Nothing -> throwError $ err401 {errBody = "Token not accepted by FUM"}
   where
+    cookie' = replace "\"" "" cookie
     getUsername =
-      if "\"uid%3D" `isPrefixOf` cookie
+      if "uid%3D" `isPrefixOf` cookie'
         then
-          let (name, _) = breakOn "%3B" $ T.drop 7 cookie
+          let (name, _) = breakOn "%3B" $ T.drop 6 cookie'
            in pure name
         else throwError $ err401 {errBody = "No username in cookie"}
 

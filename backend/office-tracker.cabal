@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 90f9dee8ca2d8658492e6fe47fc1541a4cf707d0ef4edc76d432971e8ec9c694
+-- hash: 245a7017fb47bd7001b809533025534bcdd440df3281a7909745d51e61d96dee
 
 name:           office-tracker
 version:        0.1.0.0
@@ -51,6 +51,7 @@ executable office-tracker
     , servant
     , servant-server
     , servant-swagger
+    , servant-swagger-ui
     , swagger2
     , text
     , time

@@ -1,6 +1,6 @@
 module Main where
 
-import API (api)
+import API (api, rootAPI)
 import Control.Monad.Reader (runReaderT)
 import Data.Env (Env (..))
 import Data.String (fromString)
@@ -13,8 +13,9 @@ import Network.HTTP.Types.Header (hOrigin)
 import Network.Wai (Application, Middleware, requestHeaders)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsResourcePolicy)
+import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
-import Server (authServerContext, context, handler)
+import Server (apiHandler, authServerContext, context, swaggerHandler)
 import System.Environment (getArgs, getEnv)
 
 applyCors :: Middleware
@@ -24,8 +25,10 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
 
 mkApp :: Manager -> Maybe Text -> Env -> Application
 mkApp m email env =
-  applyCors $ serveWithContext api (authServerContext m email) $
-    hoistServerWithContext api context (flip runReaderT env) handler
+  applyCors $ serveWithContext rootAPI (authServerContext m email) $
+    ( swaggerHandler
+        :<|> hoistServerWithContext api context (flip runReaderT env) apiHandler
+    )
 
 port :: Int
 port = 8000

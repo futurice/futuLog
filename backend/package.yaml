@@ -51,6 +51,7 @@ dependencies:
     - servant
     - servant-server
     - servant-swagger
+    - servant-swagger-ui
     - swagger2
     - text
     - time

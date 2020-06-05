@@ -1,4 +1,4 @@
-module Server (handler, authServerContext, context, Server) where
+module Server (apiHandler, swaggerHandler, authServerContext, context, Server) where
 
 import API
 import Control.Lens ((&), (.~), (?~))
@@ -13,7 +13,7 @@ import Data.Env (Env (..))
 import Data.Functor (($>))
 import Data.Maybe (listToMaybe)
 import Data.Proxy (Proxy (..))
-import Data.Swagger (Scheme (Http, Https), Swagger, info, schemes, title, version)
+import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import qualified Data.Text as T
 import Data.Text (Text, breakOn, isPrefixOf, replace, unpack)
 import Data.Text.Encoding (encodeUtf8)
@@ -27,25 +27,26 @@ import Network.Wai (Request, requestHeaders)
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
 import Servant.API.Experimental.Auth (AuthProtect)
 import Servant.Server (Context (..), Handler, ServerT, err400, err401, errBody)
+import qualified Servant.Server as S
 import Servant.Server.Experimental.Auth (AuthHandler, AuthServerData, mkAuthHandler)
 import Servant.Swagger (toSwagger)
+import Servant.Swagger.UI (swaggerSchemaUIServer)
 import Web.Cookie (parseCookiesText)
 
 type Server api = ServerT api (ReaderT Env Handler)
 
 type instance AuthServerData (AuthProtect "fum-cookie") = Text
 
-swagger :: Swagger
-swagger =
-  toSwagger (Proxy :: Proxy ("api" :> API))
-    & schemes ?~ [Http, Https]
-    & info . title .~ "Office Tracker API"
-    & info . version .~ "1.0"
+swaggerHandler :: S.Server SwaggerAPI
+swaggerHandler = swaggerSchemaUIServer swagger
+  where
+    swagger =
+      toSwagger (Proxy :: Proxy ("api" :> API))
+        & schemes ?~ [Https, Http]
+        & info . title .~ "Office Tracker API"
+        & info . version .~ "1.0"
 
-handler :: Server RootAPI
-handler = pure swagger :<|> apiHandler
-
-apiHandler :: Text -> Server API
+apiHandler :: Server ProtectedAPI
 apiHandler userEmail = workmodeHandler userEmail :<|> shiftHandler userEmail :<|> officeHandler
 
 workmodeHandler :: Text -> Server WorkmodeAPI

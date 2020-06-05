@@ -4,17 +4,20 @@ import Data.ClientRequest (RegisterWorkmode, SetShift)
 import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
-import Data.Swagger (Swagger)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Servant.API
+import Servant.Swagger.UI (SwaggerSchemaUI)
 
-api :: Proxy RootAPI
+api :: Proxy ProtectedAPI
 api = Proxy
 
-type RootAPI =
-  "swagger.json" :> Get '[JSON] Swagger
-    :<|> "api" :> AuthProtect "fum-cookie" :> API
+rootAPI :: Proxy (SwaggerAPI :<|> ProtectedAPI)
+rootAPI = Proxy
+
+type SwaggerAPI = SwaggerSchemaUI "swagger-ui" "swagger.json"
+
+type ProtectedAPI = "api" :> AuthProtect "fum-cookie" :> API
 
 type API =
   "workmode" :> WorkmodeAPI

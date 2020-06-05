@@ -8,6 +8,7 @@ import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (RegisterWorkmode (..), SetShift (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
+import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
@@ -17,6 +18,9 @@ import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow,
 
 getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [RegisterWorkmode]
 getAllWorkmodes = query'_ "SELECT * FROM workmodes"
+
+queryWorkmode :: (MonadIO m, MonadReader Env m) => Day -> Text -> m (Maybe RegisterWorkmode)
+queryWorkmode day email = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
 
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
 getLastShiftsFor user =

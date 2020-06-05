@@ -23,6 +23,7 @@ type API =
 
 type WorkmodeAPI =
   "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent
+    :<|> "get" :> Capture "date" Day :> QueryParam "userEmail" Text :> Get '[JSON] (Maybe RegisterWorkmode)
     :<|> "all" :> Get '[JSON] [RegisterWorkmode] -- DEVELOPMENT ONLY
 
 type ShiftAPI =

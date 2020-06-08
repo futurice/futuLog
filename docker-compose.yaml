@@ -4,10 +4,11 @@ services:
         build: .
         image: futurice/office-tracker:latest
         tty: true
+        command: ./office-tracker --devEmail office-tracker@futurice.com
         environment:
-            DB_CONNECTION: postgresql://postgres:example_password@db:5432/office
+            DB_URL: postgresql://postgres:example_password@db:5432/office
         ports:
-            - "3000:3000"
+            - "8000:8000"
         depends_on:
             - db
 

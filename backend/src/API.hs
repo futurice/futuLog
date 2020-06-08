@@ -1,20 +1,23 @@
 module API where
 
-import Data.ClientRequest (RegisterWorkmode, SetShift)
-import Data.Config (Shift)
+import Data.ClientRequest (RegisterWorkmode, SetShift, UserWorkmode)
+import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
-import Data.Swagger (Swagger)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Servant.API
+import Servant.Swagger.UI (SwaggerSchemaUI)
 
-api :: Proxy RootAPI
+api :: Proxy ProtectedAPI
 api = Proxy
 
-type RootAPI =
-  "swagger.json" :> Get '[JSON] Swagger
-    :<|> "api" :> API
+rootAPI :: Proxy (SwaggerAPI :<|> ProtectedAPI)
+rootAPI = Proxy
+
+type SwaggerAPI = SwaggerSchemaUI "swagger-ui" "swagger.json"
+
+type ProtectedAPI = "api" :> AuthProtect "fum-cookie" :> API
 
 type API =
   "workmode" :> WorkmodeAPI
@@ -23,13 +26,16 @@ type API =
 
 type WorkmodeAPI =
   "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent
-    :<|> "all" :> Get '[JSON] [RegisterWorkmode] -- DEVELOPMENT ONLY
+    :<|> "get" :> Capture "date" Day :> Get '[JSON] (Maybe UserWorkmode)
+    :<|> "all" :> Get '[JSON] [UserWorkmode] -- DEVELOPMENT ONLY
 
 type ShiftAPI =
-  "get" :> QueryParam "userEmail" Text :> Get '[JSON] (Maybe ShiftAssignment)
+  "get" :> Get '[JSON] (Maybe ShiftAssignment)
     :<|> Capture "site" Text
       :> ( "set" :> ReqBody '[JSON] SetShift :> Post '[JSON] NoContent
              :<|> "all" :> Get '[JSON] [Shift]
          )
 
-type OfficeAPI = Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int
+type OfficeAPI =
+  "all" :> Get '[JSON] [OfficeSpace]
+    :<|> Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int

@@ -12,10 +12,10 @@ export const FakeLoginPage: React.FC = () => {
     ev.preventDefault();
 
     const formData = new FormData(ev.currentTarget);
-    const user = (Object.fromEntries(formData.entries()) as any) as IUser;
+    const user = (Object.fromEntries(formData.entries()) as unknown) as IUser;
 
     if (typeof user.email === "string") {
-      dispatch(userStore.actions.setUser(user));
+      dispatch(userStore.actions.fakeLogin(user));
       historyService.push(RoutePaths.Entrance);
     }
   };

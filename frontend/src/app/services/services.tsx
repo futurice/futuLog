@@ -12,7 +12,7 @@ import { rootStore } from "app/stores/rootStore";
 //
 // History
 
-const stringifyWithBrackets = (params: object) =>
+const stringifyWithBrackets = (params: Record<string, unknown>) =>
   qsStringify(params, { arrayFormat: "bracket" });
 
 const parseWithBrackets = (url: string) =>
@@ -61,7 +61,7 @@ export function createServices() {
   return services;
 }
 
-export const ServicesContext = React.createContext<IServices>(null as any);
+export const ServicesContext = React.createContext<IServices>(null as never);
 export const Services = ServicesContext.Consumer;
 
 export const useServices = () => useContext(ServicesContext);

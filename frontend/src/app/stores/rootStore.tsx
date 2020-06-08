@@ -1,10 +1,8 @@
 import { combineReducers, StateFromReducersMapObject } from "@reduxjs/toolkit";
-import { userStore } from "app/stores/userStore";
 import { useSelector as _useSelector, useDispatch } from "react-redux";
 import { remoteStore } from "app/stores/remoteStore";
 
 const reducers = {
-  [userStore.name]: userStore.reducer,
   [remoteStore.name]: remoteStore.reducer,
 };
 

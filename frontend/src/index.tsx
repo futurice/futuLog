@@ -8,9 +8,6 @@ import { createServices } from "app/services/services";
 
 const services = createServices();
 
-// @ts-ignore
-window.__services = services;
-
 ReactDOM.render(
   <React.StrictMode>
     <App services={services} />

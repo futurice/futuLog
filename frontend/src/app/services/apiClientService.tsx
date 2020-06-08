@@ -4,19 +4,14 @@ import { IWorkmode } from "app/stores/workmodeStore";
 import { IShift } from "app/stores/shiftStore";
 
 interface IRequestInit extends RequestInit {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any;
 }
 
-function fetchJSON<T>(
-  url: string,
-  init?: IRequestInit | undefined
-): Promise<T> {
+function fetchJSON<T>(url: string, init?: IRequestInit | undefined): Promise<T> {
   return fetch(url, {
     ...init,
-    body:
-      init?.body && typeof init.body !== "string"
-        ? JSON.stringify(init.body)
-        : init?.body,
+    body: init?.body && typeof init.body !== "string" ? JSON.stringify(init.body) : init?.body,
     headers: {
       "Content-Type": "application/json;charset=utf-8",
       ...init?.headers,
@@ -42,12 +37,9 @@ interface IRegisterWorkmode {
 export function createAPIClientService(baseUrl: string) {
   return {
     getUserShift: (userEmail: string) =>
-      fetchJSON<IUserShift>(
-        `${baseUrl}/api/shift/get?${qsStringify({ userEmail })}`
-      ),
+      fetchJSON<IUserShift>(`${baseUrl}/api/shift/get?${qsStringify({ userEmail })}`),
 
-    getSiteShifts: (site: string) =>
-      fetchJSON<IShift[]>(`${baseUrl}/api/shift/${e(site)}/all`),
+    getSiteShifts: (site: string) => fetchJSON<IShift[]>(`${baseUrl}/api/shift/${e(site)}/all`),
 
     registerWorkmode: (request: IRegisterWorkmode) =>
       fetchJSON<void>(`${baseUrl}/api/workmode/register`, {
@@ -55,8 +47,7 @@ export function createAPIClientService(baseUrl: string) {
         body: request,
       }),
 
-    getWorkmodes: () =>
-      fetchJSON<IUserWorkmode[]>(`${baseUrl}/api/workmode/all`),
+    getWorkmodes: () => fetchJSON<IUserWorkmode[]>(`${baseUrl}/api/workmode/all`),
   };
 }
 

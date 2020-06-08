@@ -1,11 +1,11 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
-import { useSelector } from "app/stores/rootStore";
 import { BookingPage } from "app/ui/bookingPage/BookingPage";
 import { TrackingPage } from "app/ui/trackingPage/TrackingPage";
 import { EntrancePage } from "app/ui/entrancePage/EntrancePage";
 import { PlanningPage } from "app/ui/planningPage/PlanningPage";
 import { FakeLoginPage } from "app/ui/fakeLoginPage/FakeLoginPage";
+import { useRemoteDataValue } from "app/utils/remoteDataUtils";
 
 export enum RoutePaths {
   Entrance = "/",
@@ -16,7 +16,8 @@ export enum RoutePaths {
 }
 
 export const AppRoutes: React.FC = () => {
-  const user = useSelector((state) => state.userStore.user);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const user = useRemoteDataValue("users", "0", null!);
   console.log("user?", user);
 
   return (

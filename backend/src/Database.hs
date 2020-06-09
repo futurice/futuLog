@@ -22,6 +22,9 @@ getAllWorkmodes = query'_ "SELECT * FROM workmodes"
 queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe UserWorkmode)
 queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
 
+confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> Bool -> m ()
+confirmWorkmode email day status = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)
+
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
 getLastShiftsFor user =
   query'

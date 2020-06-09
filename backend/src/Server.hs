@@ -11,13 +11,14 @@ import Data.ClientRequest (shiftName)
 import Data.Config (Shift (name), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
-import Data.Maybe (listToMaybe)
+import Data.Maybe (fromMaybe, listToMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import qualified Data.Text as T
 import Data.Text (Text, breakOn, isPrefixOf, replace, unpack)
 import Data.Text.Encoding (encodeUtf8)
-import Database (getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
+import Data.Time.Clock (getCurrentTime, utctDay)
+import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
 import GHC.Generics (Generic)
 import Logic (registerWorkmode)
 import Network.HTTP.Client (Manager, httpLbs, parseRequest, responseBody)
@@ -50,11 +51,15 @@ apiHandler :: Server ProtectedAPI
 apiHandler userEmail = workmodeHandler userEmail :<|> shiftHandler userEmail :<|> officeHandler
 
 workmodeHandler :: Text -> Server WorkmodeAPI
-workmodeHandler email = regWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
+workmodeHandler email = regWorkmode :<|> confWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
   where
     regWorkmode m = registerWorkmode email m >>= \case
       Right _ -> pure NoContent
       Left err -> throwError $ err400 {errBody = pack err}
+    confWorkmode day status = do
+      today <- liftIO $ utctDay <$> getCurrentTime
+      confirmWorkmode email (fromMaybe today day) status
+      pure NoContent
 
 shiftHandler :: Text -> Server ShiftAPI
 shiftHandler email = getShift :<|> (\office -> setShift office :<|> getShifts office)

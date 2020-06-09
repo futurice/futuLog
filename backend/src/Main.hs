@@ -9,14 +9,18 @@ import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
 import Network.HTTP.Client (Manager)
 import Network.HTTP.Client.TLS (newTlsManager)
-import Network.HTTP.Types.Header (hOrigin)
-import Network.Wai (Application, Middleware, requestHeaders)
+import Network.HTTP.Types.Header (hContentType, hOrigin)
+import Network.HTTP.Types.Status (status200)
+import Network.Wai (Application, Middleware, requestHeaders, responseFile)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsResourcePolicy)
 import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
+import Servant.Server.StaticFiles (serveDirectoryWith)
 import Server (apiHandler, authServerContext, context, swaggerHandler)
 import System.Environment (getArgs, getEnv)
+import WaiAppStatic.Storage.Filesystem (defaultWebAppSettings)
+import WaiAppStatic.Types (StaticSettings (..))
 
 applyCors :: Middleware
 applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHeaders req)) of
@@ -28,10 +32,17 @@ mkApp m email env =
   applyCors $ serveWithContext rootAPI (authServerContext m email) $
     ( swaggerHandler
         :<|> hoistServerWithContext api context (flip runReaderT env) apiHandler
+        :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
     )
+
+serveIndex :: Application
+serveIndex _ respond = respond $ responseFile status200 [(hContentType, "text/html")] (frontendPath <> "/index.html") Nothing
 
 port :: Int
 port = 8000
+
+frontendPath :: String
+frontendPath = "./static"
 
 main :: IO ()
 main = do

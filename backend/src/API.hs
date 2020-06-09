@@ -12,8 +12,10 @@ import Servant.Swagger.UI (SwaggerSchemaUI)
 api :: Proxy ProtectedAPI
 api = Proxy
 
-rootAPI :: Proxy (SwaggerAPI :<|> ProtectedAPI)
+rootAPI :: Proxy RootAPI
 rootAPI = Proxy
+
+type RootAPI = SwaggerAPI :<|> ProtectedAPI :<|> Raw
 
 type SwaggerAPI = SwaggerSchemaUI "swagger-ui" "swagger.json"
 

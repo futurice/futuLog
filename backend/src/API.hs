@@ -26,6 +26,7 @@ type API =
 
 type WorkmodeAPI =
   "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent
+    :<|> "confirm" :> QueryParam "date" Day :> ReqBody '[JSON] Bool :> Post '[JSON] NoContent
     :<|> "get" :> Capture "date" Day :> Get '[JSON] (Maybe UserWorkmode)
     :<|> "all" :> Get '[JSON] [UserWorkmode] -- DEVELOPMENT ONLY
 

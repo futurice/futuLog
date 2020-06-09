@@ -1,11 +1,6 @@
 import { generatePath } from "react-router";
 import { stringify } from "query-string";
 
-export const routes = {
-  BOOKING: "/booking",
-  TRACKING: "/tracking",
-};
-
 interface IUrlParams {
   [paramName: string]: string | number | boolean;
 }
@@ -13,7 +8,7 @@ interface IUrlParams {
 export const generateUrl = (
   urlPattern: string,
   urlParams: IUrlParams,
-  queryParams?: object
+  queryParams?: { [key: string]: unknown }
 ) => {
   const filledUrlPattern = generatePath(urlPattern, urlParams);
 

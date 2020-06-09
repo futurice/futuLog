@@ -8,6 +8,7 @@ There are two config files:
 
 -   [`offices.yaml`](./offices.yaml): This defines the maximum number of people per site
 -   [`shifts.yaml`](./shifts.yaml): This defines which shifts exist for a given site and on which days of the week a shift is
+-   [`admins.yaml'`](./admins.yaml): A list of email addresses that should have access to the admin API
 
 ## Build this
 
@@ -15,4 +16,4 @@ The easiest way is to use docker-compose, just run `docker-compose build` and wa
 
 ## Run this
 
-`docker-compose up`. This will make the server available at port 3000
+`docker-compose up`. This will make the server available at port 8000

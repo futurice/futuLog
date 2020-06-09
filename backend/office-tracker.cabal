@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 755d71f2de109a698df726ed716bc2c84d05eae37c5529c193b3aa8cb5b06572
+-- hash: dc9056578e59694b511ad403aeee57b19ec744807566748790379a94e65f667d
 
 name:           office-tracker
 version:        0.1.0.0
@@ -20,6 +20,7 @@ executable office-tracker
   main-is: Main.hs
   other-modules:
       API
+      Auth
       Data.ClientRequest
       Data.Config
       Data.Env

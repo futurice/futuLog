@@ -4,7 +4,6 @@ import Control.Monad.Except (ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (decode)
 import Data.ByteString.Lazy.Char8 (pack)
-import Data.Maybe (isJust)
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -33,28 +32,28 @@ contextProxy = Proxy
 mkAuthServerContext :: Manager -> Maybe User -> [Text] -> IO (Context ContextContent, Middleware)
 mkAuthServerContext m user admins = do
   key <- V.newKey
-  pure (authHandler user key :. adminAuthHandler user key admins :. EmptyContext, authMiddleware user key m)
+  pure (authHandler key :. adminAuthHandler key admins :. EmptyContext, authMiddleware user key m)
 
-authHandler :: Maybe User -> V.Key User -> AuthHandler Request User
-authHandler user key = mkAuthHandler $ login user key
+authHandler :: V.Key User -> AuthHandler Request User
+authHandler key = mkAuthHandler $ login key
 
-adminAuthHandler :: Maybe User -> V.Key User -> [Text] -> AuthHandler Request AdminUser
-adminAuthHandler maybeUser key admins = mkAuthHandler $ \req -> do
-  user <- login maybeUser key req
-  if email user `elem` admins || isJust maybeUser
+adminAuthHandler :: V.Key User -> [Text] -> AuthHandler Request AdminUser
+adminAuthHandler key admins = mkAuthHandler $ \req -> do
+  user <- login key req
+  if email user `elem` admins
     then pure $ MkAdmin user
     else throwError $ err401 {errBody = "User is not an admin"}
 
-login :: Maybe User -> V.Key User -> Request -> Handler User
-login user key req = maybe doLogin pure user
+login :: V.Key User -> Request -> Handler User
+login key req = either throw401 pure (maybeToEither "No user data received from middleware" $ V.lookup key (vault req))
   where
-    doLogin = either throw401 pure (maybeToEither "No user data received from middleware" $ V.lookup key (vault req))
     throw401 msg = throwError $ err401 {errBody = msg}
 
 authMiddleware :: Maybe User -> V.Key User -> Manager -> Middleware
-authMiddleware (Just _) _ _ app req respond = app req respond
-authMiddleware Nothing key m app req respond = do
-  eitherUser <- runExceptT $ verifyLogin m req
+authMiddleware maybeUser key m app req respond = do
+  eitherUser <- case maybeUser of
+    Just x -> pure $ Right x
+    _ -> runExceptT $ verifyLogin m req
   case eitherUser of
     Left e -> respond $ responseLBS status401 [] $ pack e
     Right user -> app (req {vault = V.insert key user (vault req)}) respond

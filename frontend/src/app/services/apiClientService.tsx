@@ -1,8 +1,3 @@
-import { stringify as qsStringify } from "query-string";
-import { IUserShift, IUserWorkmode } from "app/stores/userStore";
-import { IWorkmode } from "app/stores/workmodeStore";
-import { IShift } from "app/stores/shiftStore";
-
 interface IRequestInit extends RequestInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any;
@@ -27,27 +22,104 @@ function fetchJSON<T>(url: string, init?: IRequestInit | undefined): Promise<T> 
 
 const e = encodeURIComponent;
 
-interface IRegisterWorkmode {
+export interface IUserDto {
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+}
+
+export interface IShiftAssignmentDto {
+  userEmail: string;
+  assignmentDate: string;
+  site: string;
+  shiftName: string;
+}
+
+export interface IShiftDto {
+  days: number;
+  name: string;
+  site: string;
+}
+
+export interface ISetShiftDto {
+  shiftName: string;
+}
+
+export enum Workmode {
+  Office = "Office",
+  Client = "Client",
+  Leave = "Leave",
+  Home = "Home",
+}
+
+export interface IWorkmodeDto {
+  type: string;
+  confirmed?: boolean;
+  name?: string;
+}
+
+export interface IUserWorkmodeDto {
   userEmail: string;
   site: string;
   date: string;
-  workmode: IWorkmode;
+  workmode: IWorkmodeDto;
+}
+
+export interface IRegisterWorkmodeDto {
+  site: string;
+  date: string;
+  workmode: IWorkmodeDto;
+}
+
+export interface IOfficeSpaceDto {
+  site: string;
+  maxPeople: number;
 }
 
 export function createAPIClientService(baseUrl: string) {
   return {
-    getUserShift: (userEmail: string) =>
-      fetchJSON<IUserShift>(`${baseUrl}/api/shift/get?${qsStringify({ userEmail })}`),
+    getUser: () =>
+      // TODO: Fetch /api/me
+      Promise.resolve<IUserDto>({
+        email: "office-tracker@futurice.com",
+        firstName: "Office",
+        lastName: "Tracker",
+        avatarUrl: "https://placekitten.com/300/300",
+      }),
 
-    getSiteShifts: (site: string) => fetchJSON<IShift[]>(`${baseUrl}/api/shift/${e(site)}/all`),
+    getUserShift: () => fetchJSON<IShiftAssignmentDto>(`${baseUrl}/api/shift/get`),
 
-    registerWorkmode: (request: IRegisterWorkmode) =>
+    getSiteShifts: (site: string) => fetchJSON<IShiftDto[]>(`${baseUrl}/api/shift/${e(site)}/all`),
+
+    registerSiteShift: (site: string, request: ISetShiftDto) =>
+      fetchJSON<void>(`${baseUrl}/api/shift/${e(site)}/set`, {
+        method: "POST",
+        body: request,
+      }),
+
+    getUserWorkmode: (date: string) =>
+      fetchJSON<IUserWorkmodeDto>(`${baseUrl}/api/workmode/get/${e(date)}`),
+
+    registerUserWorkmode: (request: IRegisterWorkmodeDto) =>
       fetchJSON<void>(`${baseUrl}/api/workmode/register`, {
         method: "POST",
         body: request,
       }),
 
-    getWorkmodes: () => fetchJSON<IUserWorkmode[]>(`${baseUrl}/api/workmode/all`),
+    confirmUserWorkmode: (confirm: boolean) =>
+      fetchJSON<void>(`${baseUrl}/api/workmode/confirm`, {
+        method: "POST",
+        body: confirm,
+      }),
+
+    // DEV/Admin only
+    getWorkmodes: () => fetchJSON<IUserWorkmodeDto[]>(`${baseUrl}/api/workmode/all`),
+
+    getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
+
+    getOfficeCapacity: (site: string, date: string) =>
+      fetchJSON<number>(`${baseUrl}/api/office/${e(site)}/capacity/${e(date)}`),
   };
 }
 

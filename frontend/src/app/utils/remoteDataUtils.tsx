@@ -1,5 +1,11 @@
 import { useSelector, useDispatch } from "react-redux";
-import { RemoteData, IRemoteStore, remoteStore } from "app/stores/remoteStore";
+import {
+  RemoteData,
+  IRemoteStore,
+  remoteStore,
+  getRemoteData,
+  getRemoteDataValue,
+} from "app/stores/remoteStore";
 import { useEffect } from "react";
 
 //
@@ -8,56 +14,48 @@ import { useEffect } from "react";
 type StateWithRemoteData = { remoteStore: IRemoteStore };
 
 export function useRemoteData<T>(key: keyof IRemoteStore, id: string) {
-  const res = useSelector<StateWithRemoteData, RemoteData<T>>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state) => (state.remoteStore[key] as any)[id]
+  const res = useSelector<StateWithRemoteData, RemoteData<T>>((state) =>
+    getRemoteData<T>(state.remoteStore, key, id)
   );
   return res;
 }
 
 export function useRemoteDataValue<T, K extends keyof IRemoteStore = keyof IRemoteStore>(
   key: K,
-  id: keyof IRemoteStore[K],
+  id: string,
   defaultValue: T
 ): T {
-  const res = useSelector<StateWithRemoteData, RemoteData<T>>(
+  return useSelector<StateWithRemoteData, T>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (state) => (state.remoteStore[key] as any)[id]
+    (state) => getRemoteDataValue(getRemoteData(state.remoteStore, key, id), defaultValue)
   );
-  return res
-    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      RemoteData.match<T, T>(res as any, {
-        Loading: () => defaultValue,
-        Loaded: (value) => value,
-        Error: () => defaultValue,
-      })
-    : defaultValue;
 }
 
-const loadingSingleton = RemoteData.Loading();
+const noneSingleton = RemoteData.None();
 
-export function useRemoteDataFetch<T = unknown>(
-  key: keyof IRemoteStore,
+export function useRemoteDataFetch<T, K extends keyof IRemoteStore = keyof IRemoteStore>(
+  key: K,
   id: string | undefined | null | false,
   fetch: (id: string) => Promise<T>,
+  // NOTE: Shield the caller from making the mistake of not providing deps,
+  // this would lead into infinite loop fetching and setting the data
   deps: unknown[] = []
 ) {
   const res = useSelector<StateWithRemoteData, RemoteData<T>>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (state) => !!id && (state.remoteStore[key] as any)?.[id]
   );
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (!res && id) {
-      dispatch(remoteStore.actions.setLoading({ key, id }));
-      fetch(id)
-        .then((value) => dispatch(remoteStore.actions.setLoaded({ key, id, value })))
-        .catch((error) => dispatch(remoteStore.actions.setError({ key, id, error })));
+      dispatch(remoteStore.actions.setLoading({ key, id: id as any }));
+      fetch(id as any)
+        .then((value) => dispatch(remoteStore.actions.setLoaded({ key, id: id as any, value })))
+        .catch((error) => dispatch(remoteStore.actions.setError({ key, id: id as any, error })));
     }
   }, [res, key, id, ...deps]); // eslint-disable-line
 
-  return res || loadingSingleton;
+  return res || noneSingleton;
 }
 
 //
@@ -65,21 +63,24 @@ export function useRemoteDataFetch<T = unknown>(
 
 interface IRenderRemoteData<T> {
   remoteData: RemoteData<T>;
+  onNone?: () => React.ReactElement | null;
   onLoading?: () => React.ReactElement | null;
-  onLoaded: (data: T) => React.ReactElement | null;
   onError?: (error: Error) => React.ReactElement | null;
+  children: (data: T) => React.ReactElement | null;
 }
 
 export function RenderRemoteData<T>({
   remoteData,
+  onNone,
   onLoading,
-  onLoaded,
   onError,
+  children,
 }: IRenderRemoteData<T>) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return RemoteData.match(remoteData as any, {
+    None: () => (onNone ? onNone() : null),
     Loading: () => (onLoading ? onLoading() : null),
-    Loaded: (data: T) => onLoaded(data),
+    Loaded: (data: T) => children(data),
     Error: (error) => (onError ? onError(error) : null),
   });
 }

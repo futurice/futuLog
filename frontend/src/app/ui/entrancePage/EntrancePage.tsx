@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
-import { Workmode, IWorkmode } from "app/stores/workmodeStore";
-import { userStore, IUser } from "app/stores/userStore";
 import {
   useRemoteDataFetch,
   RenderRemoteData,
   useRemoteDataValue,
 } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
+import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services/apiClientService";
+import { combineRemoteData, getRemoteDataValue, remoteStore } from "app/stores/remoteStore";
 
 const workmodes = [Workmode.Home, Workmode.Office, Workmode.Client, Workmode.Leave];
 
-function hackWorkmode(workmodeStr: string): IWorkmode {
+function hackWorkmode(workmodeStr: string): IWorkmodeDto {
   switch (workmodeStr) {
     case Workmode.Home:
       return { type: Workmode.Home };
@@ -29,58 +29,67 @@ function hackWorkmode(workmodeStr: string): IWorkmode {
 }
 
 export const EntrancePage: React.FC = () => {
-  const services = useServices();
-  const [testDate, setTestDate] = useState(new Date().toISOString().slice(0, 10));
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const user = useRemoteDataValue<IUser>("users", "0", null!);
+  const { apiClientService } = useServices();
+  const date = new Date().toISOString().slice(0, 10);
   const dispatch = useDispatch();
 
-  const onSelectWorkmode = (workmodeStr: string) => {
-    dispatch(userStore.actions.pushUserWorkmode(testDate, hackWorkmode(workmodeStr)));
-  };
-
-  const workmodeRes = useRemoteDataFetch(
-    "userWorkmodesByDay",
-    user && testDate,
-    userStore.fetchers.fetchUserWorkmode(services),
-    [user]
+  const user = useRemoteDataValue<IUserDto>("users", "0", null!);
+  const userWorkmodeRes = useRemoteDataFetch("userWorkmodesByDay", date, () =>
+    apiClientService.getUserWorkmode(date).catch(() => null)
   );
+  const userShiftRes = useRemoteDataFetch("userShifts", "0", () => apiClientService.getUserShift());
+
+  const onSelectWorkmode = async (workmodeEnum: Workmode) => {
+    const userShift = getRemoteDataValue(userShiftRes, null);
+    if (userShift) {
+      const workmode = hackWorkmode(workmodeEnum);
+      const site = userShift.site;
+      await apiClientService.registerUserWorkmode({
+        date,
+        site,
+        workmode,
+      });
+      dispatch(
+        remoteStore.actions.setLoaded({
+          key: "userWorkmodesByDay",
+          id: date,
+          value: {
+            userEmail: user && user.email,
+            date,
+            site,
+            workmode,
+          } as IUserWorkmodeDto,
+        })
+      );
+    }
+  };
 
   return (
     <div className="EntrancePage">
-      <section>
-        <h2>Where are you working today?</h2>
+      <RenderRemoteData
+        remoteData={combineRemoteData({ userWorkmode: userWorkmodeRes, userShift: userShiftRes })}
+        onLoading={() => <h2>Loading user information..</h2>}
+      >
+        {({ userWorkmode }) => (
+          <>
+            <h2>Where are you working today?</h2>
 
-        <label>
-          <span>Selected option</span>
-          <select onChange={(ev) => onSelectWorkmode(ev.currentTarget.value)}>
-            {workmodes.map((workmode) => (
-              <option key={workmode} value={workmode}>
-                {workmode}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          <span>(TEST) Date: </span>
-          <input
-            type="text"
-            value={testDate}
-            onChange={(ev) => setTestDate(ev.currentTarget.value)}
-          />
-        </label>
-      </section>
-
-      <section>
-        <h2>Workmode</h2>
-        <RenderRemoteData
-          remoteData={workmodeRes}
-          onLoading={() => <h3>Loading...</h3>}
-          onError={(error) => <h3 style={{ color: "red" }}>Error: {error.message}</h3>}
-          onLoaded={(workmode) => <pre>{JSON.stringify(workmode, null, 2)}</pre>}
-        />
-      </section>
+            <label>
+              <span>Selected option</span>
+              <select
+                onChange={(ev) => onSelectWorkmode(ev.currentTarget.value as Workmode)}
+                value={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
+              >
+                {workmodes.map((workmode) => (
+                  <option key={workmode} value={workmode}>
+                    {workmode}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </>
+        )}
+      </RenderRemoteData>
 
       <section>
         <h2>Where will you work work in the next two weeks?</h2>

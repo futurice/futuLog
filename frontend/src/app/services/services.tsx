@@ -2,10 +2,7 @@ import React, { useContext } from "react";
 import qhistory from "qhistory";
 import { parse as qsParse, stringify as qsStringify } from "query-string";
 import { createBrowserHistory } from "history";
-import {
-  createAPIClientService,
-  IAPIClientService,
-} from "app/services/apiClientService";
+import { createAPIClientService, IAPIClientService } from "app/services/apiClientService";
 import { configureStore, getDefaultMiddleware, Store } from "@reduxjs/toolkit";
 import { rootStore } from "app/stores/rootStore";
 
@@ -15,15 +12,10 @@ import { rootStore } from "app/stores/rootStore";
 const stringifyWithBrackets = (params: Record<string, unknown>) =>
   qsStringify(params, { arrayFormat: "bracket" });
 
-const parseWithBrackets = (url: string) =>
-  qsParse(url, { arrayFormat: "bracket" });
+const parseWithBrackets = (url: string) => qsParse(url, { arrayFormat: "bracket" });
 
 export function createHistoryService() {
-  const history = qhistory(
-    createBrowserHistory(),
-    stringifyWithBrackets,
-    parseWithBrackets
-  );
+  const history = qhistory(createBrowserHistory(), stringifyWithBrackets, parseWithBrackets);
   return history;
 }
 

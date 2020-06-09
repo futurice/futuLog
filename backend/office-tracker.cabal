@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 245a7017fb47bd7001b809533025534bcdd440df3281a7909745d51e61d96dee
+-- hash: 15c2eb37356e6000acda2b73cdb6c78344be34866729b2f2a97913cbd040a184
 
 name:           office-tracker
 version:        0.1.0.0
@@ -56,6 +56,7 @@ executable office-tracker
     , text
     , time
     , wai
+    , wai-app-static
     , wai-cors
     , warp
     , yaml

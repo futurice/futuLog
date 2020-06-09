@@ -14,6 +14,7 @@ default-extensions:
     - DerivingStrategies
     - DuplicateRecordFields
     - FlexibleContexts
+    - GeneralizedNewtypeDeriving
     - LambdaCase
     - NamedFieldPuns
     - OverloadedStrings
@@ -37,6 +38,7 @@ dependencies:
     - aeson
     - binary
     - bytestring
+    - cassava
     - cookie
     - exceptions
     - http-client
@@ -49,12 +51,14 @@ dependencies:
     - resource-pool
     - retry
     - servant
+    - servant-multipart
     - servant-server
     - servant-swagger
     - servant-swagger-ui
     - swagger2
     - text
     - time
+    - vault
     - wai
     - wai-app-static
     - wai-cors

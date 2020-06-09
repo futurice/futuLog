@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 755d71f2de109a698df726ed716bc2c84d05eae37c5529c193b3aa8cb5b06572
+-- hash: 404b64b45d14b2a5697867e69e33100a1e6053727dc25943c7c1a4a073016034
 
 name:           office-tracker
 version:        0.1.0.0
@@ -20,8 +20,11 @@ executable office-tracker
   main-is: Main.hs
   other-modules:
       API
+      Auth
+      CSV
       Data.ClientRequest
       Data.Config
+      Data.CSV
       Data.Env
       Data.User
       Data.Workmode
@@ -31,13 +34,14 @@ executable office-tracker
       Paths_office_tracker
   hs-source-dirs:
       src
-  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeFamilies TypeOperators
+  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts GeneralizedNewtypeDeriving LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeFamilies TypeOperators
   ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Werror
   build-depends:
       aeson
     , base >=4.7 && <5
     , binary
     , bytestring
+    , cassava
     , cookie
     , exceptions
     , http-client
@@ -50,12 +54,14 @@ executable office-tracker
     , resource-pool
     , retry
     , servant
+    , servant-multipart
     , servant-server
     , servant-swagger
     , servant-swagger-ui
     , swagger2
     , text
     , time
+    , vault
     , wai
     , wai-app-static
     , wai-cors

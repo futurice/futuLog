@@ -8,6 +8,7 @@ import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.User (User)
 import Servant.API
+import Servant.Multipart (Mem, MultipartData, MultipartForm)
 import Servant.Swagger.UI (SwaggerSchemaUI)
 
 api :: Proxy ProtectedAPI
@@ -20,7 +21,11 @@ type RootAPI = SwaggerAPI :<|> ProtectedAPI :<|> Raw
 
 type SwaggerAPI = SwaggerSchemaUI "swagger-ui" "swagger.json"
 
-type ProtectedAPI = "api" :> AuthProtect "fum-cookie" :> API
+type ProtectedAPI =
+  "api" :> AuthProtect "fum-cookie"
+    :> ( API
+           :<|> AuthProtect "admin" :> "admin" :> AdminAPI
+       )
 
 type API =
   "workmode" :> WorkmodeAPI
@@ -44,3 +49,5 @@ type ShiftAPI =
 type OfficeAPI =
   "all" :> Get '[JSON] [OfficeSpace]
     :<|> Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int
+
+type AdminAPI = "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent

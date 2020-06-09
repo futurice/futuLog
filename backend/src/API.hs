@@ -6,6 +6,7 @@ import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
+import Data.User (User)
 import Servant.API
 import Servant.Swagger.UI (SwaggerSchemaUI)
 
@@ -25,6 +26,7 @@ type API =
   "workmode" :> WorkmodeAPI
     :<|> "shift" :> ShiftAPI
     :<|> "office" :> OfficeAPI
+    :<|> "me" :> Get '[JSON] User
 
 type WorkmodeAPI =
   "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent

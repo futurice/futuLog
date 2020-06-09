@@ -5,7 +5,7 @@ import Control.Lens ((&), (.~), (?~))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Reader (ReaderT, ask)
-import Data.Aeson (FromJSON, ToJSON, decode)
+import Data.Aeson (decode)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.ClientRequest (shiftName)
 import Data.Config (Shift (name), shiftSite)
@@ -18,8 +18,8 @@ import qualified Data.Text as T
 import Data.Text (Text, breakOn, isPrefixOf, replace, unpack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (getCurrentTime, utctDay)
+import Data.User (User (..))
 import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
-import GHC.Generics (Generic)
 import Logic (registerWorkmode)
 import Network.HTTP.Client (Manager, httpLbs, parseRequest, responseBody)
 import qualified Network.HTTP.Client as C
@@ -36,7 +36,7 @@ import Web.Cookie (parseCookiesText)
 
 type Server api = ServerT api (ReaderT Env Handler)
 
-type instance AuthServerData (AuthProtect "fum-cookie") = Text
+type instance AuthServerData (AuthProtect "fum-cookie") = User
 
 swaggerHandler :: S.Server SwaggerAPI
 swaggerHandler = swaggerSchemaUIServer swagger
@@ -48,10 +48,10 @@ swaggerHandler = swaggerSchemaUIServer swagger
         & info . version .~ "1.0"
 
 apiHandler :: Server ProtectedAPI
-apiHandler userEmail = workmodeHandler userEmail :<|> shiftHandler userEmail :<|> officeHandler
+apiHandler user = workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user
 
-workmodeHandler :: Text -> Server WorkmodeAPI
-workmodeHandler email = regWorkmode :<|> confWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
+workmodeHandler :: User -> Server WorkmodeAPI
+workmodeHandler MkUser {email} = regWorkmode :<|> confWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
   where
     regWorkmode m = registerWorkmode email m >>= \case
       Right _ -> pure NoContent
@@ -61,8 +61,8 @@ workmodeHandler email = regWorkmode :<|> confWorkmode :<|> queryWorkmode email :
       confirmWorkmode email (fromMaybe today day) status
       pure NoContent
 
-shiftHandler :: Text -> Server ShiftAPI
-shiftHandler email = getShift :<|> (\office -> setShift office :<|> getShifts office)
+shiftHandler :: User -> Server ShiftAPI
+shiftHandler MkUser {email} = getShift :<|> (\office -> setShift office :<|> getShifts office)
   where
     getShift = listToMaybe <$> getLastShiftsFor email
     getShifts office = filter ((==) office . shiftSite) . shifts <$> ask
@@ -77,30 +77,30 @@ officeHandler = getOffices :<|> getOfficeCapacityOn
   where
     getOffices = offices <$> ask
 
-context :: Proxy '[AuthHandler Request Text]
+context :: Proxy '[AuthHandler Request User]
 context = Proxy
 
-authServerContext :: Manager -> Maybe Text -> Context '[AuthHandler Request Text]
-authServerContext m email = authHandler m email :. EmptyContext
+authServerContext :: Manager -> Maybe User -> Context '[AuthHandler Request User]
+authServerContext m user = authHandler m user :. EmptyContext
 
-authHandler :: Manager -> Maybe Text -> AuthHandler Request Text
-authHandler m email = mkAuthHandler checkDev
+authHandler :: Manager -> Maybe User -> AuthHandler Request User
+authHandler m user = mkAuthHandler checkDev
   where
     maybeToEither e = maybe (Left e) Right
     throw401 msg = throwError $ err401 {errBody = msg}
-    checkDev req = maybe (handleLogin req) pure email
+    checkDev req = maybe (handleLogin req) pure user
     handleLogin req = either throw401 (verifyLogin m) $ do
       cookie <- maybeToEither "Missing cookie header" $ lookup "cookie" $ requestHeaders req
       maybeToEither "Missing token in cookie" $ lookup "auth_pubtkt" $ parseCookiesText cookie
 
-verifyLogin :: Manager -> Text -> Handler Text
+verifyLogin :: Manager -> Text -> Handler User
 verifyLogin manager cookie = do
-  user <- getUsername
-  request <- liftIO $ parseRequest $ "https://fum.futurice.com/fum/api/users/" <> unpack user
+  username <- getUsername
+  request <- liftIO $ parseRequest $ "https://fum.futurice.com/fum/api/users/" <> unpack username
   let request' = request {C.requestHeaders = C.requestHeaders request <> [(hCookie, "auth_pubtkt=" <> encodeUtf8 cookie)]}
   response <- liftIO $ httpLbs request' manager
   case decode (responseBody response) of
-    Just (MkFumResponse {email}) -> pure email
+    Just user -> pure user
     Nothing -> throwError $ err401 {errBody = "Token not accepted by FUM"}
   where
     cookie' = replace "\"" "" cookie
@@ -110,13 +110,3 @@ verifyLogin manager cookie = do
           let (name, _) = breakOn "%3B" $ T.drop 6 cookie'
            in pure name
         else throwError $ err401 {errBody = "No username in cookie"}
-
-data FumResponse
-  = MkFumResponse
-      { first_name :: Text,
-        last_name :: Text,
-        username :: Text,
-        email :: Text
-      }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)

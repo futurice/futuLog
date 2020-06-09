@@ -4,7 +4,8 @@ import API (api, rootAPI)
 import Control.Monad.Reader (runReaderT)
 import Data.Env (Env (..))
 import Data.String (fromString)
-import Data.Text (Text, pack)
+import Data.Text (pack)
+import Data.User (User (..))
 import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
 import Network.HTTP.Client (Manager)
@@ -27,7 +28,7 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
   [] -> Just simpleCorsResourcePolicy
   (x : _) -> Just simpleCorsResourcePolicy {corsOrigins = Just ([x], True)}
 
-mkApp :: Manager -> Maybe Text -> Env -> Application
+mkApp :: Manager -> Maybe User -> Env -> Application
 mkApp m email env =
   applyCors $ serveWithContext rootAPI (authServerContext m email) $
     ( swaggerHandler
@@ -54,7 +55,10 @@ main = do
   shifts <- decodeFileThrow "./shifts.yaml"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
+  let devUser = do
+        email <- devEmail
+        pure $ MkUser "Dev" "User" (pack email) "" "" ""
   case devEmail of
     Nothing -> putStrLn $ "Running server on port " <> show port
     Just email -> putStrLn $ "Running development server on port " <> show port <> " with logged in email " <> email
-  run port $ mkApp manager (pack <$> devEmail) MkEnv {offices, shifts, pool}
+  run port $ mkApp manager devUser MkEnv {offices, shifts, pool}

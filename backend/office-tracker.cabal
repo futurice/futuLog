@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d3059b3de013ad38efe608209aba90fbd24bb6c01051e042d3640cb1573cc809
+-- hash: 404b64b45d14b2a5697867e69e33100a1e6053727dc25943c7c1a4a073016034
 
 name:           office-tracker
 version:        0.1.0.0
@@ -21,8 +21,10 @@ executable office-tracker
   other-modules:
       API
       Auth
+      CSV
       Data.ClientRequest
       Data.Config
+      Data.CSV
       Data.Env
       Data.User
       Data.Workmode
@@ -39,6 +41,7 @@ executable office-tracker
     , base >=4.7 && <5
     , binary
     , bytestring
+    , cassava
     , cookie
     , exceptions
     , http-client
@@ -51,6 +54,7 @@ executable office-tracker
     , resource-pool
     , retry
     , servant
+    , servant-multipart
     , servant-server
     , servant-swagger
     , servant-swagger-ui

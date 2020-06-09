@@ -8,6 +8,7 @@ import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.User (User)
 import Servant.API
+import Servant.Multipart (Mem, MultipartData, MultipartForm)
 import Servant.Swagger.UI (SwaggerSchemaUI)
 
 api :: Proxy ProtectedAPI
@@ -49,4 +50,4 @@ type OfficeAPI =
   "all" :> Get '[JSON] [OfficeSpace]
     :<|> Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int
 
-type AdminAPI = "test" :> Get '[JSON] NoContent
+type AdminAPI = "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent

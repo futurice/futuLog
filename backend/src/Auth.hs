@@ -4,6 +4,7 @@ import Control.Monad.Except (ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (decode)
 import Data.ByteString.Lazy.Char8 (pack)
+import Data.Maybe (isJust)
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -32,7 +33,7 @@ contextProxy = Proxy
 mkAuthServerContext :: Manager -> Maybe User -> [Text] -> IO (Context ContextContent, Middleware)
 mkAuthServerContext m user admins = do
   key <- V.newKey
-  pure (authHandler user key :. adminAuthHandler user key admins :. EmptyContext, authMiddleware key m)
+  pure (authHandler user key :. adminAuthHandler user key admins :. EmptyContext, authMiddleware user key m)
 
 authHandler :: Maybe User -> V.Key User -> AuthHandler Request User
 authHandler user key = mkAuthHandler $ login user key
@@ -40,7 +41,7 @@ authHandler user key = mkAuthHandler $ login user key
 adminAuthHandler :: Maybe User -> V.Key User -> [Text] -> AuthHandler Request AdminUser
 adminAuthHandler maybeUser key admins = mkAuthHandler $ \req -> do
   user <- login maybeUser key req
-  if email user `elem` admins
+  if email user `elem` admins || isJust maybeUser
     then pure $ MkAdmin user
     else throwError $ err401 {errBody = "User is not an admin"}
 
@@ -50,8 +51,9 @@ login user key req = maybe doLogin pure user
     doLogin = either throw401 pure (maybeToEither "No user data received from middleware" $ V.lookup key (vault req))
     throw401 msg = throwError $ err401 {errBody = msg}
 
-authMiddleware :: V.Key User -> Manager -> Middleware
-authMiddleware key m app req respond = do
+authMiddleware :: Maybe User -> V.Key User -> Manager -> Middleware
+authMiddleware (Just _) _ _ app req respond = app req respond
+authMiddleware Nothing key m app req respond = do
   eitherUser <- runExceptT $ verifyLogin m req
   case eitherUser of
     Left e -> respond $ responseLBS status401 [] $ pack e

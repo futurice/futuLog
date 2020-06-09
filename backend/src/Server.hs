@@ -2,6 +2,7 @@ module Server (apiHandler, swaggerHandler, mkAuthServerContext, contextProxy, Se
 
 import API
 import Auth (contextProxy, mkAuthServerContext)
+import qualified CSV
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
@@ -19,6 +20,7 @@ import Data.User (AdminUser (..), User (..))
 import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
 import Logic (registerWorkmode)
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
+import Servant.Multipart (MultipartData (..), fdPayload)
 import Servant.Server (Handler, ServerT, err400, errBody)
 import qualified Servant.Server as S
 import Servant.Swagger (toSwagger)
@@ -30,7 +32,7 @@ swaggerHandler :: S.Server SwaggerAPI
 swaggerHandler = swaggerSchemaUIServer swagger
   where
     swagger =
-      toSwagger (Proxy :: Proxy ("api" :> (API :<|> "admin" :> AdminAPI)))
+      toSwagger (Proxy :: Proxy ("api" :> API)) -- TODO: Write ToSchema instance for FormData
         & schemes ?~ [Https, Http]
         & info . title .~ "Office Tracker API"
         & info . version .~ "1.0"
@@ -66,4 +68,8 @@ officeHandler = getOffices :<|> getOfficeCapacityOn
     getOffices = offices <$> ask
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = pure NoContent
+adminHandler _ = \case
+  MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
+    Left err -> throwError $ err400 {errBody = err}
+    Right _ -> pure NoContent
+  _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}

@@ -38,6 +38,7 @@ dependencies:
     - aeson
     - binary
     - bytestring
+    - cassava
     - cookie
     - exceptions
     - http-client
@@ -50,6 +51,7 @@ dependencies:
     - resource-pool
     - retry
     - servant
+    - servant-multipart
     - servant-server
     - servant-swagger
     - servant-swagger-ui

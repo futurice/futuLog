@@ -16,3 +16,7 @@ data User
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema)
+
+newtype AdminUser = MkAdmin User
+  deriving stock (Show, Eq)
+  deriving newtype (ToJSON, FromJSON, ToSchema)

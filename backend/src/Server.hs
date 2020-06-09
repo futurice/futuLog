@@ -1,7 +1,7 @@
-module Server (apiHandler, swaggerHandler, authServerContext, context, Server) where
+module Server (apiHandler, swaggerHandler, mkAuthServerContext, contextProxy, Server) where
 
 import API
-import Auth (authServerContext, context)
+import Auth (contextProxy, mkAuthServerContext)
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
@@ -15,7 +15,7 @@ import Data.Maybe (fromMaybe, listToMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Clock (getCurrentTime, utctDay)
-import Data.User (User (..))
+import Data.User (AdminUser (..), User (..))
 import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
 import Logic (registerWorkmode)
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
@@ -30,13 +30,13 @@ swaggerHandler :: S.Server SwaggerAPI
 swaggerHandler = swaggerSchemaUIServer swagger
   where
     swagger =
-      toSwagger (Proxy :: Proxy ("api" :> API))
+      toSwagger (Proxy :: Proxy ("api" :> (API :<|> "admin" :> AdminAPI)))
         & schemes ?~ [Https, Http]
         & info . title .~ "Office Tracker API"
         & info . version .~ "1.0"
 
 apiHandler :: Server ProtectedAPI
-apiHandler user = workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user
+apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
 workmodeHandler MkUser {email} = regWorkmode :<|> confWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
@@ -64,3 +64,6 @@ officeHandler :: Server OfficeAPI
 officeHandler = getOffices :<|> getOfficeCapacityOn
   where
     getOffices = offices <$> ask
+
+adminHandler :: AdminUser -> Server AdminAPI
+adminHandler _ = pure NoContent

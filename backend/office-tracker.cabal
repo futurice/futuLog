@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: dc9056578e59694b511ad403aeee57b19ec744807566748790379a94e65f667d
+-- hash: d3059b3de013ad38efe608209aba90fbd24bb6c01051e042d3640cb1573cc809
 
 name:           office-tracker
 version:        0.1.0.0
@@ -32,7 +32,7 @@ executable office-tracker
       Paths_office_tracker
   hs-source-dirs:
       src
-  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeFamilies TypeOperators
+  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts GeneralizedNewtypeDeriving LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeFamilies TypeOperators
   ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Werror
   build-depends:
       aeson
@@ -57,6 +57,7 @@ executable office-tracker
     , swagger2
     , text
     , time
+    , vault
     , wai
     , wai-app-static
     , wai-cors

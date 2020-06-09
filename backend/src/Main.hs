@@ -4,7 +4,7 @@ import API (api, rootAPI)
 import Control.Monad.Reader (runReaderT)
 import Data.Env (Env (..))
 import Data.String (fromString)
-import Data.Text (pack)
+import Data.Text (Text, pack)
 import Data.User (User (..))
 import Data.Yaml (decodeFileThrow)
 import Database (initDatabase)
@@ -18,7 +18,7 @@ import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsRes
 import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
 import Servant.Server.StaticFiles (serveDirectoryWith)
-import Server (apiHandler, authServerContext, context, swaggerHandler)
+import Server (apiHandler, contextProxy, mkAuthServerContext, swaggerHandler)
 import System.Environment (getArgs, getEnv)
 import WaiAppStatic.Storage.Filesystem (defaultWebAppSettings)
 import WaiAppStatic.Types (StaticSettings (..))
@@ -28,11 +28,12 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
   [] -> Just simpleCorsResourcePolicy
   (x : _) -> Just simpleCorsResourcePolicy {corsOrigins = Just ([x], True)}
 
-mkApp :: Manager -> Maybe User -> Env -> Application
-mkApp m email env =
-  applyCors $ serveWithContext rootAPI (authServerContext m email) $
+mkApp :: Manager -> Maybe User -> [Text] -> Env -> IO Application
+mkApp m email admins env = do
+  (context, middleware) <- mkAuthServerContext m email admins
+  pure $ applyCors $ middleware $ serveWithContext rootAPI context $
     ( swaggerHandler
-        :<|> hoistServerWithContext api context (flip runReaderT env) apiHandler
+        :<|> hoistServerWithContext api contextProxy (flip runReaderT env) apiHandler
         :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
     )
 
@@ -53,6 +54,7 @@ main = do
         _ -> Nothing
   offices <- decodeFileThrow "./offices.yaml"
   shifts <- decodeFileThrow "./shifts.yaml"
+  admins <- decodeFileThrow "./admins.yaml"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
   let devUser = do
@@ -61,4 +63,5 @@ main = do
   case devEmail of
     Nothing -> putStrLn $ "Running server on port " <> show port
     Just email -> putStrLn $ "Running development server on port " <> show port <> " with logged in email " <> email
-  run port $ mkApp manager devUser MkEnv {offices, shifts, pool}
+  app <- mkApp manager devUser admins MkEnv {offices, shifts, pool}
+  run port app

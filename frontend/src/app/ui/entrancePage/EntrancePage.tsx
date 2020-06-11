@@ -12,8 +12,6 @@ import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services
 import { combineRemoteData, getRemoteDataValue, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/entrancePage/WorkmodeButtons";
 
-const workmodes = [Workmode.Home, Workmode.Office, Workmode.Client, Workmode.Leave];
-
 function hackWorkmode(workmodeStr: string): IWorkmodeDto {
   switch (workmodeStr) {
     case Workmode.Home:
@@ -79,20 +77,6 @@ export const EntrancePage: React.FC = () => {
               workmode={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
               onSelectWorkmode={onSelectWorkmode}
             />
-
-            <label>
-              <span>Selected option</span>
-              <select
-                onChange={(ev) => onSelectWorkmode(ev.currentTarget.value as Workmode)}
-                value={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
-              >
-                {workmodes.map((workmode) => (
-                  <option key={workmode} value={workmode}>
-                    {workmode}
-                  </option>
-                ))}
-              </select>
-            </label>
           </>
         )}
       </RenderRemoteData>

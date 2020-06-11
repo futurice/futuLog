@@ -40,7 +40,9 @@ export function createServices() {
 
   // NOTE: Make sure you populate all services here
   services.historyService = createHistoryService();
-  services.apiClientService = createAPIClientService("http://localhost:5000");
+  services.apiClientService = createAPIClientService(
+    process.env.NODE_ENV === "production" ? "" : "http://localhost:5000"
+  );
   services.storeService = configureStore({
     reducer: rootStore,
     middleware: [

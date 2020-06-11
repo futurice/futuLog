@@ -13,7 +13,10 @@ function fetchJSON<T>(url: string, init?: IRequestInit | undefined): Promise<T> 
     },
   }).then((res) => {
     if (res.ok) {
-      return res.json();
+      // NOTE: Some endpoints return empty result while still reporting
+      // Content-Type: application/json, so just revert to null
+      // value if the JSON parsing fails
+      return res.json().catch(() => null);
     } else {
       throw Error(`${res.status} ${url}`);
     }

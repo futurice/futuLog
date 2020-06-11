@@ -10,6 +10,7 @@ import {
 import { useServices } from "app/services/services";
 import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services/apiClientService";
 import { combineRemoteData, getRemoteDataValue, remoteStore } from "app/stores/remoteStore";
+import { WorkmodeButtons } from "app/ui/entrancePage/WorkmodeButtons";
 
 const workmodes = [Workmode.Home, Workmode.Office, Workmode.Client, Workmode.Leave];
 
@@ -44,11 +45,6 @@ export const EntrancePage: React.FC = () => {
     if (userShift) {
       const workmode = hackWorkmode(workmodeEnum);
       const site = userShift.site;
-      await apiClientService.registerUserWorkmode({
-        date,
-        site,
-        workmode,
-      });
       dispatch(
         remoteStore.actions.setLoaded({
           key: "userWorkmodesByDay",
@@ -61,6 +57,11 @@ export const EntrancePage: React.FC = () => {
           } as IUserWorkmodeDto,
         })
       );
+      await apiClientService.registerUserWorkmode({
+        date,
+        site,
+        workmode,
+      });
     }
   };
 
@@ -73,6 +74,11 @@ export const EntrancePage: React.FC = () => {
         {({ userWorkmode }) => (
           <>
             <h2>Where are you working today?</h2>
+
+            <WorkmodeButtons
+              workmode={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
+              onSelectWorkmode={onSelectWorkmode}
+            />
 
             <label>
               <span>Selected option</span>

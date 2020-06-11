@@ -57,7 +57,7 @@ export enum Workmode {
 }
 
 export interface IWorkmodeDto {
-  type: string;
+  type: Workmode;
   confirmed?: boolean;
   name?: string;
 }

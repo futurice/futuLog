@@ -7,6 +7,7 @@ import {
   getRemoteDataValue,
 } from "app/stores/remoteStore";
 import { useEffect } from "react";
+import { AsyncAction } from "app/utils/storeUtils";
 
 //
 // React hooks
@@ -48,39 +49,58 @@ export function useRemoteDataFetch<T, K extends keyof IRemoteStore = keyof IRemo
 
   useEffect(() => {
     if (!res && id) {
-      dispatch(remoteStore.actions.setLoading({ key, id: id as any }));
+      dispatch(remoteStore.actions.setLoading({ key, id }));
       fetch(id as any)
-        .then((value) => dispatch(remoteStore.actions.setLoaded({ key, id: id as any, value })))
-        .catch((error) => dispatch(remoteStore.actions.setError({ key, id: id as any, error })));
+        .then((value) => dispatch(remoteStore.actions.setLoaded({ key, id, value })))
+        .catch((error) => dispatch(remoteStore.actions.setError({ key, id, error })));
     }
   }, [res, key, id, ...deps]); // eslint-disable-line
 
   return res || noneSingleton;
 }
 
+export function pushRemoteData<T>(
+  key: keyof IRemoteStore,
+  id: string,
+  push: () => Promise<T>
+): AsyncAction {
+  return async (dispatch) => {
+    dispatch(remoteStore.actions.setLoading({ key, id }));
+    push()
+      .then((value) => dispatch(remoteStore.actions.setLoaded({ key, id, value })))
+      .catch((error) => dispatch(remoteStore.actions.setError({ key, id, error })));
+  };
+}
+
 //
 // Render
 
-interface IRenderRemoteData<T> {
+interface IRenderRemoteData<T, U> {
   remoteData: RemoteData<T>;
   onNone?: () => React.ReactElement | null;
-  onLoading?: () => React.ReactElement | null;
-  onError?: (error: Error) => React.ReactElement | null;
-  children: (data: T) => React.ReactElement | null;
+  onLoading?: (
+    data: T | undefined,
+    children: (data: T, ...extra: U[]) => React.ReactElement | null
+  ) => React.ReactElement | null;
+  onError?: (
+    error: Error,
+    children: (data: T, ...extra: U[]) => React.ReactElement | null
+  ) => React.ReactElement | null;
+  children: (data: T, ...extra: U[]) => React.ReactElement | null;
 }
 
-export function RenderRemoteData<T>({
+export function RenderRemoteData<T, U = any>({
   remoteData,
   onNone,
   onLoading,
   onError,
   children,
-}: IRenderRemoteData<T>) {
+}: IRenderRemoteData<T, U>) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return RemoteData.match(remoteData as any, {
     None: () => (onNone ? onNone() : null),
-    Loading: () => (onLoading ? onLoading() : null),
+    Loading: (data?: T) => (onLoading ? onLoading(data, children) : null),
     Loaded: (data: T) => children(data),
-    Error: (error) => (onError ? onError(error) : null),
+    Error: (error) => (onError ? onError(error, children) : null),
   });
 }

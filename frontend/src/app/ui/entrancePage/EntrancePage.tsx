@@ -7,6 +7,7 @@ import {
   useRemoteDataFetch,
   RenderRemoteData,
   useRemoteDataValue,
+  pushRemoteData,
 } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
 import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services/apiClientService";
@@ -39,28 +40,28 @@ export const EntrancePage: React.FC = () => {
   );
   const userShiftRes = useRemoteDataFetch("userShifts", "0", () => apiClientService.getUserShift());
 
-  const onSelectWorkmode = async (workmodeEnum: Workmode) => {
+  const onSelectWorkmode = (workmodeEnum: Workmode) => {
     const userShift = getRemoteDataValue(userShiftRes, null);
     if (userShift) {
       const workmode = hackWorkmode(workmodeEnum);
       const site = userShift.site;
-      dispatch(
-        remoteStore.actions.setLoaded({
-          key: "userWorkmodesByDay",
-          id: date,
-          value: {
-            userEmail: user && user.email,
-            date,
-            site,
-            workmode,
-          } as IUserWorkmodeDto,
-        })
-      );
-      await apiClientService.registerUserWorkmode({
+      const userWorkmode = {
+        userEmail: user && user.email,
         date,
         site,
         workmode,
-      });
+      } as IUserWorkmodeDto;
+      dispatch([
+        // Optimistic prepopulation of the selection, TODO: Reconsider
+        remoteStore.actions.setLoaded({
+          key: "userWorkmodesByDay",
+          id: date,
+          value: userWorkmode,
+        }),
+        pushRemoteData("userWorkmodesByDay", date, () =>
+          apiClientService.registerUserWorkmode({ date, site, workmode }).then(() => userWorkmode)
+        ),
+      ]);
     }
   };
 
@@ -75,18 +76,21 @@ export const EntrancePage: React.FC = () => {
     >
       <RenderRemoteData
         remoteData={combineRemoteData({ userWorkmode: userWorkmodeRes, userShift: userShiftRes })}
-        onLoading={() => <h2>Loading user information..</h2>}
+        onLoading={(data, children) => children(data || ({} as any), true)}
+        onError={(error, children) => children({} as any, false, error)}
       >
-        {({ userWorkmode }) => (
+        {({ userWorkmode }, isLoading: boolean, error?: Error) => (
           <>
             <h2>Where are you working today?</h2>
 
             <Box maxWidth="24rem" mx="auto">
               <WorkmodeButtons
+                disabled={isLoading}
                 workmode={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
                 onSelectWorkmode={onSelectWorkmode}
               />
             </Box>
+            {error && <Box component="p">{error.message}</Box>}
 
             <hr />
 

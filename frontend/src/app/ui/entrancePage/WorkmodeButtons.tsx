@@ -39,6 +39,7 @@ const WorkmodeButton = styled((props) => <Button {...props} disableRipple fullWi
 
 interface IWorkmodeButtons {
   workmode: Workmode;
+  disabled?: boolean;
   onSelectWorkmode: (workmode: Workmode) => any;
 }
 
@@ -55,10 +56,15 @@ const Item = styled("li")({
   width: "10rem",
 });
 
-export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({ workmode, onSelectWorkmode }) => (
+export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
+  workmode,
+  disabled,
+  onSelectWorkmode,
+}) => (
   <List>
     <Item>
       <WorkmodeButton
+        disabled={disabled}
         active={workmode === Workmode.Home}
         startIcon={<IconHome />}
         hoverColor="radical-red-light"
@@ -69,6 +75,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({ workmode, onSelect
     </Item>
     <Item>
       <WorkmodeButton
+        disabled={disabled}
         active={workmode === Workmode.Office}
         startIcon={<IconOffice />}
         hoverColor="jade-green-light"
@@ -79,6 +86,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({ workmode, onSelect
     </Item>
     <Item>
       <WorkmodeButton
+        disabled={disabled}
         active={workmode === Workmode.Client}
         startIcon={<IconClient />}
         hoverColor="golden-rod-light"
@@ -89,6 +97,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({ workmode, onSelect
     </Item>
     <Item>
       <WorkmodeButton
+        disabled={disabled}
         active={workmode === Workmode.Leave}
         startIcon={<IconLeave />}
         hoverColor="viking-light"

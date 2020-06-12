@@ -1,0 +1,22 @@
+name: Build
+on:
+    push:
+        paths-ignore:
+            - '**.md'
+
+jobs:
+    backend:
+        name: backend
+        runs-on: ubuntu-18.04
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Cache Backend dependencies
+              uses: actions/cache@v1
+              with:
+                  path: ~/.stack
+                  key: stack-store-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}
+
+            - name: Build backend
+              run: cd backend && stack build

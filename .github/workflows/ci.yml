@@ -12,11 +12,35 @@ jobs:
             - name: Checkout repo
               uses: actions/checkout@v2
 
-            - name: Cache Backend dependencies
+            - name: Cache dependencies
               uses: actions/cache@v1
               with:
                   path: ~/.stack
                   key: stack-store-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}
+                  restore-keys: |
+                      stack-store-${{ hashFiles('backend/stack.yaml.lock') }}-
+                      stack-store-
 
             - name: Build backend
               run: cd backend && stack build
+
+    frontend:
+        name: Build frontend
+        runs-on: ubuntu-18.04
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Cache dependencies
+              uses: actions/cache@v1
+              with:
+                  path: frontend/node_modules
+                  key: npm-store-${{ hashFiles('frontend/package-lock.json') }}
+                  restore-keys: |
+                      npm-store-
+
+            - name: Install dependencies
+              run: cd frontend && npm ci
+
+            - name: Build project
+              run: cd frontend && npm run build

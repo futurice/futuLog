@@ -59,3 +59,25 @@ jobs:
               with:
                   name: frontend
                   path: frontend/build/
+
+    docker:
+        name: Build docker container
+        runs-on: ubuntu-18.04
+        needs: [backend, frontend]
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Download backend
+              uses: actions/download-artifact@v2
+              with:
+                  name: backend
+
+            - name: Download frontend
+              uses: actions/download-artifact@v2
+              with:
+                  name: frontend
+                  path: frontend/build
+
+            - name: Build docker container
+              run: docker build -t "futurice/office-tracker:$(git rev-parse --short HEAD)" -f CI_Dockerfile .

@@ -3,7 +3,6 @@
 .git/
 **/.pnp/
 **/coverage/
-**/build/
 
 .pnp.js
 .DS_Store

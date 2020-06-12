@@ -1,0 +1,13 @@
+FROM debian:buster
+
+RUN apt-get update && apt-get install -y libpq5 ca-certificates
+
+# Add backend
+COPY office-tracker .
+COPY offices.yaml shifts.yaml admins.yaml ./
+EXPOSE 8000
+
+# Add frontend
+COPY frontend/build ./static
+
+CMD ["./office-tracker"]

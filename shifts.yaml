@@ -1,7 +1,0 @@
-- name: MON/WED/FRI
-  days: [1, 3, 5]
-  site: Munich
-
-- name: TUE/THU
-  days: [2, 4]
-  site: Munich

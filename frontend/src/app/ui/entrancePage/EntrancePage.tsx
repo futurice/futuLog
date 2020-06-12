@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Box, Button } from "@material-ui/core";
+import { Box, Button, Paper, styled } from "@material-ui/core";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
 import {
@@ -13,6 +13,7 @@ import { useServices } from "app/services/services";
 import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services/apiClientService";
 import { combineRemoteData, getRemoteDataValue, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/entrancePage/WorkmodeButtons";
+import { colors } from "app/ui/ux/colors";
 
 function hackWorkmode(workmodeStr: string): IWorkmodeDto {
   switch (workmodeStr) {
@@ -28,6 +29,25 @@ function hackWorkmode(workmodeStr: string): IWorkmodeDto {
 
   return { type: Workmode.Home };
 }
+
+const Section = styled(Paper)(({ theme }) => ({
+  width: "100%",
+  maxWidth: "52rem",
+  backgroundColor: colors["deep-blue-light"],
+  color: colors["deep-blue-dark"],
+  [theme.breakpoints.down("sm")]: {
+    padding: "2.5rem 1.25rem",
+  },
+  [theme.breakpoints.up("sm")]: {
+    padding: "2.5rem 4rem",
+  },
+}));
+
+const Separator = styled("hr")({
+  // TODO: Rearrange colors into xxx-10, xxx-20, etc..
+  // This should then be `deep-blue-20`
+  borderColor: "#D2CEE3",
+});
 
 export const EntrancePage: React.FC = () => {
   const { apiClientService } = useServices();
@@ -69,10 +89,13 @@ export const EntrancePage: React.FC = () => {
     <Box
       className="EntrancePage stack"
       width="100%"
-      maxWidth="40rem"
+      // maxWidth="40rem"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
       textAlign="center"
       mx="auto"
-      p={["1rem", "2rem"]}
+      p={["0.5rem", "1rem", "2.5rem"]}
     >
       <RenderRemoteData
         remoteData={combineRemoteData({ userWorkmode: userWorkmodeRes, userShift: userShiftRes })}
@@ -80,7 +103,7 @@ export const EntrancePage: React.FC = () => {
         onError={(error, children) => children({} as any, false, error)}
       >
         {({ userWorkmode }, isLoading: boolean, error?: Error) => (
-          <>
+          <Section elevation={0} className="stack">
             <h2>Where are you working today?</h2>
 
             <Box maxWidth="24rem" mx="auto">
@@ -92,21 +115,26 @@ export const EntrancePage: React.FC = () => {
             </Box>
             {error && <Box component="p">{error.message}</Box>}
 
-            <hr />
+            {userWorkmode &&
+              userWorkmode.workmode.type === Workmode.Office &&
+              !userWorkmode.workmode.confirmed && (
+                <>
+                  <Separator />
+                  <h3>Check in!</h3>
 
-            <h3>Check in!</h3>
+                  <p>
+                    You booked a spot to work from the office today. Please confirm that you are in
+                    the office. <a href="#">Why?</a>
+                  </p>
 
-            <p>
-              You booked a spot to work from the office today. Please confirm that you are in the
-              office. <a href="#">Why?</a>
-            </p>
-
-            <Button>I'm in the office</Button>
-          </>
+                  <Button>I'm in the office</Button>
+                </>
+              )}
+          </Section>
         )}
       </RenderRemoteData>
 
-      <section>
+      <Section elevation={0} className="stack">
         <h2>Where will you work work in the next two weeks?</h2>
 
         <p>
@@ -114,7 +142,7 @@ export const EntrancePage: React.FC = () => {
         </p>
 
         <Link to={RoutePaths.Planning}>Planning</Link>
-      </section>
+      </Section>
     </Box>
   );
 };

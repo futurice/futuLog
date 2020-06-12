@@ -30,7 +30,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-color: var(--color-deep-blue-light);
+  background-color: var(--color-white);
   color: var(--color-deep-blue-dark);
   font-size: 16px;
 }
@@ -43,12 +43,14 @@ h2 {
   font-family: Futurice;
   font-size: 1.5rem;
   line-height: 1.25;
+  margin-top: 0;
 }
 
 h3 {
   font-family: Futurice;
   font-size: 1.25rem;
   line-height: 1.25;
+  margin-top: 0;
 }
 
 p {

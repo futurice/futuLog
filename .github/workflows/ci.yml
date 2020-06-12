@@ -6,7 +6,7 @@ on:
 
 jobs:
     backend:
-        name: backend
+        name: Build Backend
         runs-on: ubuntu-18.04
         steps:
             - name: Checkout repo
@@ -23,6 +23,15 @@ jobs:
 
             - name: Build backend
               run: cd backend && stack build
+
+            - name: Copy executable
+              run: cd backend && cp "$(stack path --dist-dir)/build/office-tracker/office-tracker" .
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: backend
+                  path: backend/office-tracker
 
     frontend:
         name: Build frontend
@@ -44,3 +53,9 @@ jobs:
 
             - name: Build project
               run: cd frontend && npm run build
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: frontend
+                  path: frontend/build/

@@ -18,7 +18,10 @@ function fetchJSON<T>(url: string, init?: IRequestInit | undefined): Promise<T> 
       // value if the JSON parsing fails
       return res.json().catch(() => null);
     } else {
-      throw Error(`${res.status} ${url}`);
+      return res.text().then(
+        (message) => Promise.reject(Error(message)),
+        () => Error(`${res.status} ${url}`)
+      );
     }
   });
 }

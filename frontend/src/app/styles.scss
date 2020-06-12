@@ -56,3 +56,9 @@ p {
   font-size: 1rem;
   line-height: 1.5;
 }
+
+// Helper to space out vertically stacked items with 32px margins
+// TODO: Find a better home for this, once things settle down
+.stack > * + * {
+  margin-top: 2rem;
+}

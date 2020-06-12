@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Box, Button } from "@material-ui/core";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
 import {
@@ -64,7 +65,14 @@ export const EntrancePage: React.FC = () => {
   };
 
   return (
-    <div className="EntrancePage">
+    <Box
+      className="EntrancePage stack"
+      width="100%"
+      maxWidth="40rem"
+      textAlign="center"
+      mx="auto"
+      p={["1rem", "2rem"]}
+    >
       <RenderRemoteData
         remoteData={combineRemoteData({ userWorkmode: userWorkmodeRes, userShift: userShiftRes })}
         onLoading={() => <h2>Loading user information..</h2>}
@@ -73,10 +81,23 @@ export const EntrancePage: React.FC = () => {
           <>
             <h2>Where are you working today?</h2>
 
-            <WorkmodeButtons
-              workmode={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
-              onSelectWorkmode={onSelectWorkmode}
-            />
+            <Box maxWidth="24rem" mx="auto">
+              <WorkmodeButtons
+                workmode={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
+                onSelectWorkmode={onSelectWorkmode}
+              />
+            </Box>
+
+            <hr />
+
+            <h3>Check in!</h3>
+
+            <p>
+              You booked a spot to work from the office today. Please confirm that you are in the
+              office. <a href="#">Why?</a>
+            </p>
+
+            <Button>I'm in the office</Button>
           </>
         )}
       </RenderRemoteData>
@@ -90,6 +111,6 @@ export const EntrancePage: React.FC = () => {
 
         <Link to={RoutePaths.Planning}>Planning</Link>
       </section>
-    </div>
+    </Box>
   );
 };

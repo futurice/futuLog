@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 # Be sure to set SSH_USER to the FUM username or you will get errors
 
@@ -8,7 +8,13 @@ name="office-tracker-staging"
 image="futurice/office-tracker"
 tag="$(git rev-parse --short HEAD)"
 
-docker build -t "$image:$tag" .
+dockerfile="Dockerfile"
+
+if [ -n "$1" ]; then
+    dockerfile="$1"
+fi
+
+docker build -t "$image:$tag" -f "$dockerfile" .
 
 playswarm image:push -i "$image" -t "$tag"
 
@@ -18,7 +24,10 @@ else
     echo "Database already exists, not creating a new one"
 fi
 
-read -p "Are you sure you want to deploy to playswarm (yes/no)" confirm
+confirm="yes"
+if [ -z "$1" ]; then
+    read -p "Are you sure you want to deploy to playswarm (yes/no)" confirm
+fi
 if [[ "$confirm" == "yes" ]]; then
     playswarm app:deploy -i "$image" -t "$tag" -n "$name"
 else

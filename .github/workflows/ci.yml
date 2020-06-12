@@ -60,10 +60,11 @@ jobs:
                   name: frontend
                   path: frontend/build/
 
-    docker:
-        name: Build docker container
+    deploy:
+        name: Deploy to playswarm
         runs-on: ubuntu-18.04
         needs: [backend, frontend]
+        if: github.ref == 'master'
         steps:
             - name: Checkout repo
               uses: actions/checkout@v2
@@ -79,5 +80,12 @@ jobs:
                   name: frontend
                   path: frontend/build
 
-            - name: Build docker container
-              run: docker build -t "futurice/office-tracker:$(git rev-parse --short HEAD)" -f CI_Dockerfile .
+            - name: Save SSH key
+              run: echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+              env:
+                  DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+
+            - name: Deploy to playswarm
+              run: ./deploy.sh CI_Dockerfile
+              env:
+                  SSH_USER: jvan

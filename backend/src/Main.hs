@@ -2,11 +2,13 @@ module Main where
 
 import API (api, rootAPI)
 import Control.Monad.Reader (runReaderT)
+import Data.Char (isSpace)
 import Data.Env (Env (..))
 import Data.String (fromString)
 import Data.Text (Text, pack)
+import Data.Text.Encoding (encodeUtf8)
 import Data.User (User (..))
-import Data.Yaml (decodeFileThrow)
+import Data.Yaml (decodeFileThrow, decodeThrow)
 import Database (initDatabase)
 import Network.HTTP.Client (Manager)
 import Network.HTTP.Client.TLS (newTlsManager)
@@ -53,7 +55,11 @@ main = do
         "--devEmail" : x : _ -> Just x
         _ -> Nothing
   offices <- decodeFileThrow "./offices.yaml"
-  shifts <- decodeFileThrow "./shifts.yaml"
+  shiftsFile <- readFile "./shifts.yaml"
+  shifts <-
+    if all isSpace shiftsFile
+      then pure []
+      else decodeThrow . encodeUtf8 $ pack shiftsFile
   admins <- decodeFileThrow "./admins.yaml"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager

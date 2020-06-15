@@ -13,28 +13,7 @@ export enum RoutePaths {
   Planning = "/planning",
   Tracking = "/tracking",
 }
-/*
-export const AppRoutes: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const user = useRemoteDataValue("users", "0", null!);
-  console.log("user?", user);
 
-  return (
-    <>
-      {!user && <Redirect exact to={RoutePaths.FakeLogin} />}
-
-      <Switch>
-        <Route exact path={RoutePaths.Entrance} component={EntrancePage} />
-        <Route exact path={RoutePaths.FakeLogin} component={FakeLoginPage} />
-        <Route exact path={RoutePaths.Booking} component={BookingPage} />
-        <Route exact path={RoutePaths.Planning} component={PlanningPage} />
-        <Route exact path={RoutePaths.Tracking} component={TrackingPage} />
-        <Route path="*" component={NotFound} />
-      </Switch>
-    </>
-  );
-};
-*/
 export const AppRoutes: React.FC = () => {
   const { apiClientService } = useServices();
 

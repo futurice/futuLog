@@ -1,17 +1,13 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
-import { BookingPage } from "app/ui/bookingPage/BookingPage";
-import { TrackingPage } from "app/ui/trackingPage/TrackingPage";
-import { EntrancePage } from "app/ui/entrancePage/EntrancePage";
-import { PlanningPage } from "app/ui/planningPage/PlanningPage";
+import { HomePage } from "app/ui/homePage/HomePage";
 import { useRemoteDataFetch, RenderRemoteData } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
 
 export enum RoutePaths {
-  Entrance = "/",
-  Booking = "/booking",
+  Home = "/",
+  Welcome = "/welcome",
   Planning = "/planning",
-  Tracking = "/tracking",
 }
 
 export const AppRoutes: React.FC = () => {
@@ -29,10 +25,7 @@ export const AppRoutes: React.FC = () => {
       {(_user) => (
         <>
           <Switch>
-            <Route exact path={RoutePaths.Entrance} component={EntrancePage} />
-            <Route exact path={RoutePaths.Booking} component={BookingPage} />
-            <Route exact path={RoutePaths.Planning} component={PlanningPage} />
-            <Route exact path={RoutePaths.Tracking} component={TrackingPage} />
+            <Route exact path={RoutePaths.Home} component={HomePage} />
             {/* <Route path="*" component={NotFound} /> */}
           </Switch>
         </>

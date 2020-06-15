@@ -12,7 +12,7 @@ import {
 import { useServices } from "app/services/services";
 import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services/apiClientService";
 import { combineRemoteData, getRemoteDataValue, remoteStore } from "app/stores/remoteStore";
-import { WorkmodeButtons } from "app/ui/entrancePage/WorkmodeButtons";
+import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import { colors } from "app/ui/ux/colors";
 
 function hackWorkmode(workmodeStr: string): IWorkmodeDto {
@@ -49,7 +49,7 @@ const Separator = styled("hr")({
   borderColor: "#D2CEE3",
 });
 
-export const EntrancePage: React.FC = () => {
+export const HomePage: React.FC = () => {
   const { apiClientService } = useServices();
   const date = new Date().toISOString().slice(0, 10);
   const dispatch = useDispatch();
@@ -87,7 +87,7 @@ export const EntrancePage: React.FC = () => {
 
   return (
     <Box
-      className="EntrancePage stack"
+      className="HomePage stack"
       width="100%"
       // maxWidth="40rem"
       display="flex"

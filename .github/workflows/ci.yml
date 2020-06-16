@@ -1,0 +1,54 @@
+name: Build
+on:
+    push:
+        paths-ignore:
+            - '**.md'
+
+jobs:
+    ci:
+        name: Build and Deploy
+        runs-on: ubuntu-18.04
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v2
+
+            - name: Setup buildx
+              uses: crazy-max/ghaction-docker-buildx@v3
+
+            - name: Cache docker layers
+              uses: actions/cache@v1
+              with:
+                  path: /tmp/docker-cache
+                  key: docker-layers-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}
+                  restore-keys: |
+                      docker-layers-
+
+            - name: Install playswarm CLI
+              run: |
+                  sudo curl https://s3.eu-central-1.amazonaws.com/com.futurice.futuswarm.play.files/cli -o /usr/local/bin/playswarm
+                  sudo chmod +rx /usr/local/bin/playswarm
+
+            - name: Build container
+              run: |
+                  docker buildx build \
+                    --cache-from "type=local,src=/tmp/docker-cache" \
+                    --cache-to "type=local,dest=/tmp/docker-cache" \
+                    --output "type=docker" \
+                    --tag futurice/office-tracker:$(git rev-parse --short HEAD) .
+
+            - run: docker images
+
+            - name: Save SSH key
+              if: github.ref == 'refs/heads/master'
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+              env:
+                  DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+
+            - name: Deploy to Playswarm
+              run: eval "$(ssh-agent -s)" && ./deploy.sh deploy
+              if: github.ref == 'refs/heads/master'
+              env:
+                  SSH_USER: jvan

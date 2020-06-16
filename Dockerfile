@@ -1,4 +1,4 @@
-FROM haskell:8.8.3
+FROM haskell:8.8.3 AS backend
 
 RUN apt-get update && apt-get install -y libpq-dev liblzma-dev
 
@@ -10,7 +10,7 @@ COPY backend/src/ src/
 RUN stack build
 RUN cp "$(stack path --dist-dir)/build/office-tracker/office-tracker" .
 
-FROM node:14.4-buster
+FROM node:14.4-buster AS frontend
 
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci

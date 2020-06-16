@@ -5,6 +5,7 @@ import {
   IShiftAssignmentDto,
   IUserWorkmodeDto,
   IShiftDto,
+  IOfficeSpaceDto,
 } from "app/services/apiClientService";
 
 //
@@ -17,6 +18,8 @@ export interface IRemoteStore {
   userShifts: Singleton<IShiftAssignmentDto>;
   userWorkmodesByDay: Collection<IUserWorkmodeDto>;
   siteShifts: Collection<IShiftDto>;
+  offices: Singleton<IOfficeSpaceDto[]>;
+  officeCapacityBySiteDate: Collection<number>;
 }
 
 export type Singleton<T> = { "0"?: RemoteData<T> };
@@ -29,7 +32,7 @@ export const RemoteData = Union((t) => ({
   // NOTE: None is used as a sentinel on utility functions.
   // None should _not_ be inserted into the store
   None: of<void>(),
-  Loading: of<void>(),
+  Loading: of(t), // NOTE: This should really be <undefined | typeof t>
   Loaded: of(t),
   Error: of<Error>(),
 }));
@@ -52,7 +55,9 @@ export const remoteStore = createSlice({
     ) {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       state[key] = (state[key] || {}) as any;
-      (state[key] as any)[id] = RemoteData.Loading();
+      const oldValue =
+        (state[key] as any)[id] && RemoteData.if.Loaded((state[key] as any)[id], (value) => value);
+      (state[key] as any)[id] = RemoteData.Loading(oldValue);
       /* eslint-enable @typescript-eslint/no-explicit-any */
     },
     setLoaded(
@@ -82,11 +87,12 @@ export const remoteStore = createSlice({
 
 const noneSingleton = RemoteData.None();
 
+// TODO: Enable automatic infering of T from IRemoteStore[key][id]
 export function getRemoteData<T, K extends keyof IRemoteStore = keyof IRemoteStore>(
   remoteStore: IRemoteStore,
   key: K,
   id: string
-): IRemoteStore[K][] {
+): RemoteData<T> {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const dict = remoteStore[key] as Record<keyof IRemoteStore[K], any>;
   return (dict as any)[id] || noneSingleton;
@@ -96,7 +102,7 @@ export function getRemoteDataValue<T>(remoteData: RemoteData<T>, defaultValue: T
   return remoteData
     ? RemoteData.match<T, T>(remoteData as any, {
         None: () => defaultValue,
-        Loading: () => defaultValue,
+        Loading: (value) => (value === undefined ? defaultValue : value),
         Loaded: (value) => value,
         Error: () => defaultValue,
       })
@@ -106,7 +112,7 @@ export function getRemoteDataValue<T>(remoteData: RemoteData<T>, defaultValue: T
 export function mapRemoteData<T, U>(fn: (value: T) => U, remoteData: RemoteData<T>): RemoteData<U> {
   return RemoteData.match<RemoteData<U>, T>(remoteData as any, {
     None: () => remoteData,
-    Loading: () => remoteData,
+    Loading: (value) => (value === undefined ? remoteData : RemoteData.Loading(fn(value))),
     Loaded: (value) => RemoteData.Loaded(fn(value)),
     Error: () => remoteData,
   });
@@ -118,7 +124,7 @@ export function mapRemoteDataMany<T, U>(
   ...remoteDatas: Array<RemoteData<T>>
 ): RemoteData<U> {
   if (remoteDatas.some((remoteData) => RemoteData.if.Loading(remoteData as any, () => true))) {
-    return RemoteData.Loading();
+    return RemoteData.Loading(undefined);
   }
 
   const error = remoteDatas.find((remoteData) =>
@@ -145,7 +151,7 @@ export function combineRemoteData<M>(
   const remoteDatas = Object.values(remoteDataMap) as RemoteData[];
 
   if (remoteDatas.some((remoteData) => RemoteData.if.Loading(remoteData as any, () => true))) {
-    return RemoteData.Loading();
+    return RemoteData.Loading(undefined);
   }
 
   const error = remoteDatas.find((remoteData) =>

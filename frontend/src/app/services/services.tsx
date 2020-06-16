@@ -3,7 +3,7 @@ import qhistory from "qhistory";
 import { parse as qsParse, stringify as qsStringify } from "query-string";
 import { createBrowserHistory } from "history";
 import { createAPIClientService, IAPIClientService } from "app/services/apiClientService";
-import { configureStore, getDefaultMiddleware, Store } from "@reduxjs/toolkit";
+import { configureStore, getDefaultMiddleware, Store, Middleware } from "@reduxjs/toolkit";
 import { rootStore } from "app/stores/rootStore";
 
 //
@@ -26,6 +26,14 @@ export type IHistoryService = ReturnType<typeof createHistoryService>;
 
 export type IStoreService = Store;
 
+const multi: Middleware = ({ dispatch }) => (next) => (action) => {
+  if (Array.isArray(action)) {
+    return action.map(dispatch);
+  } else {
+    return next(action);
+  }
+};
+
 //
 // Services
 
@@ -46,6 +54,7 @@ export function createServices() {
   services.storeService = configureStore({
     reducer: rootStore,
     middleware: [
+      multi,
       ...getDefaultMiddleware({
         thunk: { extraArgument: services },
       }),

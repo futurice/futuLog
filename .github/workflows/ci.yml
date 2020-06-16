@@ -19,9 +19,9 @@ jobs:
               uses: actions/cache@v1
               with:
                   path: /tmp/docker-cache
-                  key: docker-layers-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}
+                  key: docker-cache-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}
                   restore-keys: |
-                      docker-layers-
+                      docker-cache-
 
             - name: Install playswarm CLI
               run: |
@@ -35,8 +35,6 @@ jobs:
                     --cache-to "type=local,dest=/tmp/docker-cache,mode=max" \
                     --output "type=docker" \
                     --tag futurice/office-tracker:$(git rev-parse --short HEAD) .
-
-            - run: docker images
 
             - name: Save SSH key
               if: github.ref == 'refs/heads/master'

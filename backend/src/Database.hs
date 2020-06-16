@@ -64,6 +64,7 @@ saveShift email office MkSetShift {shiftName = name} = do
 
 saveWorkmode :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m ()
 saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
+  exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
     Leave -> mkSimpleQuery "Leave"

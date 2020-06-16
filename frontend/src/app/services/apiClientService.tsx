@@ -30,9 +30,11 @@ const e = encodeURIComponent;
 
 export interface IUserDto {
   email: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
+  first_name: string;
+  last_name: string;
+  portrait_full_url: string;
+  portrait_thumb_url: string;
+  portrait_badge_url: string;
 }
 
 export interface IShiftAssignmentDto {
@@ -85,14 +87,7 @@ export interface IOfficeSpaceDto {
 
 export function createAPIClientService(baseUrl: string) {
   return {
-    getUser: () =>
-      // TODO: Fetch /api/me
-      Promise.resolve<IUserDto>({
-        email: "office-tracker@futurice.com",
-        firstName: "Office",
-        lastName: "Tracker",
-        avatarUrl: "https://placekitten.com/300/300",
-      }),
+    getUser: () => fetchJSON<IUserDto>(`${baseUrl}/api/me`),
 
     getUserShift: () => fetchJSON<IShiftAssignmentDto>(`${baseUrl}/api/shift/get`),
 

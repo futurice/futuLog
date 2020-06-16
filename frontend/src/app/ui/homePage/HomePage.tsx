@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Paper, styled } from "@material-ui/core";
 import { RoutePaths } from "app/ui/app/AppRoutes";
@@ -41,10 +41,30 @@ const Separator = styled("hr")({
   borderColor: "#D2CEE3",
 });
 
+const FauxLink = styled(Button)({
+  display: "inline",
+  minWidth: 0,
+  padding: 0,
+  fontWeight: "normal",
+  fontSize: "1rem",
+  textTransform: "none",
+  textDecoration: "underline",
+  lineHeight: "inherit",
+  color: "inherit",
+  borderRadius: 0,
+  letterSpacing: "inherit",
+  verticalAlign: "inherit",
+  "&:hover": {
+    backgroundColor: "transparent",
+    textDecoration: "underline",
+  },
+});
+
 export const HomePage: React.FC = () => {
   const { apiClientService } = useServices();
   const date = new Date().toISOString().slice(0, 10);
   const dispatch = useDispatch();
+  const [isWhyExpanded, setIsWhyExpanded] = useState(false);
 
   //
   // Remote data
@@ -142,16 +162,35 @@ export const HomePage: React.FC = () => {
               <>
                 <Separator />
                 {!userWorkmode.workmode.confirmed ? (
-                  <>
+                  <section>
                     <h3>Check in!</h3>
 
                     <p>
                       You booked a spot to work from the office today. Please confirm that you are
-                      in the office. <a href="#">Why?</a>
+                      in the office.{" "}
+                      <FauxLink
+                        aria-expanded={isWhyExpanded}
+                        onClick={() => setIsWhyExpanded(!isWhyExpanded)}
+                      >
+                        Why?
+                      </FauxLink>
                     </p>
 
+                    {isWhyExpanded && (
+                      <>
+                        <p>
+                          Since available spots are limited, if you are not going maybe somebody
+                          else could use the spot.
+                        </p>
+                        <p>
+                          We need to keep track of who is in the office to be able to contain an
+                          eventual virus spread.
+                        </p>
+                      </>
+                    )}
+
                     <Button onClick={onConfirmOffice}>I'm in the office</Button>
-                  </>
+                  </section>
                 ) : (
                   <>
                     <Box

@@ -1,22 +1,23 @@
 import React from "react";
 import { styled, Theme } from "@material-ui/core/styles";
-import Button, { ButtonProps } from "@material-ui/core/Button";
 import { Workmode, IWorkmodeDto } from "app/services/apiClientService";
 import { colors } from "app/ui/ux/colors";
-import { buttonStyles } from "app/ui/ux/styles";
 import { IconHome, IconOffice, IconClient, IconLeave } from "app/ui/ux/icons";
+import { ButtonProps, IconButton } from "app/ui/ux/Button";
 
 interface IWorkmodeButton extends ButtonProps {
   hoverColor: keyof typeof colors;
   active?: boolean;
 }
 
-const WorkmodeButton = styled(({ hoverColor, active, ...props }) => (
-  <Button {...props} disableRipple fullWidth />
-))<Theme, IWorkmodeButton & ButtonProps>({
-  ...buttonStyles,
-  background: ({ hoverColor, active }) => (active ? colors[hoverColor] : colors.white),
+const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <IconButton {...props} />)<
+  Theme,
+  IWorkmodeButton & ButtonProps
+>({
+  width: "100%",
+  padding: "0.75rem",
   border: `1px solid ${colors["deep-blue-medium"]}`,
+  background: ({ hoverColor, active }) => (active ? colors[hoverColor] : colors.white),
   fontWeight: ({ active }: IWorkmodeButton) => (active ? "bold" : "normal"),
 
   "&:focus": {
@@ -25,14 +26,6 @@ const WorkmodeButton = styled(({ hoverColor, active, ...props }) => (
 
   "&:hover": {
     backgroundColor: (props: IWorkmodeButton) => colors[props.hoverColor],
-    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
-  },
-
-  "& > .MuiButton-label": {
-    justifyContent: "flex-start",
-  },
-  "& .MuiButton-startIcon": {
-    marginLeft: 0,
   },
 });
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Button, Paper, styled } from "@material-ui/core";
+import { Box, Paper, styled } from "@material-ui/core";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
 import {
@@ -21,6 +21,7 @@ import {
 import { combineRemoteData, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import { colors } from "app/ui/ux/colors";
+import { FauxLink, Button } from "app/ui/ux/Button";
 
 const Section = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -39,25 +40,6 @@ const Separator = styled("hr")({
   // TODO: Rearrange colors into xxx-10, xxx-20, etc..
   // This should then be `deep-blue-20`
   borderColor: "#D2CEE3",
-});
-
-const FauxLink = styled(Button)({
-  display: "inline",
-  minWidth: 0,
-  padding: 0,
-  fontWeight: "normal",
-  fontSize: "1rem",
-  textTransform: "none",
-  textDecoration: "underline",
-  lineHeight: "inherit",
-  color: "inherit",
-  borderRadius: 0,
-  letterSpacing: "inherit",
-  verticalAlign: "inherit",
-  "&:hover": {
-    backgroundColor: "transparent",
-    textDecoration: "underline",
-  },
 });
 
 export const HomePage: React.FC = () => {

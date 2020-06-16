@@ -1,9 +1,9 @@
 import React from "react";
 import { styled, Theme } from "@material-ui/core/styles";
 import { Workmode, IWorkmodeDto } from "app/services/apiClientService";
-import { colors } from "app/ui/ux/colors";
+import { colors } from "app/ui/ux/theme";
 import { IconHome, IconOffice, IconClient, IconLeave } from "app/ui/ux/icons";
-import { ButtonProps, IconButton } from "app/ui/ux/Button";
+import { ButtonProps, IconButton } from "app/ui/ux/buttons";
 
 interface IWorkmodeButton extends ButtonProps {
   hoverColor: keyof typeof colors;
@@ -12,11 +12,11 @@ interface IWorkmodeButton extends ButtonProps {
 
 const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <IconButton {...props} />)<
   Theme,
-  IWorkmodeButton & ButtonProps
+  IWorkmodeButton
 >({
   width: "100%",
   padding: "0.75rem",
-  border: `1px solid ${colors["deep-blue-medium"]}`,
+  border: `1px solid ${colors["deep-blue-30"]}`,
   background: ({ hoverColor, active }) => (active ? colors[hoverColor] : colors.white),
   fontWeight: ({ active }: IWorkmodeButton) => (active ? "bold" : "normal"),
 
@@ -65,7 +65,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
             disabled={disabled}
             active={workmode.type === Workmode.Home}
             startIcon={<IconHome />}
-            hoverColor="radical-red-light"
+            hoverColor="radical-red-10"
             onClick={() => onSelectWorkmode({ type: Workmode.Home })}
           >
             Home
@@ -77,7 +77,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
           disabled={disabled || isOfficeConfirmed || officeCapacity <= 0}
           active={workmode.type === Workmode.Office}
           startIcon={<IconOffice />}
-          hoverColor="jade-green-light"
+          hoverColor="jade-green-10"
           onClick={() => onSelectWorkmode({ type: Workmode.Office, confirmed: false })}
         >
           Office{officeCapacity <= 0 ? ` - full!` : ""}
@@ -90,7 +90,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
               disabled={disabled}
               active={workmode.type === Workmode.Client}
               startIcon={<IconClient />}
-              hoverColor="golden-rod-light"
+              hoverColor="golden-rod-10"
               onClick={() => onSelectWorkmode({ type: Workmode.Client, name: "<Unknown>" })}
             >
               Client
@@ -101,7 +101,7 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
               disabled={disabled}
               active={workmode.type === Workmode.Leave}
               startIcon={<IconLeave />}
-              hoverColor="viking-light"
+              hoverColor="viking-10"
               onClick={() => onSelectWorkmode({ type: Workmode.Leave })}
             >
               Leave

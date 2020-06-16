@@ -4,14 +4,15 @@ import MuiButton, { ButtonProps as MuiButtonProps } from "@material-ui/core/Butt
 
 export type ButtonProps = MuiButtonProps;
 
-export const Button = styled((props) => <MuiButton {...props} disableRipple />)({
+export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} disableRipple />)({
   padding: "0.75rem 2rem",
   textTransform: "none",
   fontFamily: "Futurice",
   fontSize: "1rem",
   fontWeight: "bold",
   lineHeight: "1.25",
-  "&:hover": {
+  boxShadow: "none",
+  "&:hover, &:focus": {
     boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
   },
 });

@@ -20,14 +20,15 @@ import {
 } from "app/services/apiClientService";
 import { combineRemoteData, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
-import { colors } from "app/ui/ux/colors";
-import { FauxLink, Button } from "app/ui/ux/Button";
+import { colors } from "app/ui/ux/theme";
+import { FauxLink, Button } from "app/ui/ux/buttons";
+import { H2, H3, P } from "app/ui/ux/text";
 
 const Section = styled(Paper)(({ theme }) => ({
   width: "100%",
   maxWidth: "52rem",
-  backgroundColor: colors["deep-blue-light"],
-  color: colors["deep-blue-dark"],
+  backgroundColor: colors["deep-blue-10"],
+  color: colors["deep-blue-60"],
   [theme.breakpoints.down("sm")]: {
     padding: "2.5rem 1.25rem",
   },
@@ -128,7 +129,7 @@ export const HomePage: React.FC = () => {
       >
         {({ userWorkmode, officeCapacity }, isLoading: boolean, error?: Error) => (
           <Section elevation={0} className="stack">
-            <h2>Where are you working today?</h2>
+            <H2>Where are you working today?</H2>
 
             <Box maxWidth="24rem" mx="auto">
               <WorkmodeButtons
@@ -145,9 +146,9 @@ export const HomePage: React.FC = () => {
                 <Separator />
                 {!userWorkmode.workmode.confirmed ? (
                   <section>
-                    <h3>Check in!</h3>
+                    <H3>Check in!</H3>
 
-                    <p>
+                    <P>
                       You booked a spot to work from the office today. Please confirm that you are
                       in the office.{" "}
                       <FauxLink
@@ -156,27 +157,29 @@ export const HomePage: React.FC = () => {
                       >
                         Why?
                       </FauxLink>
-                    </p>
+                    </P>
 
                     {isWhyExpanded && (
                       <>
-                        <p>
+                        <P>
                           Since available spots are limited, if you are not going maybe somebody
                           else could use the spot.
-                        </p>
-                        <p>
+                        </P>
+                        <P>
                           We need to keep track of who is in the office to be able to contain an
                           eventual virus spread.
-                        </p>
+                        </P>
                       </>
                     )}
 
-                    <Button onClick={onConfirmOffice}>I'm in the office</Button>
+                    <Button variant="contained" color="primary" onClick={onConfirmOffice}>
+                      I'm in the office
+                    </Button>
                   </section>
                 ) : (
                   <>
                     <Box
-                      component="p"
+                      component={P}
                       fontSize="1.5rem"
                       fontWeight="bold"
                       fontFamily="Futurice"
@@ -197,13 +200,17 @@ export const HomePage: React.FC = () => {
       </RenderRemoteData>
 
       <Section elevation={0} className="stack">
-        <h2>Where will you work work in the next two weeks?</h2>
+        <H2>Where will you work work in the next two weeks?</H2>
 
-        <p>
+        <P>
           Check your options based on your shift and plan where you will be working in the future.
-        </p>
+        </P>
 
-        <Link to={RoutePaths.Planning}>Planning</Link>
+        <Link to={RoutePaths.Planning}>
+          <Button variant="contained" color="primary">
+            Planning
+          </Button>
+        </Link>
       </Section>
     </Box>
   );

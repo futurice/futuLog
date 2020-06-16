@@ -5,6 +5,7 @@ import {
   IShiftAssignmentDto,
   IUserWorkmodeDto,
   IShiftDto,
+  IOfficeSpaceDto,
 } from "app/services/apiClientService";
 
 //
@@ -17,6 +18,8 @@ export interface IRemoteStore {
   userShifts: Singleton<IShiftAssignmentDto>;
   userWorkmodesByDay: Collection<IUserWorkmodeDto>;
   siteShifts: Collection<IShiftDto>;
+  offices: Singleton<IOfficeSpaceDto[]>;
+  officeCapacityBySiteDate: Collection<number>;
 }
 
 export type Singleton<T> = { "0"?: RemoteData<T> };

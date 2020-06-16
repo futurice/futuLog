@@ -10,25 +10,17 @@ import {
   pushRemoteData,
 } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
-import { Workmode, IWorkmodeDto, IUserWorkmodeDto, IUserDto } from "app/services/apiClientService";
-import { combineRemoteData, getRemoteDataValue, remoteStore } from "app/stores/remoteStore";
+import {
+  Workmode,
+  IWorkmodeDto,
+  IUserWorkmodeDto,
+  IUserDto,
+  IShiftAssignmentDto,
+  IOfficeSpaceDto,
+} from "app/services/apiClientService";
+import { combineRemoteData, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import { colors } from "app/ui/ux/colors";
-
-function hackWorkmode(workmodeStr: string): IWorkmodeDto {
-  switch (workmodeStr) {
-    case Workmode.Home:
-      return { type: Workmode.Home };
-    case Workmode.Office:
-      return { type: Workmode.Office, confirmed: false };
-    case Workmode.Client:
-      return { type: Workmode.Client, name: "<Unknown>" };
-    case Workmode.Leave:
-      return { type: Workmode.Leave };
-  }
-
-  return { type: Workmode.Home };
-}
 
 const Section = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -54,16 +46,30 @@ export const HomePage: React.FC = () => {
   const date = new Date().toISOString().slice(0, 10);
   const dispatch = useDispatch();
 
+  //
+  // Remote data
+
+  // These are pre-loaded in AppRoutes
   const user = useRemoteDataValue<IUserDto>("users", "0", null!);
+  const userShift = useRemoteDataValue<IShiftAssignmentDto>("userShifts", "0", null!);
+  const offices = useRemoteDataValue<IOfficeSpaceDto[]>("offices", "0", null!);
+
   const userWorkmodeRes = useRemoteDataFetch("userWorkmodesByDay", date, () =>
     apiClientService.getUserWorkmode(date).catch(() => null)
   );
-  const userShiftRes = useRemoteDataFetch("userShifts", "0", () => apiClientService.getUserShift());
+  const officeCapacityRes = useRemoteDataFetch(
+    "officeCapacityBySiteDate",
+    userShift && `${userShift.site}/${date}`,
+    () => apiClientService.getOfficeCapacity(userShift.site, date)
+  );
 
-  const onSelectWorkmode = (workmodeEnum: Workmode) => {
-    const userShift = getRemoteDataValue(userShiftRes, null);
+  const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
+
+  //
+  // Actions
+
+  const onSelectWorkmode = (workmode: IWorkmodeDto) => {
     if (userShift) {
-      const workmode = hackWorkmode(workmodeEnum);
       const site = userShift.site;
       const userWorkmode = {
         userEmail: user && user.email,
@@ -85,6 +91,18 @@ export const HomePage: React.FC = () => {
     }
   };
 
+  const onConfirmOffice = () =>
+    dispatch(
+      pushRemoteData("userWorkmodesByDay", date, () =>
+        apiClientService
+          .confirmUserWorkmode(true)
+          .then(() => apiClientService.getUserWorkmode(date).catch(() => null))
+      )
+    );
+
+  //
+  // View
+
   return (
     <Box
       className="HomePage stack"
@@ -98,38 +116,61 @@ export const HomePage: React.FC = () => {
       p={["0.5rem", "1rem", "2.5rem"]}
     >
       <RenderRemoteData
-        remoteData={combineRemoteData({ userWorkmode: userWorkmodeRes, userShift: userShiftRes })}
+        remoteData={combineRemoteData({
+          userWorkmode: userWorkmodeRes,
+          officeCapacity: officeCapacityRes,
+        })}
+        // TODO: Improve the UX for loading state, don't let the initial state flash
         onLoading={(data, children) => children(data || ({} as any), true)}
         onError={(error, children) => children({} as any, false, error)}
       >
-        {({ userWorkmode }, isLoading: boolean, error?: Error) => (
+        {({ userWorkmode, officeCapacity }, isLoading: boolean, error?: Error) => (
           <Section elevation={0} className="stack">
             <h2>Where are you working today?</h2>
 
             <Box maxWidth="24rem" mx="auto">
               <WorkmodeButtons
                 disabled={isLoading}
-                workmode={userWorkmode ? userWorkmode.workmode.type : Workmode.Home}
+                officeCapacity={(userOffice ? userOffice.maxPeople : 0) - (officeCapacity || 0)}
+                workmode={userWorkmode ? userWorkmode.workmode : { type: Workmode.Home }}
                 onSelectWorkmode={onSelectWorkmode}
               />
             </Box>
             {error && <Box component="p">{error.message}</Box>}
 
-            {userWorkmode &&
-              userWorkmode.workmode.type === Workmode.Office &&
-              !userWorkmode.workmode.confirmed && (
-                <>
-                  <Separator />
-                  <h3>Check in!</h3>
+            {userWorkmode && userWorkmode.workmode.type === Workmode.Office && (
+              <>
+                <Separator />
+                {!userWorkmode.workmode.confirmed ? (
+                  <>
+                    <h3>Check in!</h3>
 
-                  <p>
-                    You booked a spot to work from the office today. Please confirm that you are in
-                    the office. <a href="#">Why?</a>
-                  </p>
+                    <p>
+                      You booked a spot to work from the office today. Please confirm that you are
+                      in the office. <a href="#">Why?</a>
+                    </p>
 
-                  <Button>I'm in the office</Button>
-                </>
-              )}
+                    <Button onClick={onConfirmOffice}>I'm in the office</Button>
+                  </>
+                ) : (
+                  <>
+                    <Box
+                      component="p"
+                      fontSize="1.5rem"
+                      fontWeight="bold"
+                      fontFamily="Futurice"
+                      lineHeight="1.75"
+                      marginBottom="0"
+                    >
+                      ✓<br />
+                      You are checked in!
+                      <br />
+                      Thank you.
+                    </Box>
+                  </>
+                )}
+              </>
+            )}
           </Section>
         )}
       </RenderRemoteData>

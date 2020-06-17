@@ -28,7 +28,7 @@ const Section = styled(Paper)(({ theme }) => ({
   width: "100%",
   maxWidth: "52rem",
   backgroundColor: colors["deep-blue-10"],
-  color: colors["deep-blue-60"],
+  color: colors["deep-blue-80"],
   [theme.breakpoints.down("sm")]: {
     padding: "2.5rem 1.25rem",
   },

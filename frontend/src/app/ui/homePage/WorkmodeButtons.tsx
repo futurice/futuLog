@@ -3,14 +3,14 @@ import { styled, Theme } from "@material-ui/core/styles";
 import { Workmode, IWorkmodeDto } from "app/services/apiClientService";
 import { colors } from "app/ui/ux/theme";
 import { IconHome, IconOffice, IconClient, IconLeave } from "app/ui/ux/icons";
-import { ButtonProps, IconButton } from "app/ui/ux/buttons";
+import { ButtonProps, ButtonWithIcon } from "app/ui/ux/buttons";
 
 interface IWorkmodeButton extends ButtonProps {
   hoverColor: keyof typeof colors;
   active?: boolean;
 }
 
-const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <IconButton {...props} />)<
+const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <ButtonWithIcon {...props} />)<
   Theme,
   IWorkmodeButton
 >({

@@ -17,7 +17,7 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
   },
 });
 
-export const IconButton = styled(Button)({
+export const ButtonWithIcon = styled(Button)({
   "& > .MuiButton-label": {
     justifyContent: "flex-start",
   },

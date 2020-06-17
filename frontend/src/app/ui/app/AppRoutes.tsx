@@ -4,11 +4,14 @@ import { HomePage } from "app/ui/homePage/HomePage";
 import { useRemoteDataFetch, RenderRemoteData } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
 import { combineRemoteData } from "app/stores/remoteStore";
+import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
 
 export enum RoutePaths {
   Home = "/",
   Welcome = "/welcome",
+  Info = "/info",
   Planning = "/planning",
+  User = "/user",
 }
 
 export const AppRoutes: React.FC = () => {
@@ -33,13 +36,13 @@ export const AppRoutes: React.FC = () => {
       onLoading={() => <h2>Loading user information..</h2>}
       onError={(error) => <h2>{error.message}</h2>}
     >
-      {(_user) => (
-        <>
+      {({ user }) => (
+        <SiteLayout user={user}>
           <Switch>
             <Route exact path={RoutePaths.Home} component={HomePage} />
             {/* <Route path="*" component={NotFound} /> */}
           </Switch>
-        </>
+        </SiteLayout>
       )}
     </RenderRemoteData>
   );

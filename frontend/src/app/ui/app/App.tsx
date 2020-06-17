@@ -16,7 +16,7 @@ const StyledApp = styled("div")({
       margin: 0,
       fontFamily: "Roboto, sans-serif",
       backgroundColor: colors.white,
-      color: colors["deep-blue-60"],
+      color: colors["deep-blue-80"],
       fontSize: "16px",
     },
   },

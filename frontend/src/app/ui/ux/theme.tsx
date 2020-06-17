@@ -26,3 +26,5 @@ export const theme = createMuiTheme({
     primary: { main: colors["deep-blue-80"], contrastText: colors.white },
   },
 });
+
+export type Theme = typeof theme;

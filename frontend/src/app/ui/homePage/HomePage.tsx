@@ -32,7 +32,7 @@ const Section = styled(Paper)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     padding: "2.5rem 1.25rem",
   },
-  [theme.breakpoints.up("sm")]: {
+  [theme.breakpoints.up("md")]: {
     padding: "2.5rem 4rem",
   },
 }));

@@ -1,6 +1,7 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
 import MuiButton, { ButtonProps as MuiButtonProps } from "@material-ui/core/Button";
+import { LinkProps, Link } from "react-router-dom";
 
 export type ButtonProps = MuiButtonProps;
 
@@ -45,3 +46,23 @@ export const FauxLink = styled(Button)({
     boxShadow: "none",
   },
 });
+
+const A = styled(Link)({
+  display: "inline-block",
+});
+
+// Link + Button type helper
+export const LinkButton: React.FC<LinkProps & ButtonProps> = ({
+  component = Button,
+  to,
+  replace,
+  innerRef,
+  ...props
+}) => {
+  const C = component;
+  return (
+    <A to={to as any} replace={replace} innerRef={innerRef}>
+      <C {...props} />
+    </A>
+  );
+};

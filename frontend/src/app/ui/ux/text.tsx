@@ -14,6 +14,13 @@ export const H3 = styled("h3")({
   marginTop: 0,
 });
 
+export const H4 = styled("h4")({
+  fontFamily: "Futurice",
+  fontSize: "1rem",
+  lineHeight: 1.25,
+  marginTop: 0,
+});
+
 export const P = styled("p")({
   fontFamily: "Roboto",
   fontSize: "1rem",

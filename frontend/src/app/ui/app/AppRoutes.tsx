@@ -1,10 +1,12 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
-import { HomePage } from "app/ui/homePage/HomePage";
 import { useRemoteDataFetch, RenderRemoteData } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
 import { combineRemoteData } from "app/stores/remoteStore";
 import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
+import { HomePage } from "app/ui/homePage/HomePage";
+import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
+import { InfoPage } from "app/ui/infoPage/InfoPage";
 
 export enum RoutePaths {
   Home = "/",
@@ -12,6 +14,8 @@ export enum RoutePaths {
   Info = "/info",
   Planning = "/planning",
   User = "/user",
+  // DEV
+  Playground = "/playground",
 }
 
 export const AppRoutes: React.FC = () => {
@@ -40,6 +44,12 @@ export const AppRoutes: React.FC = () => {
         <SiteLayout user={user}>
           <Switch>
             <Route exact path={RoutePaths.Home} component={HomePage} />
+            <Route exact path={RoutePaths.Info} component={InfoPage} />
+
+            {process.env.NODE_ENV !== "production" && (
+              <Route exact path={RoutePaths.Playground} component={PlaygroundPage} />
+            )}
+
             {/* <Route path="*" component={NotFound} /> */}
           </Switch>
         </SiteLayout>

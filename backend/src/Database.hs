@@ -16,14 +16,16 @@ import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 
-getAllWorkmodes :: (MonadIO m, MonadReader Env m) => m [UserWorkmode]
-getAllWorkmodes = query'_ "SELECT * FROM workmodes"
+getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> m [Text]
+getAllWorkmodes office day =
+  fmap fromOnly
+    <$> query' "SELECT user_email FROM workmodes WHERE workmode = 'Office' AND site = ? AND date = ?" (office, day)
 
 queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe UserWorkmode)
 queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
 
-confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> Bool -> m ()
-confirmWorkmode email day status = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)
+confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Bool -> Day -> m ()
+confirmWorkmode email status day = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)
 
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
 getLastShiftsFor user =

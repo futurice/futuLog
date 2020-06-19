@@ -34,7 +34,7 @@ jobs:
                     --cache-from "type=local,src=/tmp/docker-cache" \
                     --cache-to "type=local,dest=/tmp/docker-cache,mode=max" \
                     --output "type=docker" \
-                    --tag futurice/office-tracker:$(git rev-parse --short HEAD) .
+                    --tag futurice/futulog:$(git rev-parse --short HEAD) .
 
             - name: Save SSH key
               if: github.ref == 'refs/heads/master'

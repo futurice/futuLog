@@ -1,15 +1,20 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eo pipefail
 
 # Be sure to set SSH_USER to the FUM username or you will get errors
 
-name="office-tracker-staging"
-image="futurice/office-tracker"
+name="futulog-staging"
+
+if [[ "$1" == "production" ]]; then
+    name="futulog"
+fi
+
+image="futurice/futulog"
 tag="$(git rev-parse --short HEAD)"
 
 if [[ "$1" != "deploy" ]]; then
-    docker build -t "$image:$tag" $extra_args .
+    docker build -t "$image:$tag" .
 fi
 
 if [[ "$1" == "build" ]]; then

@@ -1,0 +1,9 @@
+- days: [1, 2, 3, 4, 5, 6, 7]
+  name: default
+  site: Munich
+- days: [1, 2, 3, 4, 5, 6, 7]
+  name: default
+  site: Berlin
+- days: [1, 2, 3, 4, 5, 6, 7]
+  name: default
+  site: Stuttgart

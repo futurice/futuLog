@@ -19,7 +19,7 @@ import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
-import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
+import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, queryWorkmodes, saveShift)
 import Logic (registerWorkmode)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
@@ -44,13 +44,17 @@ apiHandler :: Server ProtectedAPI
 apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
-workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> getWorkmodes
+workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch :<|> getWorkmodes
   where
     regWorkmode m = registerWorkmode email m >>= \case
       Right _ -> pure NoContent
       Left err -> throwError $ err400 {errBody = pack err}
     confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay
     getWorkmodes office = getAllWorkmodes office <=< defaultDay
+    queryBatch startDate endDate = do
+      start <- defaultDay startDate
+      end <- defaultDay endDate
+      queryWorkmodes email start end
 
 shiftHandler :: User -> Server ShiftAPI
 shiftHandler MkUser {email} = getShift :<|> (\office -> setShift office :<|> getShifts office)

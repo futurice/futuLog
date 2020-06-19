@@ -4,17 +4,19 @@ import API
 import Auth (contextProxy, mkAuthServerContext)
 import qualified CSV
 import Control.Lens ((&), (.~), (?~))
+import Control.Monad ((<=<))
 import Control.Monad.Except (throwError)
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.ClientRequest (shiftName)
 import Data.Config (Shift (name), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
-import Data.Maybe (fromMaybe, listToMaybe)
+import Data.Maybe (listToMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
+import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
 import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
@@ -42,15 +44,13 @@ apiHandler :: Server ProtectedAPI
 apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
-workmodeHandler MkUser {email} = regWorkmode :<|> confWorkmode :<|> queryWorkmode email :<|> getAllWorkmodes
+workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> getWorkmodes
   where
     regWorkmode m = registerWorkmode email m >>= \case
       Right _ -> pure NoContent
       Left err -> throwError $ err400 {errBody = pack err}
-    confWorkmode day status = do
-      today <- liftIO $ utctDay <$> getCurrentTime
-      confirmWorkmode email (fromMaybe today day) status
-      pure NoContent
+    confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay
+    getWorkmodes office = getAllWorkmodes office <=< defaultDay
 
 shiftHandler :: User -> Server ShiftAPI
 shiftHandler MkUser {email} = getShift :<|> (\office -> setShift office :<|> getShifts office)
@@ -74,3 +74,6 @@ adminHandler _ = \case
     Left err -> throwError $ err400 {errBody = err}
     Right _ -> pure NoContent
   _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}
+
+defaultDay :: MonadIO m => Maybe Day -> m Day
+defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

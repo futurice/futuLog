@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 404b64b45d14b2a5697867e69e33100a1e6053727dc25943c7c1a4a073016034
+-- hash: d8275d69b14c919573321d194243c48fd900bb2bd29e9d511f41abe68cdf6774
 
 name:           office-tracker
 version:        0.1.0.0
@@ -30,11 +30,12 @@ executable office-tracker
       Data.Workmode
       Database
       Logic
+      Orphans
       Server
       Paths_office_tracker
   hs-source-dirs:
       src
-  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts GeneralizedNewtypeDeriving LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeFamilies TypeOperators
+  default-extensions: DataKinds DeriveAnyClass DeriveGeneric DerivingStrategies DuplicateRecordFields FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving LambdaCase NamedFieldPuns OverloadedStrings ScopedTypeVariables TypeFamilies TypeOperators
   ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Werror
   build-depends:
       aeson
@@ -46,6 +47,7 @@ executable office-tracker
     , exceptions
     , http-client
     , http-client-tls
+    , http-media
     , http-types
     , insert-ordered-containers
     , lens

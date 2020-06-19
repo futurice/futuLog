@@ -14,6 +14,7 @@ default-extensions:
     - DerivingStrategies
     - DuplicateRecordFields
     - FlexibleContexts
+    - FlexibleInstances
     - GeneralizedNewtypeDeriving
     - LambdaCase
     - NamedFieldPuns
@@ -43,6 +44,7 @@ dependencies:
     - exceptions
     - http-client
     - http-client-tls
+    - http-media
     - http-types
     - insert-ordered-containers
     - lens

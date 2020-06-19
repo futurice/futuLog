@@ -19,6 +19,7 @@ import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
 import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, saveShift)
 import Logic (registerWorkmode)
+import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
 import Servant.Multipart (MultipartData (..), fdPayload)
 import Servant.Server (Handler, ServerT, err400, errBody)
@@ -32,7 +33,7 @@ swaggerHandler :: S.Server SwaggerAPI
 swaggerHandler = swaggerSchemaUIServer swagger
   where
     swagger =
-      toSwagger (Proxy :: Proxy ("api" :> API)) -- TODO: Write ToSchema instance for FormData
+      toSwagger (Proxy :: Proxy ("api" :> (API :<|> "admin" :> AdminAPI)))
         & schemes ?~ [Https, Http]
         & info . title .~ "Office Tracker API"
         & info . version .~ "1.0"

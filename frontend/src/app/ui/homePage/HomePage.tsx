@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Box, Paper, styled, IconButton } from "@material-ui/core";
+import { Box, styled, IconButton } from "@material-ui/core";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
 import {

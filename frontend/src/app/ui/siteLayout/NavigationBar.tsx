@@ -7,6 +7,7 @@ import { IconInfoBalloon, IconProfile } from "app/ui/ux/icons";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { MediaQuery } from "app/ui/mediaQuery/MediaQuery";
+import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
 
 interface INavigationBar {
   user: IUserDto;
@@ -45,15 +46,6 @@ const BarButton = styled(ButtonWithIcon)({
   background: "transparent",
 });
 
-const AvatarIcon = styled("img")({
-  borderRadius: "100%",
-  width: "2.5rem",
-  height: "2.5rem",
-});
-
-const avatarIconPlaceholder =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8vwkAArYBs3xK2c8AAAAASUVORK5CYII=";
-
 export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
   <StyledAppBar position="static" className="NavigationBar">
     <Toolbar>
@@ -88,14 +80,7 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
           <LinkButton
             to={RoutePaths.User}
             component={BarButton}
-            startIcon={
-              <AvatarIcon
-                src={user.portrait_thumb_url || avatarIconPlaceholder}
-                width="40"
-                height="40"
-                aria-hidden={true}
-              />
-            }
+            startIcon={<AvatarIcon src={user.portrait_thumb_url} />}
           >
             {user.first_name} {user.last_name}
           </LinkButton>

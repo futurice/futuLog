@@ -7,6 +7,7 @@ import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 import { InfoPage } from "app/ui/infoPage/InfoPage";
+import { UserPage } from "app/ui/userPage/UserPage";
 
 export enum RoutePaths {
   Home = "/",
@@ -45,6 +46,7 @@ export const AppRoutes: React.FC = () => {
           <Switch>
             <Route exact path={RoutePaths.Home} component={HomePage} />
             <Route exact path={RoutePaths.Info} component={InfoPage} />
+            <Route exact path={RoutePaths.User} component={UserPage} />
 
             {process.env.NODE_ENV !== "production" && (
               <Route exact path={RoutePaths.Playground} component={PlaygroundPage} />

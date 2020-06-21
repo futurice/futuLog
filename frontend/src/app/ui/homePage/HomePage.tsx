@@ -23,7 +23,7 @@ import { colors } from "app/ui/ux/theme";
 import { Button, LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo } from "app/ui/ux/icons";
-import { Stack } from "app/ui/ux/containers";
+import { Stack, HR } from "app/ui/ux/containers";
 
 const Card = styled(Stack)(({ theme }) => ({
   width: "100%",
@@ -37,12 +37,6 @@ const Card = styled(Stack)(({ theme }) => ({
     padding: "2.5rem 4rem",
   },
 }));
-
-const Separator = styled("hr")({
-  // TODO: Rearrange colors into xxx-10, xxx-20, etc..
-  // This should then be `deep-blue-20`
-  borderColor: "#D2CEE3",
-});
 
 const InlineIconButton = styled(IconButton)({
   padding: "0.5rem",
@@ -154,7 +148,7 @@ export const HomePage: React.FC = () => {
             {/* Office check-in status */}
             {userWorkmode && userWorkmode.workmode.type === Workmode.Office && (
               <>
-                <Separator />
+                <HR />
                 {!userWorkmode.workmode.confirmed ? (
                   //
                   // Not checked in yet

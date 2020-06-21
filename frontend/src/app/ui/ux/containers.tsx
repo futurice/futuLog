@@ -19,3 +19,9 @@ export const PageMargins = styled(Box)(({ theme }) => ({
   [theme.breakpoints.up("sm")]: { padding: "1rem" },
   [theme.breakpoints.up("md")]: { padding: "2.5rem" },
 }));
+
+export const HR = styled("hr")({
+  // TODO: Rearrange colors into xxx-10, xxx-20, etc..
+  // This should then be `deep-blue-20`
+  borderColor: "#D2CEE3",
+});

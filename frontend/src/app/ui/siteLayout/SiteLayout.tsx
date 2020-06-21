@@ -1,8 +1,8 @@
 import React from "react";
-import { styled, ThemeProvider } from "@material-ui/core";
+import { styled } from "@material-ui/core";
 import { IUserDto } from "app/services/apiClientService";
 import { NavigationBar } from "app/ui/siteLayout/NavigationBar";
-import { theme, colors } from "app/ui/ux/theme";
+import { colors } from "app/ui/ux/theme";
 
 interface ISiteLayout {
   user: IUserDto;

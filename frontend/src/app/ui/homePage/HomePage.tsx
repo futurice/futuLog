@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Box, styled, IconButton } from "@material-ui/core";
-import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
 import {
   useRemoteDataFetch,
@@ -20,7 +19,7 @@ import {
 import { combineRemoteData, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import { colors } from "app/ui/ux/theme";
-import { Button, LinkButton } from "app/ui/ux/buttons";
+import { Button } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo } from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
@@ -56,9 +55,11 @@ export const HomePage: React.FC = () => {
   // Remote data
 
   // These are pre-loaded in AppRoutes
+  /* eslint-disable @typescript-eslint/no-non-null-assertion */
   const user = useRemoteDataValue<IUserDto>("users", "0", null!);
   const userShift = useRemoteDataValue<IShiftAssignmentDto>("userShifts", "0", null!);
   const offices = useRemoteDataValue<IOfficeSpaceDto[]>("offices", "0", null!);
+  /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
   const userWorkmodeRes = useRemoteDataFetch("userWorkmodesByDay", date, () =>
     apiClientService.getUserWorkmode(date).catch(() => null)

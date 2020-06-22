@@ -4,6 +4,7 @@ import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
 
 export type BreakpointProp<T> = T | Array<T> | Partial<Record<Breakpoint, T>>;
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type PropFn<P extends {}, K extends keyof P = keyof P> = (propKey: K) => (props: P) => any;
 
 function breakpointProp<P>(theme: Theme, breakpointKey: Breakpoint): PropFn<P> {
@@ -32,6 +33,7 @@ function breakpointProp<P>(theme: Theme, breakpointKey: Breakpoint): PropFn<P> {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function breakpoints<P extends {}>(
   theme: Theme,
   breakpointFn: (propFn: PropFn<P>) => CreateCSSProperties<P>

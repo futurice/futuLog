@@ -7,6 +7,7 @@ import { IUserDto } from "app/services/apiClientService";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
 
 export const UserPage: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const user = useRemoteDataValue<IUserDto>("users", "0", null!);
 
   return (

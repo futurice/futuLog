@@ -209,6 +209,7 @@ export const HomePage: React.FC = () => {
         )}
       </RenderRemoteData>
 
+      {/*
       <Card spacing="2rem" textAlign="center">
         <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
           <H2>Where will you work work in the next two weeks?</H2>
@@ -222,6 +223,7 @@ export const HomePage: React.FC = () => {
           </LinkButton>
         </Stack>
       </Card>
+      */}
     </Stack>
   );
 };

@@ -1,14 +1,14 @@
 @font-face {
-  font-family: Futurice;
+  font-family: "Futurice";
   font-weight: normal;
   src: local("Futurice Regular"),
-    url("./assets/fonts/Font Futurice 2017/Futurice Regular.otf") format("otf");
+    url("./assets/fonts/Font Futurice 2017/Futurice-Regular/Futurice-Regular.woff") format("woff");
 }
 @font-face {
-  font-family: Futurice;
+  font-family: "Futurice";
   font-weight: bold;
   src: local("Futurice Bold"),
-    url("./assets/fonts/Font Futurice 2017/Futurice Bold.otf") format("otf");
+    url("./assets/fonts/Font Futurice 2017/Futurice-Bold/Futurice-Bold.woff") format("woff");
 }
 
 body {
@@ -20,10 +20,4 @@ body {
 
 * {
   box-sizing: border-box;
-}
-
-// Helper to space out vertically stacked items with 32px margins
-// TODO: Find a better home for this, once things settle down
-.stack > * + * {
-  margin-top: 2rem;
 }

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
+import { useQuery } from "react-query";
 import { Switch, Route, Redirect } from "react-router-dom";
-import { useRemoteDataFetch, RenderRemoteData } from "app/utils/remoteDataUtils";
 import { useServices } from "app/services/services";
-import { combineRemoteData } from "app/stores/remoteStore";
 import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 import { InfoPage } from "app/ui/infoPage/InfoPage";
 import { UserPage } from "app/ui/userPage/UserPage";
 import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
+import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
 
 export enum RoutePaths {
   Home = "/",
@@ -21,23 +21,23 @@ export enum RoutePaths {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { apiClientService, storageService } = useServices();
+  const { apiClient: apiClientService, localStorage: localStorageService } = useServices();
   const [hasVisitedWelcomePage, setHasVisitedWelcomePage] = useState(
-    !!storageService.getItem("futulog/started")
+    !!localStorageService.getItem("futulog/started")
   );
   const onVisitWelcomePage = () => {
-    storageService.setItem("futulog/started", "true");
+    localStorageService.setItem("futulog/started", "true");
     setHasVisitedWelcomePage(true);
   };
 
   // Fetch all critical data here
-  const userRes = useRemoteDataFetch("users", "0", () => apiClientService.getUser());
-  const userShiftRes = useRemoteDataFetch("userShifts", "0", () => apiClientService.getUserShift());
-  const officesRes = useRemoteDataFetch("offices", "0", () => apiClientService.getOffices());
+  const userRes = useQuery("user", () => apiClientService.getUser());
+  const userShiftRes = useQuery("userShift", () => apiClientService.getUserShift());
+  const officesRes = useQuery("office", () => apiClientService.getOffices());
 
   return (
-    <RenderRemoteData
-      remoteData={combineRemoteData({
+    <RenderQuery
+      query={combineQueries({
         user: userRes,
         userShift: userShiftRes,
         offices: officesRes,
@@ -68,6 +68,6 @@ export const AppRoutes: React.FC = () => {
           </Switch>
         </SiteLayout>
       )}
-    </RenderRemoteData>
+    </RenderQuery>
   );
 };

@@ -2,9 +2,8 @@ import React, { useContext } from "react";
 import qhistory from "qhistory";
 import { parse as qsParse, stringify as qsStringify } from "query-string";
 import { createBrowserHistory } from "history";
+import { QueryCache, makeQueryCache } from "react-query";
 import { createAPIClientService, IAPIClientService } from "app/services/apiClientService";
-import { configureStore, getDefaultMiddleware, Store, Middleware } from "@reduxjs/toolkit";
-import { rootStore } from "app/stores/rootStore";
 
 //
 // History
@@ -22,46 +21,24 @@ export function createHistoryService() {
 export type IHistoryService = ReturnType<typeof createHistoryService>;
 
 //
-// Store
-
-export type IStoreService = Store;
-
-const multi: Middleware = ({ dispatch }) => (next) => (action) => {
-  if (Array.isArray(action)) {
-    return action.map(dispatch);
-  } else {
-    return next(action);
-  }
-};
-
-//
 // Services
 
 export interface IServices {
-  historyService: IHistoryService;
-  apiClientService: IAPIClientService;
-  storeService: IStoreService;
-  storageService: Storage;
+  history: IHistoryService;
+  apiClient: IAPIClientService;
+  queryCache: QueryCache;
+  localStorage: Storage;
 }
 
-export function createServices() {
-  const services = {} as IServices;
-
-  // NOTE: Make sure you populate all services here
-  services.historyService = createHistoryService();
-  services.apiClientService = createAPIClientService(
-    process.env.NODE_ENV === "production" ? "" : "http://localhost:5000"
-  );
-  services.storeService = configureStore({
-    reducer: rootStore,
-    middleware: [
-      multi,
-      ...getDefaultMiddleware({
-        thunk: { extraArgument: services },
-      }),
-    ],
-  });
-  services.storageService = localStorage;
+export function createServices(): IServices {
+  const services = {
+    history: createHistoryService(),
+    apiClient: createAPIClientService(
+      process.env.NODE_ENV === "production" ? "" : "http://localhost:5000"
+    ),
+    queryCache: makeQueryCache(),
+    localStorage: localStorage,
+  };
 
   return services;
 }

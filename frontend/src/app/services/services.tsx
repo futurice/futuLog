@@ -41,6 +41,7 @@ export interface IServices {
   historyService: IHistoryService;
   apiClientService: IAPIClientService;
   storeService: IStoreService;
+  storageService: Storage;
 }
 
 export function createServices() {
@@ -60,6 +61,7 @@ export function createServices() {
       }),
     ],
   });
+  services.storageService = localStorage;
 
   return services;
 }

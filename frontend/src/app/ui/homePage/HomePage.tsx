@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Box, Paper, styled } from "@material-ui/core";
+import { Box, styled, IconButton } from "@material-ui/core";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { useDispatch } from "app/stores/rootStore";
 import {
@@ -21,10 +20,12 @@ import {
 import { combineRemoteData, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import { colors } from "app/ui/ux/theme";
-import { FauxLink, Button } from "app/ui/ux/buttons";
+import { Button, LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
+import { IconInfo } from "app/ui/ux/icons";
+import { Stack, HR } from "app/ui/ux/containers";
 
-const Section = styled(Paper)(({ theme }) => ({
+const Card = styled(Stack)(({ theme }) => ({
   width: "100%",
   maxWidth: "52rem",
   backgroundColor: colors["deep-blue-10"],
@@ -37,10 +38,12 @@ const Section = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const Separator = styled("hr")({
-  // TODO: Rearrange colors into xxx-10, xxx-20, etc..
-  // This should then be `deep-blue-20`
-  borderColor: "#D2CEE3",
+const InlineIconButton = styled(IconButton)({
+  padding: "0.5rem",
+  fontSize: "inherit",
+  "& > .MuiIconButton-label": {
+    display: "inline",
+  },
 });
 
 export const HomePage: React.FC = () => {
@@ -107,16 +110,15 @@ export const HomePage: React.FC = () => {
   // View
 
   return (
-    <Box
-      className="HomePage stack"
-      width="100%"
-      // maxWidth="40rem"
+    <Stack
+      className="HomePage"
       display="flex"
       flexDirection="column"
       alignItems="center"
-      textAlign="center"
+      // textAlign="center"
       mx="auto"
       p={["0.5rem", "1rem", "2.5rem"]}
+      spacing={["0.5rem", "1rem", "2.5rem"]}
     >
       <RenderRemoteData
         remoteData={combineRemoteData({
@@ -128,46 +130,51 @@ export const HomePage: React.FC = () => {
         onError={(error, children) => children({} as any, false, error)}
       >
         {({ userWorkmode, officeCapacity }, isLoading: boolean, error?: Error) => (
-          <Section elevation={0} className="stack">
-            <H2>Where are you working today?</H2>
+          <Card spacing="2rem" textAlign="center">
+            <Stack spacing="2rem" maxWidth="26rem" mx="auto">
+              <H2>Where are you working today?</H2>
 
-            <Box maxWidth="24rem" mx="auto">
-              <WorkmodeButtons
-                disabled={isLoading}
-                officeCapacity={(userOffice ? userOffice.maxPeople : 0) - (officeCapacity || 0)}
-                workmode={userWorkmode ? userWorkmode.workmode : { type: Workmode.Home }}
-                onSelectWorkmode={onSelectWorkmode}
-              />
-            </Box>
-            {error && <Box component="p">{error.message}</Box>}
+              <Box maxWidth="24rem" mx="auto">
+                <WorkmodeButtons
+                  disabled={isLoading}
+                  officeCapacity={(userOffice ? userOffice.maxPeople : 0) - (officeCapacity || 0)}
+                  workmode={userWorkmode ? userWorkmode.workmode : { type: Workmode.Home }}
+                  onSelectWorkmode={onSelectWorkmode}
+                />
+              </Box>
+              {error && <Box component="p">{error.message}</Box>}
+            </Stack>
 
+            {/* Office check-in status */}
             {userWorkmode && userWorkmode.workmode.type === Workmode.Office && (
               <>
-                <Separator />
+                <HR />
                 {!userWorkmode.workmode.confirmed ? (
-                  <section>
+                  //
+                  // Not checked in yet
+                  <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
                     <H3>Check in!</H3>
 
                     <P>
-                      You booked a spot to work from the office today. Please confirm that you are
-                      in the office.{" "}
-                      <FauxLink
+                      You have booked a spot to work from the office today. Please confirm that you
+                      are there or that you are going and that you feel healthy.
+                      <InlineIconButton
+                        aria-label="More information"
                         aria-expanded={isWhyExpanded}
+                        disableRipple
                         onClick={() => setIsWhyExpanded(!isWhyExpanded)}
                       >
-                        Why?
-                      </FauxLink>
+                        <IconInfo />
+                      </InlineIconButton>
                     </P>
 
                     {isWhyExpanded && (
                       <>
                         <P>
-                          Since available spots are limited, if you are not going maybe somebody
-                          else could use the spot.
-                        </P>
-                        <P>
-                          We need to keep track of who is in the office to be able to contain an
-                          eventual virus spread.
+                          Since Futurice needs to track who went to the office, we need to be sure
+                          who went there and we need to be sure about you feeling healthy and do not
+                          have any of these symptoms: dry cough, sore throat, fever or general
+                          feeling of sickness.
                         </P>
                       </>
                     )}
@@ -175,11 +182,14 @@ export const HomePage: React.FC = () => {
                     <Button variant="contained" color="primary" onClick={onConfirmOffice}>
                       I'm in the office
                     </Button>
-                  </section>
+                  </Stack>
                 ) : (
+                  //
+                  // Checked in
                   <>
                     <Box
                       component={P}
+                      maxWidth="26rem"
                       fontSize="1.5rem"
                       fontWeight="bold"
                       fontFamily="Futurice"
@@ -195,23 +205,23 @@ export const HomePage: React.FC = () => {
                 )}
               </>
             )}
-          </Section>
+          </Card>
         )}
       </RenderRemoteData>
 
-      <Section elevation={0} className="stack">
-        <H2>Where will you work work in the next two weeks?</H2>
+      <Card spacing="2rem" textAlign="center">
+        <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
+          <H2>Where will you work work in the next two weeks?</H2>
 
-        <P>
-          Check your options based on your shift and plan where you will be working in the future.
-        </P>
+          <P>
+            Check your options based on your shift and plan where you will be working in the future.
+          </P>
 
-        <Link to={RoutePaths.Planning}>
-          <Button variant="contained" color="primary">
+          <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">
             Planning
-          </Button>
-        </Link>
-      </Section>
-    </Box>
+          </LinkButton>
+        </Stack>
+      </Card>
+    </Stack>
   );
 };

@@ -2,11 +2,12 @@ import React from "react";
 import { AppBar, styled, Toolbar, IconButton } from "@material-ui/core";
 import { IUserDto } from "app/services/apiClientService";
 import { colors } from "app/ui/ux/theme";
-import { ButtonWithIcon } from "app/ui/ux/buttons";
-import { IconInfo, IconProfile } from "app/ui/ux/icons";
+import { ButtonWithIcon, LinkButton } from "app/ui/ux/buttons";
+import { IconInfoBalloon, IconProfile } from "app/ui/ux/icons";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { MediaQuery } from "app/ui/mediaQuery/MediaQuery";
+import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
 
 interface INavigationBar {
   user: IUserDto;
@@ -29,6 +30,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 
 const AppTitleLink = styled(Link)({
   flexGrow: 1,
+  textDecoration: "none",
 });
 
 const AppTitle = styled("h1")({
@@ -45,62 +47,44 @@ const BarButton = styled(ButtonWithIcon)({
   background: "transparent",
 });
 
-const AvatarIcon = styled("img")({
-  borderRadius: "100%",
-  width: "2.5rem",
-  height: "2.5rem",
-});
-
-const avatarIconPlaceholder =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8vwkAArYBs3xK2c8AAAAASUVORK5CYII=";
-
 export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
   <StyledAppBar position="static" className="NavigationBar">
     <Toolbar>
       <AppTitleLink to={RoutePaths.Home} aria-label="Home">
-        <AppTitle>FutuLog</AppTitle>
+        <AppTitle>futuLog</AppTitle>
       </AppTitleLink>
 
-      <MediaQuery query={(theme) => theme.breakpoints.down("xs")}>
+      {/* Mobile controls */}
+      <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
         <>
-          <Link to={RoutePaths.Info} aria-label="Info">
-            <IconButton aria-label="Info">
-              <IconInfo />
-            </IconButton>
-          </Link>
+          <LinkButton to={RoutePaths.Info} component={IconButton} aria-label="Info">
+            <IconInfoBalloon />
+          </LinkButton>
 
-          <Link to={RoutePaths.User} aria-label="Info">
-            <IconButton aria-label="Profile">
-              <IconProfile />
-            </IconButton>
-          </Link>
+          <LinkButton to={RoutePaths.User} component={IconButton} aria-label="Info">
+            <IconProfile />
+          </LinkButton>
         </>
       </MediaQuery>
 
-      <MediaQuery query={(theme) => theme.breakpoints.up("sm")}>
+      {/* Desktop controls */}
+      <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <>
-          <Link to={RoutePaths.Info}>
-            <BarButton startIcon={<IconInfo />}>Info</BarButton>
-          </Link>
+          <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
+            Info
+          </LinkButton>
 
           <BarButton startIcon={<IconProfile />} href="https://login.futurice.com/?logout=true">
             Logout
           </BarButton>
 
-          <Link to={RoutePaths.User}>
-            <BarButton
-              startIcon={
-                <AvatarIcon
-                  src={user.portrait_thumb_url || avatarIconPlaceholder}
-                  width="40"
-                  height="40"
-                  aria-hidden={true}
-                />
-              }
-            >
-              {user.first_name} {user.last_name}
-            </BarButton>
-          </Link>
+          <LinkButton
+            to={RoutePaths.User}
+            component={BarButton}
+            startIcon={<AvatarIcon src={user.portrait_thumb_url} />}
+          >
+            {user.first_name} {user.last_name}
+          </LinkButton>
         </>
       </MediaQuery>
     </Toolbar>

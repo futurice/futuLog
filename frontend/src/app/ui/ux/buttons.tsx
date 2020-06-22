@@ -49,6 +49,7 @@ export const FauxLink = styled(Button)({
 
 const A = styled(Link)({
   display: "inline-block",
+  textDecoration: "none",
 });
 
 // Link + Button type helper

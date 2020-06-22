@@ -30,6 +30,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 
 const AppTitleLink = styled(Link)({
   flexGrow: 1,
+  textDecoration: "none",
 });
 
 const AppTitle = styled("h1")({

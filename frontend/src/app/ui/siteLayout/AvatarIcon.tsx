@@ -12,6 +12,7 @@ const Container = styled(Box)<Theme, Pick<ImageProps, "width">>({
   height: ({ width = DEFAULT_AVATAR_SIZE }) => width,
   borderRadius: "50%",
   background: "linear-gradient(180deg, #FBE6E9 0%, #3812CE 100%)",
+  overflow: "hidden",
 });
 
 const Image = styled("img")({
@@ -20,6 +21,9 @@ const Image = styled("img")({
   left: 0,
   bottom: 0,
   right: 0,
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
 });
 
 export const AvatarIcon: React.FC<ImageProps> = (props) => (

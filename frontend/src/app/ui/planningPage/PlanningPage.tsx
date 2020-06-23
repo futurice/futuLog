@@ -4,6 +4,10 @@ import { Theme } from "app/ui/ux/theme";
 import { H2 } from "app/ui/ux/text";
 import { PlanningCalendar } from "app/ui/planningPage/PlanningCalendar";
 
+const Page = styled(Box)<Theme>(({ theme }) => ({
+  backgroundColor: theme.colors["deep-blue-10"],
+}));
+
 const HeaderWrapper = styled(Box)<Theme>(({ theme }) => ({
   paddingTop: "2.5rem",
   color: theme.colors["deep-blue-90"],
@@ -23,7 +27,7 @@ const CalendarWrapper = styled(Box)({
 });
 
 export const PlanningPage: React.FC = () => (
-  <Box className="PlanningPage">
+  <Page className="PlanningPage">
     {/* Heading element */}
     <HeaderWrapper>
       <Header>
@@ -44,5 +48,5 @@ export const PlanningPage: React.FC = () => (
     <CalendarWrapper>
       <PlanningCalendar />
     </CalendarWrapper>
-  </Box>
+  </Page>
 );

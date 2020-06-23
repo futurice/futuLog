@@ -1,28 +1,21 @@
 import React, { useState } from "react";
 import { Box, styled, IconButton } from "@material-ui/core";
-import { useDispatch } from "app/stores/rootStore";
-import {
-  useRemoteDataFetch,
-  RenderRemoteData,
-  useRemoteDataValue,
-  pushRemoteData,
-} from "app/utils/remoteDataUtils";
+import { useQuery, useMutation } from "react-query";
 import { useServices } from "app/services/services";
 import {
   Workmode,
   IWorkmodeDto,
-  IUserWorkmodeDto,
-  IUserDto,
   IShiftAssignmentDto,
   IOfficeSpaceDto,
+  IRegisterWorkmodeDto,
 } from "app/services/apiClientService";
-import { combineRemoteData, remoteStore } from "app/stores/remoteStore";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import { colors } from "app/ui/ux/theme";
 import { Button } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo } from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
+import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
 
 const Card = styled(Stack)(({ theme }) => ({
   width: "100%",
@@ -46,29 +39,35 @@ const InlineIconButton = styled(IconButton)({
 });
 
 export const HomePage: React.FC = () => {
-  const { apiClientService } = useServices();
+  const { apiClient, queryCache } = useServices();
   const date = new Date().toISOString().slice(0, 10);
-  const dispatch = useDispatch();
   const [isWhyExpanded, setIsWhyExpanded] = useState(false);
 
   //
   // Remote data
 
   // These are pre-loaded in AppRoutes
-  /* eslint-disable @typescript-eslint/no-non-null-assertion */
-  const user = useRemoteDataValue<IUserDto>("users", "0", null!);
-  const userShift = useRemoteDataValue<IShiftAssignmentDto>("userShifts", "0", null!);
-  const offices = useRemoteDataValue<IOfficeSpaceDto[]>("offices", "0", null!);
-  /* eslint-disable @typescript-eslint/no-non-null-assertion */
+  const userShift = queryCache.getQueryData<IShiftAssignmentDto>("userShift");
+  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>("office");
 
-  const userWorkmodeRes = useRemoteDataFetch("userWorkmodesByDay", date, () =>
-    apiClientService.getUserWorkmode(date).catch(() => null)
+  const userWorkmodeRes = useQuery(["userWorkmodesByDay", date], () =>
+    apiClient.getUserWorkmode(date).catch(() => null)
   );
-  const officeCapacityRes = useRemoteDataFetch(
-    "officeCapacityBySiteDate",
-    userShift && `${userShift.site}/${date}`,
-    () => apiClientService.getOfficeCapacity(userShift.site, date)
+  const officeCapacityRes = useQuery(
+    userShift && ["officeCapacityBySiteDate", userShift.site, date],
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    () => apiClient.getOfficeCapacity(userShift!.site, date)
   );
+
+  const [registerWorkmode] = useMutation(
+    (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode(request),
+    {
+      onSuccess: () => queryCache.refetchQueries(["userWorkmodesByDay", date]),
+    }
+  );
+  const [confirmWorkmode] = useMutation(() => apiClient.confirmUserWorkmode(true), {
+    onSuccess: () => queryCache.refetchQueries(["userWorkmodesByDay", date]),
+  });
 
   const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
 
@@ -78,34 +77,15 @@ export const HomePage: React.FC = () => {
   const onSelectWorkmode = (workmode: IWorkmodeDto) => {
     if (userShift) {
       const site = userShift.site;
-      const userWorkmode = {
-        userEmail: user && user.email,
-        date,
-        site,
-        workmode,
-      } as IUserWorkmodeDto;
-      dispatch([
-        // Optimistic prepopulation of the selection, TODO: Reconsider
-        remoteStore.actions.setLoaded({
-          key: "userWorkmodesByDay",
-          id: date,
-          value: userWorkmode,
-        }),
-        pushRemoteData("userWorkmodesByDay", date, () =>
-          apiClientService.registerUserWorkmode({ date, site, workmode }).then(() => userWorkmode)
-        ),
-      ]);
+      registerWorkmode({ date, site, workmode });
     }
   };
 
-  const onConfirmOffice = () =>
-    dispatch(
-      pushRemoteData("userWorkmodesByDay", date, () =>
-        apiClientService
-          .confirmUserWorkmode(true)
-          .then(() => apiClientService.getUserWorkmode(date).catch(() => null))
-      )
-    );
+  const onConfirmOffice = () => {
+    confirmWorkmode();
+  };
+
+  console.log({ userOffice, officeCapacity: officeCapacityRes });
 
   //
   // View
@@ -121,8 +101,8 @@ export const HomePage: React.FC = () => {
       p={["0.5rem", "1rem", "2.5rem"]}
       spacing={["0.5rem", "1rem", "2.5rem"]}
     >
-      <RenderRemoteData
-        remoteData={combineRemoteData({
+      <RenderQuery
+        query={combineQueries({
           userWorkmode: userWorkmodeRes,
           officeCapacity: officeCapacityRes,
         })}
@@ -191,6 +171,7 @@ export const HomePage: React.FC = () => {
                     <Box
                       component={P}
                       maxWidth="26rem"
+                      mx="auto"
                       fontSize="1.5rem"
                       fontWeight="bold"
                       fontFamily="Futurice"
@@ -208,7 +189,7 @@ export const HomePage: React.FC = () => {
             )}
           </Card>
         )}
-      </RenderRemoteData>
+      </RenderQuery>
 
       {/*
       <Card spacing="2rem" textAlign="center">

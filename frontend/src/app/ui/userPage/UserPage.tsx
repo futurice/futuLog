@@ -1,14 +1,14 @@
 import React from "react";
+import { Box, Button } from "@material-ui/core";
+import { useServices } from "app/services/services";
+import { IUserDto } from "app/services/apiClientService";
 import { PageMargins, Stack } from "app/ui/ux/containers";
 import { H2 } from "app/ui/ux/text";
-import { Box, Button } from "@material-ui/core";
-import { useRemoteDataValue } from "app/utils/remoteDataUtils";
-import { IUserDto } from "app/services/apiClientService";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
 
 export const UserPage: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const user = useRemoteDataValue<IUserDto>("users", "0", null!);
+  const { queryCache } = useServices();
+  const user = queryCache.getQueryData<IUserDto>("user");
 
   return (
     <PageMargins className="UserPage">
@@ -23,10 +23,10 @@ export const UserPage: React.FC = () => {
           alignItems="center"
           flexWrap="wrap"
         >
-          <AvatarIcon src={user.portrait_thumb_url} />
+          <AvatarIcon src={user?.portrait_thumb_url} />
 
           <Box fontWeight="bold" padding="1rem">
-            {user.first_name} {user.last_name}
+            {user?.first_name} {user?.last_name}
           </Box>
         </Box>
 

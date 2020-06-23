@@ -9,13 +9,14 @@ import {
   IOfficeSpaceDto,
   IRegisterWorkmodeDto,
 } from "app/services/apiClientService";
-import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
+import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
+import { RoutePaths } from "app/ui/app/AppRoutes";
 import { colors } from "app/ui/ux/theme";
-import { Button } from "app/ui/ux/buttons";
+import { Button, LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo } from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
-import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
+import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 
 const Card = styled(Stack)(({ theme }) => ({
   width: "100%",
@@ -191,7 +192,6 @@ export const HomePage: React.FC = () => {
         )}
       </RenderQuery>
 
-      {/*
       <Card spacing="2rem" textAlign="center">
         <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
           <H2>Where will you work work in the next two weeks?</H2>
@@ -205,7 +205,6 @@ export const HomePage: React.FC = () => {
           </LinkButton>
         </Stack>
       </Card>
-      */}
     </Stack>
   );
 };

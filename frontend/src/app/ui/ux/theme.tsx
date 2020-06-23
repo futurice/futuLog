@@ -21,10 +21,13 @@ export const colors = {
   "golden-rod-60": "#ffcd73",
 };
 
-export const theme = createMuiTheme({
-  palette: {
-    primary: { main: colors["deep-blue-80"], contrastText: colors.white },
+export const theme = createMuiTheme(
+  {
+    palette: {
+      primary: { main: colors["deep-blue-80"], contrastText: colors.white },
+    },
   },
-});
+  { colors }
+);
 
-export type Theme = typeof theme;
+export type Theme = typeof theme & { colors: typeof colors };

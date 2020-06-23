@@ -3,12 +3,13 @@ import { useQuery } from "react-query";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { useServices } from "app/services/services";
 import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
+import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
-import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 import { InfoPage } from "app/ui/infoPage/InfoPage";
 import { UserPage } from "app/ui/userPage/UserPage";
 import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
-import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
+import { PlanningPage } from "app/ui/planningPage/PlanningPage";
+import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 
 export enum RoutePaths {
   Home = "/",
@@ -59,6 +60,7 @@ export const AppRoutes: React.FC = () => {
             <Route exact path={RoutePaths.Home} component={HomePage} />
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />
+            <Route exact path={RoutePaths.Planning} component={PlanningPage} />
 
             {process.env.NODE_ENV !== "production" && (
               <Route exact path={RoutePaths.Playground} component={PlaygroundPage} />

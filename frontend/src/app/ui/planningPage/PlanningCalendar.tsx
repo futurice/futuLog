@@ -6,6 +6,7 @@ import {
   ExpansionPanelDetails,
   styled,
   BoxProps,
+  ExpansionPanelProps,
 } from "@material-ui/core";
 import dayjs from "dayjs";
 import { Button } from "app/ui/ux/buttons";
@@ -27,6 +28,8 @@ function dateRange(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) {
   return arr;
 }
 
+const isWeekend = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6;
+
 interface IPlanningDay {
   date: dayjs.Dayjs;
   onClose: () => void;
@@ -44,16 +47,24 @@ const PlanningDay: React.FC<IPlanningDay> = ({ date, onClose }) => {
   );
 };
 
-const AccordionItem = styled(ExpansionPanel)<Theme>(({ theme }) => ({
+interface IAccordionItem extends ExpansionPanelProps {
+  isPast?: boolean;
+}
+
+const AccordionItem = styled(ExpansionPanel)<Theme, IAccordionItem>(({ theme, isPast }) => ({
   "&::before": { display: "none" },
   padding: "0 1rem",
   marginBottom: "0.5rem",
+  opacity: isPast ? 0.5 : 1,
   background: theme.colors.white,
   boxShadow: "20px 20px 40px rgba(20, 7, 75, 0.12)",
   borderRadius: "8px",
   "&.Mui-expanded": {
     margin: 0,
     marginBottom: "0.5rem",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: theme.colors["deep-blue-10"],
   },
 }));
 
@@ -137,16 +148,17 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = () => {
       <Box>
         {dateRange(startDate, endDate).map((date) => {
           const dateStr = date.format("YYYY-MM-DD");
-          const isToday = date.isSame(today);
           return (
             <AccordionItem
               key={dateStr}
+              disabled={isWeekend(date)}
+              isPast={date.isBefore(today)}
               expanded={!!expandedDate && expandedDate === dateStr}
               onChange={(_, isExpanded) => setExpandedDate(isExpanded ? dateStr : undefined)}
             >
               <AccordionTitle id={dateStr}>
                 <DateWrapper>
-                  <DateNumber isToday={isToday}>{date.date()}</DateNumber>
+                  <DateNumber isToday={date.isSame(today)}>{date.date()}</DateNumber>
                   <DateName>{date.format("ddd")}</DateName>
                 </DateWrapper>
                 <StatusWrapper>Home</StatusWrapper>

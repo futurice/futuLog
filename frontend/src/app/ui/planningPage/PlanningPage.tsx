@@ -9,6 +9,9 @@ const Page = styled(Box)<Theme>(({ theme }) => ({
 }));
 
 const HeaderWrapper = styled(Box)<Theme>(({ theme }) => ({
+  position: "sticky",
+  top: 0,
+  zIndex: 1,
   paddingTop: "2.5rem",
   color: theme.colors["deep-blue-90"],
   backgroundColor: theme.colors.white,

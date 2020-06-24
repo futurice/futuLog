@@ -7,6 +7,9 @@ import { createServices } from "app/services/services";
 // import * as serviceWorker from "./serviceWorker";
 
 const services = createServices();
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+window.__services = services;
 
 ReactDOM.render(
   <React.StrictMode>

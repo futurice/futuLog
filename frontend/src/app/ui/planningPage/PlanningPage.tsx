@@ -8,14 +8,17 @@ const Page = styled(Box)<Theme>(({ theme }) => ({
   backgroundColor: theme.colors["deep-blue-10"],
 }));
 
-const HeaderWrapper = styled(Box)<Theme>(({ theme }) => ({
+const HeaderWrapper = styled("div")<Theme>(({ theme }) => ({
   position: "sticky",
-  top: 0,
+  top: "64px", // NOTE: NavigationBar is 64px tall in desktop
   zIndex: 1,
   paddingTop: "2.5rem",
   color: theme.colors["deep-blue-90"],
   backgroundColor: theme.colors.white,
   boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+  [theme.breakpoints.down("sm")]: {
+    display: "none",
+  },
 }));
 
 const Header = styled(Box)<Theme>(({ theme }) => ({
@@ -29,27 +32,29 @@ const CalendarWrapper = styled(Box)({
   margin: "0 auto",
 });
 
-export const PlanningPage: React.FC = () => (
-  <Page className="PlanningPage">
-    {/* Heading element */}
-    <HeaderWrapper>
-      <Header>
-        <H2>Where will you work in the next two weeks?</H2>
-        <Box
-          textAlign="left"
-          paddingBottom="0.5rem"
-          fontSize="1.25rem"
-          fontWeight="bold"
-          lineHeight="1"
-        >
-          June ***
-        </Box>
-      </Header>
-    </HeaderWrapper>
+export const PlanningPage: React.FC = () => {
+  return (
+    <Page className="PlanningPage">
+      {/* Heading element */}
+      <HeaderWrapper>
+        <Header>
+          <H2>Where will you work in the next two weeks?</H2>
+          <Box
+            textAlign="left"
+            paddingBottom="0.5rem"
+            fontSize="1.25rem"
+            fontWeight="bold"
+            lineHeight="1"
+          >
+            June ***
+          </Box>
+        </Header>
+      </HeaderWrapper>
 
-    {/* Calendar view */}
-    <CalendarWrapper>
-      <PlanningCalendar />
-    </CalendarWrapper>
-  </Page>
-);
+      {/* Calendar view */}
+      <CalendarWrapper>
+        <PlanningCalendar />
+      </CalendarWrapper>
+    </Page>
+  );
+};

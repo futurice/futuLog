@@ -14,7 +14,9 @@ import { Theme } from "app/ui/ux/theme";
 import { H3 } from "app/ui/ux/text";
 import { useServices } from "app/services/services";
 
-interface IPlanningCalendar {}
+interface IPlanningCalendar {
+  onChangeVisibleMonth: (month: string) => void;
+}
 
 const NUM_INITIAL_WEEKS = 4;
 const NUM_LOAD_MORE_WEEKS = 4;
@@ -159,7 +161,7 @@ const DateName = styled(Box)<Theme>({
   fontWeight: "bold",
 });
 
-export const PlanningCalendar: React.FC<IPlanningCalendar> = () => {
+export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleMonth }) => {
   const { history } = useServices();
   const rootEl = useRef<HTMLDivElement>(null);
   const today = dayjs().startOf("day");
@@ -170,23 +172,66 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = () => {
     return weekStart;
   });
   const [endDate, setEndDate] = useState(() => startDate.add(NUM_INITIAL_WEEKS, "week"));
+  const startDateStr = startDate.format("YYYY-MM-DD");
+  const endDateStr = endDate.format("YYYY-MM-DD");
 
-  // Handle initial scrolling taking into account the sticky headers in the pagex
+  const getStickyHeaderOffset = (rootEl: HTMLElement) => {
+    // Calculate the absolute position of the root element which we can
+    // use as offset for the element that we want to scroll into view
+    const rootRect = rootEl.getBoundingClientRect();
+    const offset = rootRect ? rootRect.top + window.pageYOffset : 0;
+    return offset;
+  };
+
+  //
+  // Handle initial scrolling taking into account the sticky headers in the pages,
+  // even in mobile mode where we don't show the calendar header
   useEffect(() => {
-    const scrollDate = history.location.hash.slice(1) || startDate.format("YYYY-MM-DD");
+    const scrollDate = history.location.hash.slice(1) || startDateStr;
     const scrollEl = rootEl.current?.querySelector(`#date-${scrollDate}`);
     if (scrollEl && rootEl.current) {
-      // Calculate the absolute position of the root element which we can
-      // use as offset for the element that we want to scroll into view
-      const rootRect = rootEl.current.getBoundingClientRect();
-      const offset = rootRect ? rootRect.top + window.pageYOffset : 0;
-
+      const offset = getStickyHeaderOffset(rootEl.current);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       scrollEl.style.scrollMarginTop = `${offset}px`;
       scrollEl.scrollIntoView();
     }
   }, []); // eslint-disable-line
+
+  //
+  // Handle scroll changes that affect the month name displayed in calendar header
+  useEffect(() => {
+    const monthElements = rootEl.current?.querySelectorAll("[data-month]");
+    if (!monthElements) {
+      return;
+    }
+    const monthVisibilities: Record<string, boolean> = Object.fromEntries(
+      Array.from(monthElements.values()).map((el) => [el.getAttribute("data-month"), false])
+    );
+
+    const offset = rootEl.current ? getStickyHeaderOffset(rootEl.current) : 0;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const month = entry.target.getAttribute("data-month")!;
+          monthVisibilities[month] = entry.isIntersecting;
+        }
+
+        for (const [month, isVisible] of Object.entries(monthVisibilities)) {
+          if (isVisible) {
+            onChangeVisibleMonth(month);
+            break;
+          }
+        }
+      },
+      { rootMargin: `-${offset}px` }
+    );
+    monthElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [startDateStr, endDateStr, onChangeVisibleMonth]);
 
   return (
     <div className="PlanningCalendar" ref={rootEl}>
@@ -198,41 +243,43 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = () => {
         Load more
       </Button>
       {startDate.toISOString()} - {endDate.toISOString()}
-      {monthlyDateRanges(startDate, endDate).map((monthDates) => (
-        <Box key={monthDates[0].unix()}>
-          <MonthTitle>{monthDates[0].format("MMMM YYYY")}</MonthTitle>
-          {weeklyDateRanges(monthDates[0], monthDates[monthDates.length - 1]).map((dates) => (
-            <Box key={dates[0].unix()} paddingBottom="1.5rem">
-              {dates.map((date) => {
-                const dateStr = date.format("YYYY-MM-DD");
-                return (
-                  <AccordionItem
-                    key={dateStr}
-                    disabled={isWeekend(date)}
-                    isPast={date.isBefore(today)}
-                    expanded={!!expandedDate && expandedDate === dateStr}
-                    onChange={(_, isExpanded) => setExpandedDate(isExpanded ? dateStr : undefined)}
-                  >
-                    <AccordionTitle id={`date-${dateStr}`}>
-                      <DateWrapper>
-                        <DateNumber isToday={date.isSame(today)}>{date.date()}</DateNumber>
-                        <DateName>{date.format("ddd")}</DateName>
-                      </DateWrapper>
-                      <StatusWrapper>Home</StatusWrapper>
-                    </AccordionTitle>
-                    <AccordionContent>
-                      <PlanningDay
-                        date={date}
-                        onClose={() => console.log(`Closing ${date.format("YYYY-MM-DD")}`)}
-                      />
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })}
-            </Box>
-          ))}
-        </Box>
-      ))}
+      {monthlyDateRanges(startDate, endDate).map((monthDates) => {
+        const monthName = monthDates[0].format("MMMM YYYY");
+        return (
+          <Box key={monthDates[0].unix()} data-month={monthName}>
+            <MonthTitle>{monthName}</MonthTitle>
+            {weeklyDateRanges(monthDates[0], monthDates[monthDates.length - 1]).map((dates) => (
+              <Box key={dates[0].unix()} paddingBottom="1.5rem">
+                {dates.map((date) => {
+                  const dateStr = date.format("YYYY-MM-DD");
+                  return (
+                    <AccordionItem
+                      key={dateStr}
+                      disabled={isWeekend(date)}
+                      isPast={date.isBefore(today)}
+                      expanded={!!expandedDate && expandedDate === dateStr}
+                      onChange={(_, isExpanded) =>
+                        setExpandedDate(isExpanded ? dateStr : undefined)
+                      }
+                    >
+                      <AccordionTitle className="AccordionTitle" id={`date-${dateStr}`}>
+                        <DateWrapper>
+                          <DateNumber isToday={date.isSame(today)}>{date.date()}</DateNumber>
+                          <DateName>{date.format("ddd")}</DateName>
+                        </DateWrapper>
+                        <StatusWrapper>Home</StatusWrapper>
+                      </AccordionTitle>
+                      <AccordionContent>
+                        <PlanningDay date={date} onClose={() => setExpandedDate(undefined)} />
+                      </AccordionContent>
+                    </AccordionItem>
+                  );
+                })}
+              </Box>
+            ))}
+          </Box>
+        );
+      })}
       <Button
         variant="contained"
         color="primary"

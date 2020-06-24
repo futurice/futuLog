@@ -86,8 +86,6 @@ export const HomePage: React.FC = () => {
     confirmWorkmode();
   };
 
-  console.log({ userOffice, officeCapacity: officeCapacityRes });
-
   //
   // View
 

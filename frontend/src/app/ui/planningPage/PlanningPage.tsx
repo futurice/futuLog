@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, styled } from "@material-ui/core";
 import { Theme } from "app/ui/ux/theme";
 import { H2 } from "app/ui/ux/text";
@@ -33,6 +33,8 @@ const CalendarWrapper = styled(Box)({
 });
 
 export const PlanningPage: React.FC = () => {
+  const [month, setMonth] = useState<string>();
+
   return (
     <Page className="PlanningPage">
       {/* Heading element */}
@@ -46,14 +48,14 @@ export const PlanningPage: React.FC = () => {
             fontWeight="bold"
             lineHeight="1"
           >
-            June ***
+            {month}
           </Box>
         </Header>
       </HeaderWrapper>
 
       {/* Calendar view */}
       <CalendarWrapper>
-        <PlanningCalendar />
+        <PlanningCalendar onChangeVisibleMonth={setMonth} />
       </CalendarWrapper>
     </Page>
   );

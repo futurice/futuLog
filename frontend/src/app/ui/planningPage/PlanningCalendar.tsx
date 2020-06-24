@@ -201,6 +201,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   //
   // Handle scroll changes that affect the month name displayed in calendar header
   useEffect(() => {
+    onChangeVisibleMonth(startDate.format("MMMM YYYY"));
     const monthElements = rootEl.current?.querySelectorAll("[data-month]");
     if (!monthElements) {
       return;
@@ -231,7 +232,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
     monthElements.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [startDateStr, endDateStr, onChangeVisibleMonth]);
+  }, [startDateStr, endDateStr, onChangeVisibleMonth]); // eslint-disable-line
 
   return (
     <div className="PlanningCalendar" ref={rootEl}>

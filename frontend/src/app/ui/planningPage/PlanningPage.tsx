@@ -3,6 +3,7 @@ import { Box, styled } from "@material-ui/core";
 import { Theme } from "app/ui/ux/theme";
 import { H2 } from "app/ui/ux/text";
 import { PlanningCalendar } from "app/ui/planningPage/PlanningCalendar";
+import dayjs from "dayjs";
 
 const Page = styled(Box)<Theme>(({ theme }) => ({
   backgroundColor: theme.colors["deep-blue-10"],
@@ -21,19 +22,21 @@ const HeaderWrapper = styled("div")<Theme>(({ theme }) => ({
   },
 }));
 
-const Header = styled(Box)<Theme>(({ theme }) => ({
-  maxWidth: "72rem",
+const Header = styled(Box)<Theme>({
+  maxWidth: "74rem",
   margin: "0 auto",
   textAlign: "center",
-}));
+  padding: "0 0.5rem",
+});
 
 const CalendarWrapper = styled(Box)({
-  maxWidth: "72rem",
+  maxWidth: "74rem",
   margin: "0 auto",
+  padding: "0 0.5rem",
 });
 
 export const PlanningPage: React.FC = () => {
-  const [month, setMonth] = useState<string>();
+  const [month, setMonth] = useState<string>(dayjs().format("MMMM YYYY"));
 
   return (
     <Page className="PlanningPage">
@@ -48,7 +51,7 @@ export const PlanningPage: React.FC = () => {
             fontWeight="bold"
             lineHeight="1"
           >
-            {month}
+            {month || "\u00a0"}
           </Box>
         </Header>
       </HeaderWrapper>

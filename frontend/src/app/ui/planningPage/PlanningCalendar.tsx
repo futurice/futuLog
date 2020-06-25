@@ -9,10 +9,13 @@ import {
   ExpansionPanelProps,
 } from "@material-ui/core";
 import dayjs from "dayjs";
+import { useServices } from "app/services/services";
 import { Button } from "app/ui/ux/buttons";
 import { Theme } from "app/ui/ux/theme";
 import { H3 } from "app/ui/ux/text";
-import { useServices } from "app/services/services";
+
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 interface IPlanningCalendar {
   onChangeVisibleMonth: (month: string) => void;
@@ -37,7 +40,7 @@ function weeklyDateRanges(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs): dayjs.D
 
   while (!startDate.isAfter(endDate)) {
     // NOTE: dayjs weeks start from sunday
-    const endOfWeek = startDate.endOf("week").add(1, "day");
+    const endOfWeek = startDate.endOf("week").add(1, "day").startOf("day");
     arrays.push(dateRange(startDate, endOfWeek.isBefore(endDate) ? endOfWeek : endDate));
     startDate = endOfWeek.add(1, "day");
   }
@@ -49,8 +52,7 @@ function monthlyDateRanges(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs): dayjs.
   const arrays = [];
 
   while (!startDate.isAfter(endDate)) {
-    // NOTE: dayjs weeks start from sunday
-    const endOfMonth = startDate.endOf("month");
+    const endOfMonth = startDate.endOf("month").startOf("day");
     arrays.push(dateRange(startDate, endOfMonth.isBefore(endDate) ? endOfMonth : endDate));
     startDate = endOfMonth.add(1, "day");
   }
@@ -76,6 +78,10 @@ const PlanningDay: React.FC<IPlanningDay> = ({ date, onClose }) => {
     </Box>
   );
 };
+
+const Root = styled("div")({
+  padding: "2.5rem 0",
+});
 
 interface IAccordionItem extends ExpansionPanelProps {
   isPast?: boolean;
@@ -164,14 +170,13 @@ const DateName = styled(Box)<Theme>({
 export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleMonth }) => {
   const { history } = useServices();
   const rootEl = useRef<HTMLDivElement>(null);
-  const today = dayjs().startOf("day");
+  const today = dayjs().utc().startOf("day");
   const [expandedDate, setExpandedDate] = useState<string>();
-  const [startDate, setStartDate] = useState(() => {
-    const today = dayjs();
-    const weekStart = today.startOf("week").add(1, "day");
-    return weekStart;
-  });
-  const [endDate, setEndDate] = useState(() => startDate.add(NUM_INITIAL_WEEKS, "week"));
+  // NOTE: dayjs weeks start from sunday, hence we'll add 1 day
+  const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [endDate, setEndDate] = useState(() =>
+    startDate.add(NUM_INITIAL_WEEKS, "week").subtract(1, "day")
+  );
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 
@@ -201,7 +206,9 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   //
   // Handle scroll changes that affect the month name displayed in calendar header
   useEffect(() => {
+    // Recall the initial month
     onChangeVisibleMonth(startDate.format("MMMM YYYY"));
+
     const monthElements = rootEl.current?.querySelectorAll("[data-month]");
     if (!monthElements) {
       return;
@@ -234,16 +241,27 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
     return () => observer.disconnect();
   }, [startDateStr, endDateStr, onChangeVisibleMonth]); // eslint-disable-line
 
+  //
+  // View
+
   return (
-    <div className="PlanningCalendar" ref={rootEl}>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setStartDate(startDate.subtract(NUM_LOAD_MORE_WEEKS, "week"))}
-      >
-        Load more
-      </Button>
-      {startDate.toISOString()} - {endDate.toISOString()}
+    <Root className="PlanningCalendar" ref={rootEl}>
+      <Box display="flex" paddingBottom="0.5rem" justifyContent="center">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() =>
+            setStartDate(startDate.subtract(NUM_LOAD_MORE_WEEKS, "week").startOf("day"))
+          }
+        >
+          Load more
+        </Button>
+      </Box>
+
+      <p>
+        {startDate.toISOString()} - {endDate.toISOString()}
+      </p>
+
       {monthlyDateRanges(startDate, endDate).map((monthDates) => {
         const monthName = monthDates[0].format("MMMM YYYY");
         return (
@@ -253,6 +271,12 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
               <Box key={dates[0].unix()} paddingBottom="1.5rem">
                 {dates.map((date) => {
                   const dateStr = date.format("YYYY-MM-DD");
+                  console.log(
+                    "today?",
+                    date.isSame(today),
+                    date.toISOString(),
+                    today.toISOString()
+                  );
                   return (
                     <AccordionItem
                       key={dateStr}
@@ -281,13 +305,16 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
           </Box>
         );
       })}
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setEndDate(endDate.add(NUM_LOAD_MORE_WEEKS, "week"))}
-      >
-        Load more
-      </Button>
-    </div>
+
+      <Box display="flex" justifyContent="center">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setEndDate(endDate.add(NUM_LOAD_MORE_WEEKS, "week").startOf("day"))}
+        >
+          Load more
+        </Button>
+      </Box>
+    </Root>
   );
 };

@@ -6,7 +6,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
+import Data.ClientRequest (Capacity, RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -45,8 +45,11 @@ getLastShiftsFor user =
 shiftQuery :: Query
 shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assignment_date DESC LIMIT 1"
 
-getOfficeCapacityOn :: (MonadIO m, MonadReader Env m) => Text -> Day -> m Int
-getOfficeCapacityOn office day = fromOnly . head <$> query' "SELECT COUNT(*) FROM workmodes WHERE date = ? AND site = ? AND workmode = 'Office'" (day, office)
+getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]
+getOfficeBooked office start end =
+  query'
+    "SELECT date, COUNT(*) FROM workmodes WHERE site = ? AND date >= ? AND date <= ? AND workmode = 'Office' GROUP BY date ORDER BY date DESC"
+    (office, start, end)
 
 saveShift :: (MonadIO m, MonadReader Env m) => Text -> Text -> SetShift -> m ()
 saveShift email office MkSetShift {shiftName = name} = do

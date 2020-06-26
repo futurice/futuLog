@@ -3,7 +3,13 @@ import { useQuery } from "react-query";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { useServices } from "app/services/services";
 import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
-import { RenderQuery, combineQueries } from "app/utils/reactQueryUtils";
+import {
+  RenderQuery,
+  combineQueries,
+  officesQueryKey,
+  userShiftQueryKey,
+  userQueryKey,
+} from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { InfoPage } from "app/ui/infoPage/InfoPage";
 import { UserPage } from "app/ui/userPage/UserPage";
@@ -32,9 +38,9 @@ export const AppRoutes: React.FC = () => {
   };
 
   // Fetch all critical data here
-  const userRes = useQuery("user", () => apiClientService.getUser());
-  const userShiftRes = useQuery("userShift", () => apiClientService.getUserShift());
-  const officesRes = useQuery("office", () => apiClientService.getOffices());
+  const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
+  const userShiftRes = useQuery(userShiftQueryKey(), () => apiClientService.getUserShift());
+  const officesRes = useQuery(officesQueryKey(), () => apiClientService.getOffices());
 
   return (
     <RenderQuery

@@ -7,7 +7,20 @@ import { Flex, Stack } from "app/ui/ux/containers";
 import { Theme } from "app/ui/ux/theme";
 import { IconClose } from "app/ui/ux/icons";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
-import { Workmode, IWorkmodeDto } from "app/services/apiClientService";
+import {
+  Workmode,
+  IWorkmodeDto,
+  IShiftAssignmentDto,
+  IOfficeSpaceDto,
+} from "app/services/apiClientService";
+import { useServices } from "app/services/services";
+import {
+  userShiftQueryKey,
+  officesQueryKey,
+  officeBookingsQueryKey,
+} from "app/utils/reactQueryUtils";
+import { useQuery } from "react-query";
+import { Button } from "app/ui/ux/buttons";
 
 interface IPlanningCalendarDay {
   date: dayjs.Dayjs;
@@ -19,6 +32,8 @@ const Root = styled("div")({
   display: "flex",
   flexDirection: "column",
   width: "100%",
+  // Primary font for the widget, few places use Roboto
+  fontFamily: "Futurice",
 });
 
 const CloseButtonContainer = styled("div")({
@@ -40,11 +55,35 @@ const DatePickerContainer = styled("div")({
   padding: "0.5rem",
 });
 
+const OfficeInfoContainer = styled("p")({
+  fontFamily: "Roboto",
+  fontSize: "1rem",
+  lineHeight: 1.5,
+});
+
 export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onClose }) => {
+  const { apiClient, queryCache } = useServices();
   const [startDate, setStartDate] = useState(date);
   const [endDate, setEndDate] = useState(date);
   const [workmode, setWorkmode] = useState<IWorkmodeDto>({ type: Workmode.Home });
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
+  const startDateStr = startDate.format("YYYY-MM-DD");
+  const endDateStr = endDate.format("YYYY-MM-DD");
+
+  // These should be pre-loaded by AppRoutes
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey())!;
+  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
+
+  const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
+
+  const officeBookingsRes = useQuery(
+    userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    () => apiClient.getOfficeBookings(userOffice!.site, startDateStr, endDateStr)
+  );
+
+  console.log({ userShift, offices, userOffice, officeBookingsRes });
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
     setStartDate(startDate);
@@ -54,6 +93,10 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
   const onSelectWorkmode = (workmode: IWorkmodeDto) => {
     console.log("workmode", workmode);
     setWorkmode(workmode);
+  };
+  const onConfirmChanges = async () => {
+    console.log("Confirming changes");
+    onClose();
   };
 
   return (
@@ -104,6 +147,19 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
             officeCapacity={9001}
             onSelectWorkmode={onSelectWorkmode}
           />
+        </Box>
+
+        <OfficeInfoContainer>
+          {/* TODO: userSite should be office dto */}
+          Current office: {userOffice?.site || "N/A"}
+          <br />
+          x/y spots available
+        </OfficeInfoContainer>
+
+        <Box textAlign="center">
+          <Button variant="contained" color="primary" onClick={onConfirmChanges}>
+            Confirm changes
+          </Button>
         </Box>
       </WidgetContainer>
     </Root>

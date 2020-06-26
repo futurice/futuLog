@@ -5,10 +5,11 @@ import { IUserDto } from "app/services/apiClientService";
 import { PageMargins, Stack } from "app/ui/ux/containers";
 import { H2 } from "app/ui/ux/text";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
+import { userQueryKey } from "app/utils/reactQueryUtils";
 
 export const UserPage: React.FC = () => {
   const { queryCache } = useServices();
-  const user = queryCache.getQueryData<IUserDto>("user");
+  const user = queryCache.getQueryData<IUserDto>(userQueryKey());
 
   return (
     <PageMargins className="UserPage">

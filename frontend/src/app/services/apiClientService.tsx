@@ -1,3 +1,5 @@
+import { stringify as qsStringify } from "query-string";
+
 interface IRequestInit extends RequestInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any;
@@ -85,8 +87,13 @@ export interface IOfficeSpaceDto {
   maxPeople: number;
 }
 
+export interface ICapacityDto {
+  date: string;
+  numBooked: number;
+}
+
 export function createAPIClientService(baseUrl: string) {
-  return {
+  const apiClient = {
     getUser: () => fetchJSON<IUserDto>(`${baseUrl}/api/me`),
 
     getUserShift: () => fetchJSON<IShiftAssignmentDto>(`${baseUrl}/api/shift/get`),
@@ -119,9 +126,13 @@ export function createAPIClientService(baseUrl: string) {
 
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
 
-    getOfficeCapacity: (site: string, date: string) =>
-      fetchJSON<number>(`${baseUrl}/api/office/${e(site)}/capacity/${e(date)}`),
+    getOfficeBookings: (site: string, startDate: string, endDate: string) =>
+      fetchJSON<ICapacityDto[]>(
+        `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
+      ),
   };
+
+  return apiClient;
 }
 
 export type IAPIClientService = ReturnType<typeof createAPIClientService>;

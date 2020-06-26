@@ -168,6 +168,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   const [endDate, setEndDate] = useState(() =>
     startDate.add(NUM_INITIAL_WEEKS, "week").subtract(1, "day")
   );
+
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 

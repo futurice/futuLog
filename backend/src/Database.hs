@@ -46,7 +46,7 @@ shiftQuery :: Query
 shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assignment_date DESC LIMIT 1"
 
 getOfficeCapacityOn :: (MonadIO m, MonadReader Env m) => Text -> Day -> m Int
-getOfficeCapacityOn office day = fromOnly . head <$> query' "SELECT COUNT(*) FROM workmodes WHERE date = ? AND site = ?" (day, office)
+getOfficeCapacityOn office day = fromOnly . head <$> query' "SELECT COUNT(*) FROM workmodes WHERE date = ? AND site = ? AND workmode = 'Office'" (day, office)
 
 saveShift :: (MonadIO m, MonadReader Env m) => Text -> Text -> SetShift -> m ()
 saveShift email office MkSetShift {shiftName = name} = do

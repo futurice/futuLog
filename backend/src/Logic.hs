@@ -2,13 +2,13 @@ module Logic (registerWorkmode) where
 
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (MonadReader, ask)
-import Data.ClientRequest (RegisterWorkmode (..))
+import Data.ClientRequest (RegisterWorkmode (..), numBooked)
 import Data.Config (Shift (..), maxPeople, officeSite, shiftSite)
 import Data.Env (Env (..), ShiftAssignment (..))
 import Data.Text (Text)
 import Data.Time.Calendar (dayOfWeek)
 import Data.Workmode (Workmode (..))
-import Database (getLastShiftsFor, getOfficeCapacityOn, saveWorkmode)
+import Database (getLastShiftsFor, getOfficeBooked, saveWorkmode)
 
 registerWorkmode :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m (Either String ())
 registerWorkmode email mode@(MkRegisterWorkmode {workmode, site = office}) =
@@ -37,11 +37,11 @@ checkShift email mode@(MkRegisterWorkmode {site = office, date}) (MkShiftAssignm
 
 checkOfficeCapacity :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m (Either String ())
 checkOfficeCapacity email mode@(MkRegisterWorkmode {date, site = office}) = do
-  occupancy <- getOfficeCapacityOn office date
+  occupancy <- getOfficeBooked office date date
   maxCapacity <- maxPeople . head . filter ((==) office . officeSite) . offices <$> ask
-  if occupancy < maxCapacity
-    then Right <$> saveWorkmode email mode
-    else pure $ Left "Office already full on chosen day"
+  case occupancy of
+    [x] | numBooked x < maxCapacity -> Right <$> saveWorkmode email mode
+    _ -> pure $ Left "Office already full on chosen day"
 
 getOfficeShifts :: MonadReader Env m => Text -> m [Shift]
 getOfficeShifts office = filter ((==) office . shiftSite) . shifts <$> ask

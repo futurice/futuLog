@@ -34,6 +34,14 @@ data UserWorkmode
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
+data Capacity
+  = MkCapacity
+      { date :: Day,
+        numBooked :: Int
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow)
+
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site
 

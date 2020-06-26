@@ -19,7 +19,7 @@ import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
-import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeCapacityOn, queryWorkmode, queryWorkmodes, saveShift)
+import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeBooked, queryWorkmode, queryWorkmodes, saveShift)
 import Logic (registerWorkmode)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
@@ -68,9 +68,13 @@ shiftHandler MkUser {email} = getShift :<|> (\office -> setShift office :<|> get
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: Server OfficeAPI
-officeHandler = getOffices :<|> getOfficeCapacityOn
+officeHandler = getOffices :<|> getBooked
   where
     getOffices = offices <$> ask
+    getBooked office startDate endDate = do
+      start <- defaultDay startDate
+      end <- defaultDay endDate
+      getOfficeBooked office start end
 
 adminHandler :: AdminUser -> Server AdminAPI
 adminHandler _ = \case

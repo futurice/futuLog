@@ -34,7 +34,7 @@ type API =
     :<|> "me" :> Get '[JSON] User
 
 type WorkmodeAPI =
-  "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent
+  "register" :> ReqBody '[JSON] [RegisterWorkmode] :> Post '[JSON] NoContent
     :<|> "confirm" :> QueryParam "date" Day :> ReqBody '[JSON] Bool :> Post '[JSON] NoContent
     :<|> "get" :> Capture "date" Day :> Get '[JSON] (Maybe UserWorkmode)
     :<|> "batch" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]

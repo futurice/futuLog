@@ -5,6 +5,8 @@ import { AppRoutes } from "app/ui/app/AppRoutes";
 import { ThemeProvider } from "@material-ui/core";
 import { theme } from "app/ui/ux/theme";
 import { ReactQueryCacheProvider } from "react-query";
+import { MuiPickersUtilsProvider } from "@material-ui/pickers";
+import DayjsUtils from "@date-io/dayjs";
 
 interface IApp {
   services: IServices;
@@ -15,9 +17,11 @@ export const App: React.FC<IApp> = ({ services }) => (
     <ThemeProvider theme={theme}>
       <ServicesContext.Provider value={services}>
         <ReactQueryCacheProvider queryCache={services.queryCache}>
-          <Router history={services.history}>
-            <AppRoutes />
-          </Router>
+          <MuiPickersUtilsProvider utils={DayjsUtils}>
+            <Router history={services.history}>
+              <AppRoutes />
+            </Router>
+          </MuiPickersUtilsProvider>
         </ReactQueryCacheProvider>
       </ServicesContext.Provider>
     </ThemeProvider>

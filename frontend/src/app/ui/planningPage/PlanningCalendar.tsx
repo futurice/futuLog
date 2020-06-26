@@ -9,12 +9,13 @@ import {
   ExpansionPanelProps,
 } from "@material-ui/core";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { useServices } from "app/services/services";
 import { Button } from "app/ui/ux/buttons";
 import { Theme } from "app/ui/ux/theme";
 import { H3 } from "app/ui/ux/text";
+import { PlanningCalendarDay } from "app/ui/planningPage/PlanningCalendarDay";
 
-import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
 interface IPlanningCalendar {
@@ -62,23 +63,13 @@ function monthlyDateRanges(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs): dayjs.
 
 const isWeekend = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6;
 
-interface IPlanningDay {
-  date: dayjs.Dayjs;
-  onClose: () => void;
-}
-
-const PlanningDay: React.FC<IPlanningDay> = ({ date, onClose }) => {
-  return (
-    <Box className="PlanningDay">
-      <p>
-        Aliquip ea velit officia enim id magna nisi amet veniam dolore amet. Deserunt aliquip
-        nostrud velit non dolor magna occaecat duis aliqua nulla id est. Dolor et cillum nulla anim
-        culpa incididunt anim.
-      </p>
-    </Box>
-  );
-};
-
+// NOTE: This padding needs to be on the component level instead of
+// the page-level where it technically should belong. This is because
+// there's some evil hacking going on to get the automatic scrolling
+// to current week to work with the sticky header. This padding needs
+// to be taken into account when we calculate the scrolling offset
+// and for some reason (at least on FF), the calculations go wrong when
+// this padding exists on the page level.
 const Root = styled("div")({
   padding: "2.5rem 0",
 });
@@ -94,8 +85,8 @@ const AccordionItem = styled(({ isPast, ...props }) => <ExpansionPanel {...props
   "&::before": { display: "none" },
   padding: "0 1rem",
   marginBottom: "0.5rem",
-  opacity: isPast ? 0.5 : 1,
   background: theme.colors.white,
+  opacity: isPast ? 0.5 : 1,
   boxShadow: "20px 20px 40px rgba(20, 7, 75, 0.12)",
   borderRadius: "8px",
   "&.Mui-expanded": {
@@ -123,7 +114,7 @@ const AccordionTitle = styled(ExpansionPanelSummary)<Theme>({
 
 const AccordionContent = styled(ExpansionPanelDetails)<Theme>(({ theme }) => ({
   borderTop: `1px solid ${theme.colors["deep-blue-20"]}`,
-  padding: 0,
+  padding: "1rem 0.5rem 2rem",
 }));
 
 const DateWrapper = styled(Box)({
@@ -264,6 +255,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
 
       {monthlyDateRanges(startDate, endDate).map((monthDates) => {
         const monthName = monthDates[0].format("MMMM YYYY");
+
         return (
           <Box key={monthDates[0].unix()} data-month={monthName}>
             <MonthTitle>{monthName}</MonthTitle>
@@ -271,18 +263,14 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
               <Box key={dates[0].unix()} paddingBottom="1.5rem">
                 {dates.map((date) => {
                   const dateStr = date.format("YYYY-MM-DD");
-                  console.log(
-                    "today?",
-                    date.isSame(today),
-                    date.toISOString(),
-                    today.toISOString()
-                  );
+
                   return (
                     <AccordionItem
                       key={dateStr}
                       disabled={isWeekend(date)}
                       isPast={date.isBefore(today)}
                       expanded={!!expandedDate && expandedDate === dateStr}
+                      TransitionProps={{ mountOnEnter: true, unmountOnExit: true }}
                       onChange={(_, isExpanded) =>
                         setExpandedDate(isExpanded ? dateStr : undefined)
                       }
@@ -295,7 +283,10 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                         <StatusWrapper>Home</StatusWrapper>
                       </AccordionTitle>
                       <AccordionContent>
-                        <PlanningDay date={date} onClose={() => setExpandedDate(undefined)} />
+                        <PlanningCalendarDay
+                          date={date}
+                          onClose={() => setExpandedDate(undefined)}
+                        />
                       </AccordionContent>
                     </AccordionItem>
                   );

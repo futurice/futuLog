@@ -46,8 +46,9 @@ apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandle
 workmodeHandler :: User -> Server WorkmodeAPI
 workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch :<|> getWorkmodes
   where
-    regWorkmode m = registerWorkmode email m >>= \case
-      Right _ -> pure NoContent
+    regWorkmode [] = pure NoContent
+    regWorkmode (m : xs) = registerWorkmode email m >>= \case
+      Right _ -> regWorkmode xs
       Left err -> throwError $ err400 {errBody = pack err}
     confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay
     getWorkmodes office = getAllWorkmodes office <=< defaultDay

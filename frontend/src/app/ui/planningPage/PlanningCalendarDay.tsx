@@ -12,12 +12,14 @@ import {
   IWorkmodeDto,
   IShiftAssignmentDto,
   IOfficeSpaceDto,
+  ICapacityDto,
 } from "app/services/apiClientService";
 import { useServices } from "app/services/services";
 import {
   userShiftQueryKey,
   officesQueryKey,
   officeBookingsQueryKey,
+  RenderQuery,
 } from "app/utils/reactQueryUtils";
 import { useQuery } from "react-query";
 import { Button } from "app/ui/ux/buttons";
@@ -61,6 +63,14 @@ const OfficeInfoContainer = styled("p")({
   lineHeight: 1.5,
 });
 
+function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
+  if (!bookings.length) {
+    return office.maxPeople;
+  }
+  const capacities = bookings.map((booking) => office.maxPeople - booking.numBooked);
+  return Math.min(...capacities);
+}
+
 export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onClose }) => {
   const { apiClient, queryCache } = useServices();
   const [startDate, setStartDate] = useState(date);
@@ -83,9 +93,8 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
     () => apiClient.getOfficeBookings(userOffice!.site, startDateStr, endDateStr)
   );
 
-  console.log({ userShift, offices, userOffice, officeBookingsRes });
-
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
+    console.log("onSelectDateRange", startDate.toISOString(), endDate.toISOString());
     setStartDate(startDate);
     setEndDate(endDate);
     // Update some data
@@ -108,59 +117,83 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
       </CloseButtonContainer>
 
       <WidgetContainer>
-        <Box>
-          <H2Center>When</H2Center>
+        <RenderQuery
+          query={officeBookingsRes}
+          onError={(error) => <H2Center>{error.message}</H2Center>}
+        >
+          {(officeBookings) => {
+            const officeCapacity = userOffice ? getOfficeCapacity(userOffice, officeBookings) : 0;
 
-          <Flex margin="-0.5rem">
-            <DatePickerContainer>
-              <DatePicker
-                value={startDate}
-                label="from"
-                format="D MMM YYYY"
-                variant={isMobile ? "dialog" : "inline"}
-                onChange={(date: any) =>
-                  onSelectDateRange(date, endDate.isBefore(date) ? date : endDate)
-                }
-              />
-            </DatePickerContainer>
-            <DatePickerContainer>
-              <DatePicker
-                value={endDate}
-                label="to"
-                minDate={startDate}
-                format="D MMM YYYY"
-                variant={isMobile ? "dialog" : "inline"}
-                onChange={(date: any) => onSelectDateRange(startDate, date)}
-              />
-            </DatePickerContainer>
-          </Flex>
-        </Box>
+            return (
+              <>
+                <Box>
+                  <H2Center>When</H2Center>
 
-        <Box>
-          <H2Center>Where</H2Center>
+                  <Flex margin="-0.5rem">
+                    <DatePickerContainer>
+                      <DatePicker
+                        value={startDate}
+                        label="from"
+                        format="D MMM YYYY"
+                        variant={isMobile ? "dialog" : "inline"}
+                        onChange={(date: any) =>
+                          onSelectDateRange(date, endDate.isBefore(date) ? date : endDate)
+                        }
+                      />
+                    </DatePickerContainer>
+                    <DatePickerContainer>
+                      <DatePicker
+                        value={endDate}
+                        label="to"
+                        minDate={startDate}
+                        format="D MMM YYYY"
+                        variant={isMobile ? "dialog" : "inline"}
+                        onChange={(date: any) => onSelectDateRange(startDate, date)}
+                      />
+                    </DatePickerContainer>
+                  </Flex>
+                </Box>
 
-          <H4>Where are you working from?</H4>
-          {/* TODO: Handle officeCapacity */}
-          <WorkmodeButtons
-            disabled={false}
-            workmode={workmode}
-            officeCapacity={9001}
-            onSelectWorkmode={onSelectWorkmode}
-          />
-        </Box>
+                <Box>
+                  <H2Center>Where</H2Center>
 
-        <OfficeInfoContainer>
-          {/* TODO: userSite should be office dto */}
-          Current office: {userOffice?.site || "N/A"}
-          <br />
-          x/y spots available
-        </OfficeInfoContainer>
+                  <H4>Where are you working from?</H4>
+                  {/* TODO: Handle officeCapacity */}
+                  <WorkmodeButtons
+                    disabled={officeBookingsRes.status === "loading"}
+                    workmode={workmode}
+                    officeCapacity={officeCapacity}
+                    onSelectWorkmode={onSelectWorkmode}
+                  />
+                </Box>
 
-        <Box textAlign="center">
-          <Button variant="contained" color="primary" onClick={onConfirmChanges}>
-            Confirm changes
-          </Button>
-        </Box>
+                <OfficeInfoContainer>
+                  Current office: {userOffice?.site || "N/A"}
+                  <br />
+                  {userOffice ? (
+                    startDate.isSame(endDate) ? (
+                      <>
+                        {officeCapacity}/{userOffice.maxPeople} spots available
+                      </>
+                    ) : officeCapacity <= 0 ? (
+                      "No spots available"
+                    ) : (
+                      "Multiple slots available"
+                    )
+                  ) : (
+                    ""
+                  )}
+                </OfficeInfoContainer>
+
+                <Box textAlign="center">
+                  <Button variant="contained" color="primary" onClick={onConfirmChanges}>
+                    Confirm changes
+                  </Button>
+                </Box>
+              </>
+            );
+          }}
+        </RenderQuery>
       </WidgetContainer>
     </Root>
   );

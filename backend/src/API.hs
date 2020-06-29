@@ -1,6 +1,6 @@
 module API where
 
-import Data.ClientRequest (RegisterWorkmode, SetShift, UserWorkmode)
+import Data.ClientRequest (Capacity, RegisterWorkmode, SetShift, UserWorkmode)
 import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
@@ -34,7 +34,7 @@ type API =
     :<|> "me" :> Get '[JSON] User
 
 type WorkmodeAPI =
-  "register" :> ReqBody '[JSON] RegisterWorkmode :> Post '[JSON] NoContent
+  "register" :> ReqBody '[JSON] [RegisterWorkmode] :> Post '[JSON] NoContent
     :<|> "confirm" :> QueryParam "date" Day :> ReqBody '[JSON] Bool :> Post '[JSON] NoContent
     :<|> "get" :> Capture "date" Day :> Get '[JSON] (Maybe UserWorkmode)
     :<|> "batch" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]
@@ -49,6 +49,6 @@ type ShiftAPI =
 
 type OfficeAPI =
   "all" :> Get '[JSON] [OfficeSpace]
-    :<|> Capture "site" Text :> "capacity" :> Capture "date" Day :> Get '[JSON] Int
+    :<|> Capture "site" Text :> "booked" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [Capacity]
 
 type AdminAPI = "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent

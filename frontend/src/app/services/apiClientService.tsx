@@ -112,7 +112,7 @@ export function createAPIClientService(baseUrl: string) {
     registerUserWorkmode: (request: IRegisterWorkmodeDto) =>
       fetchJSON<void>(`${baseUrl}/api/workmode/register`, {
         method: "POST",
-        body: request,
+        body: [request],
       }),
 
     confirmUserWorkmode: (confirm: boolean) =>

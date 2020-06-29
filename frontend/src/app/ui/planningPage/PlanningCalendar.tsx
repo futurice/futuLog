@@ -15,6 +15,11 @@ import { Button } from "app/ui/ux/buttons";
 import { Theme } from "app/ui/ux/theme";
 import { H3 } from "app/ui/ux/text";
 import { PlanningCalendarDay } from "app/ui/planningPage/PlanningCalendarDay";
+import { useQuery, useMutation } from "react-query";
+import { userWorkmodesQueryKey } from "app/utils/reactQueryUtils";
+import { IUserWorkmodeDto, Workmode, IRegisterWorkmodeDto } from "app/services/apiClientService";
+import { IconHome, IconOffice, IconClient, IconLeave } from "app/ui/ux/icons";
+import { monthlyDateRanges, weeklyDateRanges, isWeekend } from "app/utils/dateUtils";
 
 dayjs.extend(utc);
 
@@ -25,43 +30,25 @@ interface IPlanningCalendar {
 const NUM_INITIAL_WEEKS = 4;
 const NUM_LOAD_MORE_WEEKS = 4;
 
-function dateRange(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) {
-  const arr = [];
+const getStickyHeaderOffset = (rootEl: HTMLElement) => {
+  // Calculate the absolute position of the root element which we can
+  // use as offset for the element that we want to scroll into view
+  const rootRect = rootEl.getBoundingClientRect();
+  const offset = rootRect ? rootRect.top + window.pageYOffset : 0;
+  return offset;
+};
 
-  while (!startDate.isAfter(endDate)) {
-    arr.push(startDate);
-    startDate = startDate.add(1, "day");
-  }
+const getUserWorkmode = (dateStr: string, userWorkmodes: IUserWorkmodeDto[]) => {
+  const userWorkmode = userWorkmodes.find((workmode) => workmode.date === dateStr);
+  return userWorkmode && userWorkmode.workmode.type;
+};
 
-  return arr;
-}
-
-function weeklyDateRanges(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs): dayjs.Dayjs[][] {
-  const arrays = [];
-
-  while (!startDate.isAfter(endDate)) {
-    // NOTE: dayjs weeks start from sunday
-    const endOfWeek = startDate.endOf("week").add(1, "day").startOf("day");
-    arrays.push(dateRange(startDate, endOfWeek.isBefore(endDate) ? endOfWeek : endDate));
-    startDate = endOfWeek.add(1, "day");
-  }
-
-  return arrays;
-}
-
-function monthlyDateRanges(startDate: dayjs.Dayjs, endDate: dayjs.Dayjs): dayjs.Dayjs[][] {
-  const arrays = [];
-
-  while (!startDate.isAfter(endDate)) {
-    const endOfMonth = startDate.endOf("month").startOf("day");
-    arrays.push(dateRange(startDate, endOfMonth.isBefore(endDate) ? endOfMonth : endDate));
-    startDate = endOfMonth.add(1, "day");
-  }
-
-  return arrays;
-}
-
-const isWeekend = (date: dayjs.Dayjs) => date.day() === 0 || date.day() === 6;
+const workmodeIcons = {
+  [Workmode.Home]: IconHome,
+  [Workmode.Office]: IconOffice,
+  [Workmode.Client]: IconClient,
+  [Workmode.Leave]: IconLeave,
+};
 
 // NOTE: This padding needs to be on the component level instead of
 // the page-level where it technically should belong. This is because
@@ -124,6 +111,8 @@ const DateWrapper = styled(Box)({
 });
 
 const StatusWrapper = styled(Box)({
+  display: "flex",
+  alignItems: "center",
   width: "50%",
 });
 
@@ -159,7 +148,7 @@ const DateName = styled(Box)<Theme>({
 });
 
 export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleMonth }) => {
-  const { history } = useServices();
+  const { history, apiClient, queryCache } = useServices();
   const rootEl = useRef<HTMLDivElement>(null);
   const today = dayjs().utc().startOf("day");
   const [expandedDate, setExpandedDate] = useState<string>();
@@ -168,17 +157,18 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   const [endDate, setEndDate] = useState(() =>
     startDate.add(NUM_INITIAL_WEEKS, "week").subtract(1, "day")
   );
-
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 
-  const getStickyHeaderOffset = (rootEl: HTMLElement) => {
-    // Calculate the absolute position of the root element which we can
-    // use as offset for the element that we want to scroll into view
-    const rootRect = rootEl.getBoundingClientRect();
-    const offset = rootRect ? rootRect.top + window.pageYOffset : 0;
-    return offset;
-  };
+  const userWorkmodesRes = useQuery(userWorkmodesQueryKey(startDateStr, endDateStr), () =>
+    apiClient.getUserWorkmodes(startDateStr, endDateStr)
+  );
+  const [mutateUserWorkmodes, mutateUserWorkmodesRes] = useMutation(
+    (requests: IRegisterWorkmodeDto[]) => apiClient.registerUserWorkmode(requests),
+    {
+      onSuccess: () => queryCache.refetchQueries(userWorkmodesQueryKey(startDateStr, endDateStr)),
+    }
+  );
 
   //
   // Handle initial scrolling taking into account the sticky headers in the pages,
@@ -234,6 +224,13 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   }, [startDateStr, endDateStr, onChangeVisibleMonth]); // eslint-disable-line
 
   //
+  // Events
+
+  const onSelectWorkmodes = (workmodes: IUserWorkmodeDto[]) => {
+    mutateUserWorkmodes(workmodes);
+  };
+
+  //
   // View
 
   return (
@@ -264,6 +261,12 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
               <Box key={dates[0].unix()} paddingBottom="1.5rem">
                 {dates.map((date) => {
                   const dateStr = date.format("YYYY-MM-DD");
+                  const workmode =
+                    getUserWorkmode(
+                      dateStr,
+                      userWorkmodesRes.status === "success" ? userWorkmodesRes.data : []
+                    ) || Workmode.Home;
+                  const WorkmodeIcon = workmodeIcons[workmode];
 
                   return (
                     <AccordionItem
@@ -281,11 +284,23 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                           <DateNumber isToday={date.isSame(today)}>{date.date()}</DateNumber>
                           <DateName>{date.format("ddd")}</DateName>
                         </DateWrapper>
-                        <StatusWrapper>Home</StatusWrapper>
+
+                        <StatusWrapper>
+                          <WorkmodeIcon />
+                          <Box marginLeft="0.5rem">{workmode}</Box>
+                        </StatusWrapper>
                       </AccordionTitle>
+
                       <AccordionContent>
                         <PlanningCalendarDay
                           date={date}
+                          workmode={workmode}
+                          isLoading={
+                            userWorkmodesRes.status === "loading" ||
+                            mutateUserWorkmodesRes.status === "loading"
+                          }
+                          isExpanded={!!expandedDate && expandedDate === dateStr}
+                          onSelectWorkmodes={onSelectWorkmodes}
                           onClose={() => setExpandedDate(undefined)}
                         />
                       </AccordionContent>

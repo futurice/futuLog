@@ -109,12 +109,15 @@ export function createAPIClientService(baseUrl: string) {
     getUserWorkmode: (date: string) =>
       fetchJSON<IUserWorkmodeDto>(`${baseUrl}/api/workmode/get/${e(date)}`),
 
-    // TODO: Lift the array of requests up to the function parameters to
-    // support registering multiple days from the UI
-    registerUserWorkmode: (request: IRegisterWorkmodeDto) =>
+    getUserWorkmodes: (startDate: string, endDate: string) =>
+      fetchJSON<IUserWorkmodeDto[]>(
+        `${baseUrl}/api/workmode/batch?${qsStringify({ startDate, endDate })}`
+      ),
+
+    registerUserWorkmode: (requests: IRegisterWorkmodeDto[]) =>
       fetchJSON<void>(`${baseUrl}/api/workmode/register`, {
         method: "POST",
-        body: [request],
+        body: requests,
       }),
 
     confirmUserWorkmode: (confirm: boolean) =>

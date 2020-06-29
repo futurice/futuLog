@@ -78,7 +78,7 @@ export const HomePage: React.FC = () => {
   );
 
   const [registerWorkmode] = useMutation(
-    (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode(request),
+    (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode([request]),
     {
       onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
     }

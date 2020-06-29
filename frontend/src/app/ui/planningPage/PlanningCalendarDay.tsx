@@ -13,6 +13,8 @@ import {
   IShiftAssignmentDto,
   IOfficeSpaceDto,
   ICapacityDto,
+  IUserWorkmodeDto,
+  IUserDto,
 } from "app/services/apiClientService";
 import { useServices } from "app/services/services";
 import {
@@ -20,12 +22,20 @@ import {
   officesQueryKey,
   officeBookingsQueryKey,
   RenderQuery,
+  userQueryKey,
+  userWorkmodesQueryKey,
+  combineQueries,
 } from "app/utils/reactQueryUtils";
 import { useQuery } from "react-query";
 import { Button } from "app/ui/ux/buttons";
+import { dateRange, isWeekend } from "app/utils/dateUtils";
 
 interface IPlanningCalendarDay {
   date: dayjs.Dayjs;
+  workmode: Workmode;
+  isLoading?: boolean;
+  isExpanded?: boolean;
+  onSelectWorkmodes: (workmodes: IUserWorkmodeDto[]) => void;
   onClose: () => void;
 }
 
@@ -63,6 +73,20 @@ const OfficeInfoContainer = styled("p")({
   lineHeight: 1.5,
 });
 
+const ConfirmButtonContainer = styled("div")<Theme>(({ theme }) => ({
+  textAlign: "center",
+  [theme.breakpoints.down("sm")]: {
+    position: "fixed",
+    zIndex: 1,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: "1rem",
+    borderTop: `1px solid ${theme.colors["deep-blue-20"]}`,
+    backgroundColor: theme.colors.white,
+  },
+}));
+
 function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
   if (!bookings.length) {
     return office.maxPeople;
@@ -71,20 +95,29 @@ function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
   return Math.min(...capacities);
 }
 
-export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onClose }) => {
+export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
+  date,
+  workmode,
+  isLoading,
+  isExpanded,
+  onSelectWorkmodes,
+  onClose,
+}) => {
   const { apiClient, queryCache } = useServices();
   const [startDate, setStartDate] = useState(date);
   const [endDate, setEndDate] = useState(date);
-  const [workmode, setWorkmode] = useState<IWorkmodeDto>({ type: Workmode.Home });
+  const [localWorkmode, setLocalWorkmode] = useState<IWorkmodeDto>({ type: workmode });
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 
   // These should be pre-loaded by AppRoutes
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const user = queryCache.getQueryData<IUserDto>(userQueryKey())!;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey())!;
-  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
-
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey())!;
   const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
 
   const officeBookingsRes = useQuery(
@@ -92,20 +125,27 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     () => apiClient.getOfficeBookings(userOffice!.site, startDateStr, endDateStr)
   );
+  const userWorkmodesRes = useQuery(userWorkmodesQueryKey(startDateStr, endDateStr), () =>
+    apiClient.getUserWorkmodes(startDateStr, endDateStr)
+  );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
-    console.log("onSelectDateRange", startDate.toISOString(), endDate.toISOString());
     setStartDate(startDate);
     setEndDate(endDate);
-    // Update some data
-  };
-  const onSelectWorkmode = (workmode: IWorkmodeDto) => {
-    console.log("workmode", workmode);
-    setWorkmode(workmode);
   };
   const onConfirmChanges = async () => {
-    console.log("Confirming changes");
-    onClose();
+    const workmodes = dateRange(startDate, endDate)
+      .filter((date) => !isWeekend(date))
+      .map(
+        (date) =>
+          ({
+            userEmail: user.email,
+            site: userOffice?.site,
+            date: date.format("YYYY-MM-DD"),
+            workmode: localWorkmode,
+          } as IUserWorkmodeDto)
+      );
+    onSelectWorkmodes(workmodes);
   };
 
   return (
@@ -118,10 +158,16 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
 
       <WidgetContainer>
         <RenderQuery
-          query={officeBookingsRes}
+          query={combineQueries({
+            officeBookings: officeBookingsRes,
+            userWorkmodes: userWorkmodesRes,
+          })}
           onError={(error) => <H2Center>{error.message}</H2Center>}
+          onLoading={(data, children) =>
+            children(data || { officeBookings: [], userWorkmodes: [] })
+          }
         >
-          {(officeBookings) => {
+          {({ officeBookings, userWorkmodes }) => {
             const officeCapacity = userOffice ? getOfficeCapacity(userOffice, officeBookings) : 0;
 
             return (
@@ -161,9 +207,9 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
                   {/* TODO: Handle officeCapacity */}
                   <WorkmodeButtons
                     disabled={officeBookingsRes.status === "loading"}
-                    workmode={workmode}
+                    workmode={localWorkmode}
                     officeCapacity={officeCapacity}
-                    onSelectWorkmode={onSelectWorkmode}
+                    onSelectWorkmode={setLocalWorkmode}
                   />
                 </Box>
 
@@ -185,11 +231,28 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({ date, onCl
                   )}
                 </OfficeInfoContainer>
 
-                <Box textAlign="center">
-                  <Button variant="contained" color="primary" onClick={onConfirmChanges}>
-                    Confirm changes
-                  </Button>
-                </Box>
+                {/*
+                  TODO: Smarter display logic for the confirm-button.
+                  Ideally it should only show up when there are downstream changes
+                  in the widget that don't match with the upstream.
+                */}
+                {/*
+                  NOTE: We use explicit `isExpanded` flag here due to collapsible
+                  panels performing a transition animation. We want to hide the button
+                  immediately in mobile view
+                */}
+                {isExpanded && (
+                  <ConfirmButtonContainer>
+                    <Button
+                      disabled={isLoading}
+                      variant="contained"
+                      color="primary"
+                      onClick={onConfirmChanges}
+                    >
+                      Confirm changes
+                    </Button>
+                  </ConfirmButtonContainer>
+                )}
               </>
             );
           }}

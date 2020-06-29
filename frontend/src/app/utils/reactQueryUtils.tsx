@@ -9,6 +9,12 @@ export const userQueryKey = () => "user";
 export const userShiftQueryKey = () => "userShift";
 // IUserWorkmodeDto
 export const userWorkmodeQueryKey = (date: string): AnyQueryKey => ["userWorkmodes", date];
+// IUserWorkmodeDto[]
+export const userWorkmodesQueryKey = (startDate: string, endDate: string): AnyQueryKey => [
+  "userWorkmodes",
+  startDate,
+  endDate,
+];
 // IShiftDto
 export const siteShiftQueryKey = (site: string): AnyQueryKey => ["siteShifts", site];
 // IOfficeSpaceDto[]

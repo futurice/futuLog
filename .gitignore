@@ -3,6 +3,7 @@ node_modules/
 .pnp/
 coverage/
 build/
+.idea
 
 .pnp.js
 .DS_Store

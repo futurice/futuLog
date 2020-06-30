@@ -36,7 +36,7 @@ Entrypoints to CRA are in `src` folder, but the grunt of the application exists 
 
 - `src/app/ui`
 
-  App components are stored in relatively flat hierarchy with a system where each main component exists in a folder named with a camel-cased version of the component, the component itself in pascal-cased file. Sub components specific to the main component also exist in the main components folder. Page components are named such, postfixed with `Page`. Folder named `src/app/ui/ux` contains design-system specific code, components, helpers, etc.
+  App components are stored in a relatively flat hierarchy with a system where each main component exists in a folder named with a camel-cased version of the component, the component itself in a pascal-cased file. Sub components specific to the main component also exist in the main components folder. Page components are named such, postfixed with `Page`. Folder named `src/app/ui/ux` contains design-system specific code, components, helpers, etc.
 
 - `src/app/utils`
 

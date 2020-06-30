@@ -22,7 +22,7 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
     position: "absolute",
     width: "100%",
     height: "100%",
-    borderRadius: '4px',
+    borderRadius: "3px",
     backgroundColor: "transparent",
     color: "transparent",
     transition: "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",

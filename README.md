@@ -12,7 +12,10 @@ There are two config files:
 
 ## Build this
 
-The easiest way is to use docker-compose, just run `docker-compose build` and wait until everything is done. Note that the first clean build will take roughly 15min. After that however the dependencies are cached and the rebuilds are fast.
+The easiest way is to use docker-compose, just run `docker-compose build` and wait until everything is done.
+ Note that the first clean build will take roughly 15min and Docker memory should be increased to 4GB.
+ After that however the dependencies are cached and the rebuilds are fast.
+
 
 ## Run this
 

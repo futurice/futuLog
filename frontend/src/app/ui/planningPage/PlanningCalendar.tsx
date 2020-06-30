@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import {
   Box,
   ExpansionPanel,
@@ -187,7 +187,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   //
   // Handle initial scrolling taking into account the sticky headers in the pages,
   // even in mobile mode where we don't show the calendar header
-  useEffect(() => {
+  useLayoutEffect(() => {
     const scrollDate = history.location.hash.slice(1) || startDateStr;
     const scrollEl = rootEl.current?.querySelector(`#date-${scrollDate}`);
     if (scrollEl && rootEl.current) {

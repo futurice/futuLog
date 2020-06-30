@@ -4,6 +4,7 @@ import { Theme } from "app/ui/ux/theme";
 import { H2 } from "app/ui/ux/text";
 import { PlanningCalendar } from "app/ui/planningPage/PlanningCalendar";
 import dayjs from "dayjs";
+import { NAVIGATION_BAR_HEIGHT_PX } from "app/ui/siteLayout/NavigationBar";
 
 const Page = styled(Box)<Theme>(({ theme }) => ({
   backgroundColor: theme.colors["deep-blue-10"],
@@ -11,7 +12,7 @@ const Page = styled(Box)<Theme>(({ theme }) => ({
 
 const HeaderWrapper = styled("div")<Theme>(({ theme }) => ({
   position: "sticky",
-  top: "64px", // NOTE: NavigationBar is 64px tall in desktop
+  top: `${NAVIGATION_BAR_HEIGHT_PX}px`,
   zIndex: 1,
   paddingTop: "2.5rem",
   color: theme.colors["deep-blue-90"],

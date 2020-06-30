@@ -13,6 +13,9 @@ interface INavigationBar {
   user: IUserDto;
 }
 
+// Due to sticky header behaviour, this is a useful constant to keep around
+export const NAVIGATION_BAR_HEIGHT_PX = 64;
+
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: colors["deep-blue-90"],
   boxShadow: "none",
@@ -27,6 +30,10 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
     },
   },
 }));
+
+const StyledToolbar = styled(Toolbar)({
+  height: `${NAVIGATION_BAR_HEIGHT_PX}px`,
+});
 
 const AppTitleLink = styled(Link)({
   flexGrow: 1,
@@ -49,7 +56,7 @@ const BarButton = styled(ButtonWithIcon)({
 
 export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
   <StyledAppBar position="static" className="NavigationBar">
-    <Toolbar>
+    <StyledToolbar>
       <AppTitleLink to={RoutePaths.Home} aria-label="Home">
         <AppTitle>futuLog</AppTitle>
       </AppTitleLink>
@@ -87,6 +94,6 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
           </LinkButton>
         </>
       </MediaQuery>
-    </Toolbar>
+    </StyledToolbar>
   </StyledAppBar>
 );

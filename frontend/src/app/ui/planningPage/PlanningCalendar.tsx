@@ -28,7 +28,7 @@ interface IPlanningCalendar {
 }
 
 const NUM_INITIAL_WEEKS = 4;
-const NUM_LOAD_MORE_WEEKS = 4;
+const NUM_LOAD_MORE_WEEKS = 2;
 
 const getStickyHeaderOffset = (rootEl: HTMLElement) => {
   // Calculate the absolute position of the root element which we can
@@ -246,10 +246,6 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
           Load more
         </Button>
       </Box>
-
-      <p>
-        {startDate.toISOString()} - {endDate.toISOString()}
-      </p>
 
       {monthlyDateRanges(startDate, endDate).map((monthDates) => {
         const monthName = monthDates[0].format("MMMM YYYY");

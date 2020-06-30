@@ -47,7 +47,7 @@ const List = styled("ul")({
 const Item = styled("li")<Theme>(({ theme }) => ({
   padding: "0.375rem 0.75rem",
   width: "12rem",
-  [theme.breakpoints.up("md")]: {
+  [theme.breakpoints.up("sm")]: {
     width: "50%",
   },
 }));

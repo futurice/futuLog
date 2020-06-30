@@ -1,44 +1,53 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# futuLog frontend
 
-## Available Scripts
+This directory contains the frontend for [futuLog](https://futulog.play.futurice.com/). This is a standard [Create React App](https://github.com/facebook/create-react-app)-based project. You will need to setup the backend for local development, find instructions in the root [README.md](../README.md).
 
-In the project directory, you can run:
+The frontend is written with Typescript, using React, Material UI as a component library and the main styling mechanism and react-query to handle remote data fetching and caching.
 
-### `npm start`
+## Local development
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Once you have the backend compiled, run `npm start` to start the development mode. This script will do the following:
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+- Starts the backend at port `8000` by running `docker-compose up` in the parent directory (via `dev:backend-server` NPM script).
+- Starts a CORS-passing proxy server at port `5000` against the backend (via `dev:backend-proxy` NPM script).
+- Starts the frontend app with live reloading and all the CRA-goodies at port `3000` (via `dev:frontend` NPM script).
 
-### `npm test`
+In development mode the frontend will contact the API through `http://localhost:5000`, i.e. the proxy server to allow CORS-requests to pass through to another port, you can find the switch for this in the code at [services.tsx](src/app/services/services.tsx).
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+To run tests (which there aren't any) and linter, run `CI=1 npm test`. The `CI` environment variable is recommended so far as there are no tests, otherwise the command would leave `jest` in watch mode.
 
-### `npm run build`
+You might want to install Prettier, ESLint and Typescript support for your editor.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Production
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Run `npm run build` to create a production bundle and assets to `build`-directory. This step is done automatically by the Docker build in the parent directory, which is what the production pipeline does.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## App structure
 
-### `npm run eject`
+Entrypoints to CRA are in `src` folder, but the grunt of the application exists under `src/app`. From there you can find the following:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- `src/app/assets`
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  Static assets that are referenced and bundled from the source, for e.g. Futurice fonts.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- `src/app/services`
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+  This app uses a _service_-model, where moving parts of the app are provided as interfaces in a single object, such as API client, local storage, etc. This object is injected into the React-tree through _Context_ named `ServicesContext`.
 
-## Learn More
+- `src/app/ui`
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  App components are stored in relatively flat hierarchy with a system where each main component exists in a folder named with a camel-cased version of the component, the component itself in pascal-cased file. Sub components specific to the main component also exist in the main components folder. Page components are named such, postfixed with `Page`. Folder named `src/app/ui/ux` contains design-system specific code, components, helpers, etc.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `src/app/utils`
+
+  Miscellaneous utility code.
+
+- `public`
+
+  Static assets that are bundled with the app.
+
+## Resources
+
+- [Material UI documentation](https://material-ui.com/getting-started/installation/)
+- [Create React App documentation](https://create-react-app.dev/docs/getting-started/)
+- [react-query](https://github.com/tannerlinsley/react-query)

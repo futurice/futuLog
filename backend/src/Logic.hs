@@ -5,6 +5,7 @@ import Control.Monad.Reader (MonadReader, ask)
 import Data.ClientRequest (RegisterWorkmode (..), numBooked)
 import Data.Config (Shift (..), maxPeople, officeSite, shiftSite)
 import Data.Env (Env (..), ShiftAssignment (..))
+import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Time.Calendar (dayOfWeek)
 import Data.Workmode (Workmode (..))
@@ -30,10 +31,10 @@ registerWorkmode email mode@(MkRegisterWorkmode {workmode, site = office}) =
 
 checkShift :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> ShiftAssignment -> m (Either String ())
 checkShift email mode@(MkRegisterWorkmode {site = office, date}) (MkShiftAssignment {shiftName}) = do
-  shiftDays <- days . head . filter ((==) shiftName . name) <$> getOfficeShifts office
-  if not (fromEnum (dayOfWeek date) `elem` shiftDays)
-    then pure $ Left "The date you tried to register for is not part of your shift"
-    else checkOfficeCapacity email mode
+  shiftDays <- fmap days . listToMaybe . filter ((==) shiftName . name) <$> getOfficeShifts office
+  case shiftDays of
+    Just xs | fromEnum (dayOfWeek date) `elem` xs -> checkOfficeCapacity email mode
+    _ -> pure $ Left "The date you tried to register for is not part of your shift"
 
 checkOfficeCapacity :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m (Either String ())
 checkOfficeCapacity email mode@(MkRegisterWorkmode {date, site = office}) = do
@@ -41,6 +42,7 @@ checkOfficeCapacity email mode@(MkRegisterWorkmode {date, site = office}) = do
   maxCapacity <- maxPeople . head . filter ((==) office . officeSite) . offices <$> ask
   case occupancy of
     [x] | numBooked x < maxCapacity -> Right <$> saveWorkmode email mode
+    [] -> Right <$> saveWorkmode email mode
     _ -> pure $ Left "Office already full on chosen day"
 
 getOfficeShifts :: MonadReader Env m => Text -> m [Shift]

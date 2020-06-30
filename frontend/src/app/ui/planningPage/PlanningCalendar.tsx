@@ -43,6 +43,12 @@ const getUserWorkmode = (dateStr: string, userWorkmodes: IUserWorkmodeDto[]) => 
   return userWorkmode && userWorkmode.workmode.type;
 };
 
+// NOTE: This function assumes the hex color string looks like #rrggbb
+const hexToRgba = (hex: string, a: number) => {
+  const [r, g, b] = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((x) => parseInt(x, 16));
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
 const workmodeIcons = {
   [Workmode.Home]: IconHome,
   [Workmode.Office]: IconOffice,
@@ -72,9 +78,8 @@ const AccordionItem = styled(({ isPast, ...props }) => <ExpansionPanel {...props
   "&::before": { display: "none" },
   padding: "0 1rem",
   marginBottom: "0.5rem",
-  background: theme.colors.white,
-  opacity: isPast ? 0.5 : 1,
-  boxShadow: "20px 20px 40px rgba(20, 7, 75, 0.12)",
+  background: isPast ? hexToRgba(theme.colors.white, 0.5) : theme.colors.white,
+  boxShadow: isPast ? "none" : "20px 20px 40px rgba(20, 7, 75, 0.12)",
   borderRadius: "8px",
   "&.Mui-expanded": {
     margin: 0,
@@ -82,6 +87,12 @@ const AccordionItem = styled(({ isPast, ...props }) => <ExpansionPanel {...props
   },
   "&.Mui-disabled": {
     backgroundColor: theme.colors["deep-blue-10"],
+  },
+  "&:first-child, &:last-child": {
+    borderRadius: "8px",
+  },
+  "& .AccordionTitle": {
+    opacity: isPast ? 0.5 : 1,
   },
 }));
 

@@ -2,6 +2,7 @@ import React from "react";
 import { styled } from "@material-ui/core/styles";
 import MuiButton, { ButtonProps as MuiButtonProps } from "@material-ui/core/Button";
 import { LinkProps, Link } from "react-router-dom";
+import { colors } from "./theme";
 
 export type ButtonProps = MuiButtonProps;
 
@@ -13,8 +14,26 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
   fontWeight: "bold",
   lineHeight: "1.25",
   boxShadow: "none",
+
+  "&:after": {
+    content: "''",
+    display: "flex",
+    zIndex: 10,
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "transparent",
+    color: "transparent",
+    transition: "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+  },
+
   "&:hover, &:focus": {
     boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+    borderWidth: "1px !important",
+
+    "&:after": {
+      boxShadow: "inset 0 0 1px 1px" + colors["deep-blue-80"],
+    }
   },
 });
 

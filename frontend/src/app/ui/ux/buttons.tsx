@@ -14,37 +14,51 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
   fontWeight: "bold",
   lineHeight: "1.25",
   boxShadow: "none",
+  borderRadius: "8px",
+  outline: "none",
 
-  "&:after": {
-    content: "''",
-    display: "flex",
-    zIndex: 10,
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: "3px",
-    backgroundColor: "transparent",
-    color: "transparent",
-    transition: "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-  },
-
-  "&:hover, &:focus": {
+  "&:hover": {
     boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
-    borderWidth: "1px !important",
-
-    "&:after": {
-      boxShadow: "inset 0 0 1px 1px" + colors["deep-blue-80"],
-    }
+    backgroundColor: colors["deep-blue-50"]
   },
+  "&:focus": {
+    boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`
+  },
+  "&:active": {
+    boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
+    backgroundColor: colors["deep-blue-50"]
+  }
 });
 
 export const ButtonWithIcon = styled(Button)({
+  borderRadius: "4px",
+
+  "&:hover, &:focus": {
+    borderWidth: "1px !important"
+  },
+  "&:hover": {
+    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)"
+  },
+  "&:focus": {
+    boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-50"]}`
+  },
+  "&:active": {
+    boxShadow: "none",
+    backgroundColor: "initial",
+
+    "& > .MuiButton-label": {
+      fontWeight: "bold"
+    }
+  },
   "& > .MuiButton-label": {
-    justifyContent: "flex-start",
+    justifyContent: "flex-start"
   },
   "& .MuiButton-startIcon": {
-    marginLeft: 0,
+    marginLeft: 0
   },
+  "&:disabled .MuiButton-startIcon": {
+    opacity: 0.5
+  }
 });
 
 export const FauxLink = styled(Button)({
@@ -69,7 +83,7 @@ export const FauxLink = styled(Button)({
 
 const A = styled(Link)({
   display: "inline-block",
-  textDecoration: "none",
+  textDecoration: "none"
 });
 
 // Link + Button type helper
@@ -82,7 +96,7 @@ export const LinkButton: React.FC<LinkProps & ButtonProps> = ({
 }) => {
   const C = component;
   return (
-    <A to={to as any} replace={replace} innerRef={innerRef}>
+    <A to={to as any} replace={replace} innerRef={innerRef} tabIndex={-1}>
       <C {...props} />
     </A>
   );

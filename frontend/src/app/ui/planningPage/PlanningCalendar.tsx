@@ -88,6 +88,9 @@ const AccordionItem = styled(({ isPast, ...props }) => <ExpansionPanel {...props
   "&.Mui-disabled": {
     backgroundColor: theme.colors["deep-blue-10"],
   },
+  "&.Mui-disabled .StatusWrapper": {
+    opacity: 0.5,
+  },
   "&:first-child, &:last-child": {
     borderRadius: "8px",
   },
@@ -292,7 +295,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                           <DateName>{date.format("ddd")}</DateName>
                         </DateWrapper>
 
-                        <StatusWrapper>
+                        <StatusWrapper className="StatusWrapper">
                           <WorkmodeIcon />
                           <Box marginLeft="0.5rem">{workmode}</Box>
                         </StatusWrapper>

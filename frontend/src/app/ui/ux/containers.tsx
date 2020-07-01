@@ -25,3 +25,7 @@ export const HR = styled("hr")({
   // This should then be `deep-blue-20`
   borderColor: "#D2CEE3",
 });
+
+export const Flex = styled(Box)({
+  display: "flex",
+});

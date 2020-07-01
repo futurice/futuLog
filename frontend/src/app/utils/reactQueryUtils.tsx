@@ -1,21 +1,36 @@
-import { QueryResult } from "react-query";
-import {
-  IUserDto,
-  IShiftAssignmentDto,
-  IUserWorkmodeDto,
-  IShiftDto,
-  IOfficeSpaceDto,
-} from "app/services/apiClientService";
+import { QueryResult, AnyQueryKey } from "react-query";
 
-// TODO: Utilize this schema in typing `useQuery` calls
-export interface IQueryCache {
-  user: IUserDto;
-  userShift: IShiftAssignmentDto;
-  userWorkmodesByDay: Record<string, IUserWorkmodeDto>;
-  siteShifts: Record<string, IShiftDto>;
-  offices: IOfficeSpaceDto[];
-  officeCapacityBySiteDate: Record<string, number>;
-}
+//
+// TODO: Consider typed helpers for `useQuery` and `queryCache.getQuery*`
+
+// IUserDto
+export const userQueryKey = () => "user";
+// IShiftAssignmentDto
+export const userShiftQueryKey = () => "userShift";
+// IUserWorkmodeDto
+export const userWorkmodeQueryKey = (date: string): AnyQueryKey => ["userWorkmodes", date];
+// IUserWorkmodeDto[]
+export const userWorkmodesQueryKey = (startDate: string, endDate: string): AnyQueryKey => [
+  "userWorkmodes",
+  startDate,
+  endDate,
+];
+// IShiftDto
+export const siteShiftQueryKey = (site: string): AnyQueryKey => ["siteShifts", site];
+// IOfficeSpaceDto[]
+export const officesQueryKey = () => "offices";
+// number
+export const officeCapacityQueryKey = (site: string, date: string): AnyQueryKey => [
+  "officeCapacity",
+  site,
+  date,
+];
+// ICapacityDto
+export const officeBookingsQueryKey = (
+  site: string,
+  startDate: string,
+  endDate: string
+): AnyQueryKey => ["officeBookings", site, startDate, endDate];
 
 export function combineQueries<M>(queryMap: { [K in keyof M]: QueryResult<M[K]> }): QueryResult<M> {
   const queries = Object.values(queryMap) as QueryResult<any>[];

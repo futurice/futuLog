@@ -122,3 +122,9 @@ export const IconLogoLight: React.FC<IIcon> = ({ color = "#fff" }) => (
     />
   </svg>
 );
+
+export const IconClose: React.FC<IIcon> = ({ color = "#200A74" }) => (
+  <svg fill="none" height="18" viewBox="0 0 18 18" width="18" xmlns="http://www.w3.org/2000/svg">
+    <path d="m1 1 16 16m-16 0 16-16" stroke={color} strokeWidth="1.5" />
+  </svg>
+);

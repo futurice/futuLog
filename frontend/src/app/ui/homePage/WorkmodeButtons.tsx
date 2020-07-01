@@ -1,7 +1,7 @@
 import React from "react";
-import { styled, Theme } from "@material-ui/core/styles";
+import { styled } from "@material-ui/core/styles";
 import { Workmode, IWorkmodeDto } from "app/services/apiClientService";
-import { colors } from "app/ui/ux/theme";
+import { colors, Theme } from "app/ui/ux/theme";
 import { IconHome, IconOffice, IconClient, IconLeave } from "app/ui/ux/icons";
 import { ButtonProps, ButtonWithIcon } from "app/ui/ux/buttons";
 
@@ -44,10 +44,13 @@ const List = styled("ul")({
   justifyContent: "center",
   listStyle: "none",
 });
-const Item = styled("li")({
+const Item = styled("li")<Theme>(({ theme }) => ({
   padding: "0.375rem 0.75rem",
   width: "12rem",
-});
+  [theme.breakpoints.up("sm")]: {
+    width: "50%",
+  },
+}));
 
 export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
   workmode,

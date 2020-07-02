@@ -1,8 +1,8 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
-import { IconButton as MuiIconButton } from "@material-ui/core";
+import {IconButton as MuiIconButton, Link as MuiLink } from "@material-ui/core";
 import MuiButton, { ButtonProps as MuiButtonProps } from "@material-ui/core/Button";
-import { LinkProps, Link } from "react-router-dom";
+import { LinkProps, Link as ReactRouterLink } from "react-router-dom";
 import { colors } from "./theme";
 
 export type ButtonProps = MuiButtonProps;
@@ -72,10 +72,10 @@ export const ButtonDiscrete = styled(Button)({
     backgroundColor: colors["deep-blue-20"]
   },
   "&:focus": {
-    boxShadow: `0 0 0px 3px ${colors["deep-blue-50"]}`,
+    boxShadow: `0 0 0px 4px ${colors["deep-blue-50"]}`,
   },
   "&:active": {
-    boxShadow: `0 0 0px 1px ${colors["deep-blue-80"]}`,
+    boxShadow: `0 0 0px 2px ${colors["deep-blue-80"]}`,
     backgroundColor: "transparent"
   }
 });
@@ -101,13 +101,26 @@ export const IconButton = styled(MuiIconButton)({
     backgroundColor: colors["deep-blue-20"]
   },
   "&:focus": {
-    boxShadow: `0 0 0px 3px ${colors["deep-blue-50"]}`,
+    boxShadow: `0 0 0px 4px ${colors["deep-blue-50"]}`,
   },
   "& > .MuiTouchRipple-root": {
     display: "none"
   }
 });
 
+export const Link = styled(MuiLink)({
+  borderRadius: "4px",
+  textDecoration: "underline",
+  outline: "none",
+
+  "&:focus": {
+    boxShadow: `0 0 0px 4px ${colors["deep-blue-50"]}`,
+  },
+  "&:hover": {
+    boxShadow: "none",
+    color: colors["deep-blue-50"]
+  }
+});
 
 export const FauxLink = styled(Button)({
   display: "inline",
@@ -129,7 +142,7 @@ export const FauxLink = styled(Button)({
   },
 });
 
-const A = styled(Link)({
+const A = styled(ReactRouterLink)({
   display: "inline-block",
   textDecoration: "none"
 });

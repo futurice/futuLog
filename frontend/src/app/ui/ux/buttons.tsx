@@ -28,6 +28,20 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
   "&:active": {
     boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
     backgroundColor: colors["deep-blue-50"]
+  },
+
+  "&.MuiButton-outlinedPrimary": {
+    "&:hover": {
+      boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+      backgroundColor: colors["deep-blue-20"]
+    },
+    "&:focus": {
+      boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`,
+      backgroundColor: colors["deep-blue-20"]
+    },
+    "&:active": {
+      boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
+    }
   }
 });
 

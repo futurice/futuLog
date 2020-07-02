@@ -42,16 +42,16 @@ const ToolbarButtonContainer = styled("div")({
       boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`
     },
     "&:active": {
-      boxShadow: `inset 0 0 0px 1px ${colors["white"]}`,
+      boxShadow: `inset 0 0 0px 1px ${colors.white}`,
       backgroundColor: "initial"
     }
   },
   "& button:disabled": {
-    color: colors["white"],
+    color: colors.white,
     opacity: 0.5
   },
   "& .MuiButtonBase-root.Mui-disabled": {
-    color: colors["white"],
+    color: colors.white,
     opacity: 0.5
   }
 })

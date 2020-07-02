@@ -23,7 +23,6 @@
     "@material-ui/pickers": "3.2.10",
     "dayjs": "1.8.28",
     "history": "4.10.1",
-    "lodash": "4.17.15",
     "qhistory": "1.0.3",
     "query-string": "6.12.1",
     "react": "16.13.1",

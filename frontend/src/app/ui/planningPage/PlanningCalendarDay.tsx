@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import dayjs from "dayjs";
-import { styled, useMediaQuery, Box, IconButton } from "@material-ui/core";
+import { styled, useMediaQuery, Box } from "@material-ui/core";
 import { DatePicker } from "@material-ui/pickers";
 import { H4, H2Center } from "app/ui/ux/text";
 import { Flex, Stack } from "app/ui/ux/containers";
@@ -25,7 +25,7 @@ import {
   userQueryKey,
 } from "app/utils/reactQueryUtils";
 import { useQuery } from "react-query";
-import { Button } from "app/ui/ux/buttons";
+import { Button, IconButton } from "app/ui/ux/buttons";
 import { dateRange, isWeekend } from "app/utils/dateUtils";
 
 interface IPlanningCalendarDay {
@@ -153,7 +153,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   return (
     <Root className="PlanningCalendarDay">
       <CloseButtonContainer>
-        <IconButton aria-label="More information" disableRipple onClick={onClose}>
+        <IconButton aria-label="More information" onClick={onClose}>
           <IconClose />
         </IconButton>
       </CloseButtonContainer>

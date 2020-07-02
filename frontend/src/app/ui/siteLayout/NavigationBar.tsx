@@ -28,16 +28,40 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
     "& > .MuiToolBar-root": {
       padding: "0.5rem 1.75rem",
     },
-  },
+  }
 }));
+
+const ToolbarButtonContainer = styled("div")({
+  marginLeft: "auto",
+
+  "& button, & .MuiButtonBase-root" : {
+    "&:hover": {
+      backgroundColor: colors["deep-blue-40"]
+    },
+    "&:focus": {
+      boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`
+    },
+    "&:active": {
+      boxShadow: `inset 0 0 0px 1px ${colors["white"]}`,
+      backgroundColor: "initial"
+    }
+  },
+  "& button:disabled": {
+    color: colors["white"],
+    opacity: 0.5
+  },
+  "& .MuiButtonBase-root.Mui-disabled": {
+    color: colors["white"],
+    opacity: 0.5
+  }
+})
 
 const StyledToolbar = styled(Toolbar)({
   height: `${NAVIGATION_BAR_HEIGHT_PX}px`,
 });
 
 const AppTitleLink = styled(Link)({
-  flexGrow: 1,
-  textDecoration: "none",
+  textDecoration: "none"
 });
 
 const AppTitle = styled("h1")({
@@ -63,7 +87,7 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
 
       {/* Mobile controls */}
       <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
-        <>
+        <ToolbarButtonContainer>
           <LinkButton to={RoutePaths.Info} component={IconButton} aria-label="Info">
             <IconInfoBalloon />
           </LinkButton>
@@ -71,12 +95,12 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
           <LinkButton to={RoutePaths.User} component={IconButton} aria-label="Info">
             <IconProfile />
           </LinkButton>
-        </>
+        </ToolbarButtonContainer>
       </MediaQuery>
 
       {/* Desktop controls */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
-        <>
+        <ToolbarButtonContainer>
           <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
             Info
           </LinkButton>
@@ -92,7 +116,7 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
           >
             {user.first_name} {user.last_name}
           </LinkButton>
-        </>
+        </ToolbarButtonContainer>
       </MediaQuery>
     </StyledToolbar>
   </StyledAppBar>

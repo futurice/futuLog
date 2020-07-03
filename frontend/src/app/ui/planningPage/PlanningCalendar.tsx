@@ -144,7 +144,7 @@ const DateNumber = styled(({ isToday, ...props }) => <Box {...props} />)<
 >(({ theme, isToday }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-end",
+  justifyContent: "center",
   width: "2rem",
   height: "2rem",
   fontSize: "1.5rem",

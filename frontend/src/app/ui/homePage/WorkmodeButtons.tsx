@@ -58,26 +58,22 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
   disabled,
   onSelectWorkmode,
 }) => {
-  const isOfficeConfirmed = workmode.type === Workmode.Office && workmode.confirmed;
-
   return (
     <List>
-      {!isOfficeConfirmed && (
-        <Item>
-          <WorkmodeButton
-            disabled={disabled}
-            active={workmode.type === Workmode.Home}
-            startIcon={<IconHome />}
-            hoverColor="radical-red-10"
-            onClick={() => onSelectWorkmode({ type: Workmode.Home })}
-          >
-            Home
-          </WorkmodeButton>
-        </Item>
-      )}
       <Item>
         <WorkmodeButton
-          disabled={disabled || isOfficeConfirmed || officeCapacity <= 0}
+          disabled={disabled}
+          active={workmode.type === Workmode.Home}
+          startIcon={<IconHome />}
+          hoverColor="radical-red-10"
+          onClick={() => onSelectWorkmode({ type: Workmode.Home })}
+        >
+          Home
+        </WorkmodeButton>
+      </Item>
+      <Item>
+        <WorkmodeButton
+          disabled={disabled || officeCapacity <= 0}
           active={workmode.type === Workmode.Office}
           startIcon={<IconOffice />}
           hoverColor="jade-green-10"
@@ -86,32 +82,28 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
           Office{officeCapacity <= 0 ? ` - full!` : ""}
         </WorkmodeButton>
       </Item>
-      {!isOfficeConfirmed && (
-        <>
-          <Item>
-            <WorkmodeButton
-              disabled={disabled}
-              active={workmode.type === Workmode.Client}
-              startIcon={<IconClient />}
-              hoverColor="golden-rod-10"
-              onClick={() => onSelectWorkmode({ type: Workmode.Client, name: "<Unknown>" })}
-            >
-              Client
-            </WorkmodeButton>
-          </Item>
-          <Item>
-            <WorkmodeButton
-              disabled={disabled}
-              active={workmode.type === Workmode.Leave}
-              startIcon={<IconLeave />}
-              hoverColor="viking-10"
-              onClick={() => onSelectWorkmode({ type: Workmode.Leave })}
-            >
-              Leave
-            </WorkmodeButton>
-          </Item>
-        </>
-      )}
+      <Item>
+        <WorkmodeButton
+          disabled={disabled}
+          active={workmode.type === Workmode.Client}
+          startIcon={<IconClient />}
+          hoverColor="golden-rod-10"
+          onClick={() => onSelectWorkmode({ type: Workmode.Client, name: "<Unknown>" })}
+        >
+          Client
+        </WorkmodeButton>
+      </Item>
+      <Item>
+        <WorkmodeButton
+          disabled={disabled}
+          active={workmode.type === Workmode.Leave}
+          startIcon={<IconLeave />}
+          hoverColor="viking-10"
+          onClick={() => onSelectWorkmode({ type: Workmode.Leave })}
+        >
+          Leave
+        </WorkmodeButton>
+      </Item>
     </List>
   );
 };

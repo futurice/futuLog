@@ -9,10 +9,7 @@ The frontend is written with Typescript, using React, Material UI as a component
 Once you have the backend compiled, run `npm start` to start the development mode. This script will do the following:
 
 - Starts the backend at port `8000` by running `docker-compose up` in the parent directory (via `dev:backend-server` NPM script).
-- Starts a CORS-passing proxy server at port `5000` against the backend (via `dev:backend-proxy` NPM script).
 - Starts the frontend app with live reloading and all the CRA-goodies at port `3000` (via `dev:frontend` NPM script).
-
-In development mode the frontend will contact the API through `http://localhost:5000`, i.e. the proxy server to allow CORS-requests to pass through to another port, you can find the switch for this in the code at [services.tsx](src/app/services/services.tsx).
 
 To run tests (which there aren't any) and linter, run `CI=1 npm test`. The `CI` environment variable is recommended so far as there are no tests, otherwise the command would leave `jest` in watch mode.
 

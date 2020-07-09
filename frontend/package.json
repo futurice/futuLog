@@ -12,11 +12,11 @@
     "test:lint": "eslint \"src/**/*.tsx\"",
     "\n============== DEV SCRIPTS ==============": "",
     "dev:frontend": "react-scripts start",
-    "dev:backend-proxy": "node src/dev-backend-proxy.js",
     "dev:backend-server": "cd .. && docker-compose up",
     "\n============== MISC SCRIPTS ==============": "",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:8000",
   "dependencies": {
     "@date-io/dayjs": "1.3.13",
     "@material-ui/core": "4.10.0",

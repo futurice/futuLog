@@ -142,7 +142,7 @@ export const HomePage: React.FC = () => {
               <>
                 <HR />
                 <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-                  <H3>You are checked in!</H3>
+                  <H3>You are going to the office!</H3>
                   <P>
                     You have booked a spot to work from the office today.
                     Please make sure you feel healthy before going to the office.

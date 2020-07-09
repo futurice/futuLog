@@ -83,9 +83,6 @@ export const HomePage: React.FC = () => {
       onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
     }
   );
-  const [confirmWorkmode] = useMutation(() => apiClient.confirmUserWorkmode(true), {
-    onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
-  });
 
   const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
 
@@ -97,10 +94,6 @@ export const HomePage: React.FC = () => {
       const site = userShift.site;
       registerWorkmode({ date, site, workmode });
     }
-  };
-
-  const onConfirmOffice = () => {
-    confirmWorkmode();
   };
 
   //
@@ -148,61 +141,19 @@ export const HomePage: React.FC = () => {
             {userWorkmode && userWorkmode.workmode.type === Workmode.Office && (
               <>
                 <HR />
-                {!userWorkmode.workmode.confirmed ? (
-                  //
-                  // Not checked in yet
-                  <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-                    <H3>Check in!</H3>
-
-                    <P>
-                      You have booked a spot to work from the office today. Please confirm that you
-                      are there or that you are going and that you feel healthy.
-                      <InlineIconButton
-                        aria-label="More information"
-                        aria-expanded={isWhyExpanded}
-                        disableRipple
-                        onClick={() => setIsWhyExpanded(!isWhyExpanded)}
-                      >
-                        <IconInfo />
-                      </InlineIconButton>
-                    </P>
-
-                    {isWhyExpanded && (
-                      <>
-                        <P>
-                          Since Futurice needs to track who went to the office, we need to be sure
-                          who went there and we need to be sure about you feeling healthy and do not
-                          have any of these symptoms: dry cough, sore throat, fever or general
-                          feeling of sickness.
-                        </P>
-                      </>
-                    )}
-
-                    <Button variant="contained" color="primary" onClick={onConfirmOffice}>
-                      I'm in the office
-                    </Button>
-                  </Stack>
-                ) : (
-                  //
-                  // Checked in
-                  <>
-                    <Box
-                      component={P}
-                      maxWidth="26rem"
-                      mx="auto"
-                      fontSize="1.5rem"
-                      fontWeight="bold"
-                      fontFamily="Futurice"
-                      lineHeight="1.75"
-                      marginBottom="0"
-                    >
-                      ✓<br />
-                      You are checked in!
-                      <br />
-                      Thank you.
-                    </Box>
-                  </>
-                )}
+                <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
+                  <H3>You are checked in!</H3>
+                  <P>
+                    You have booked a spot to work from the office today.
+                    Please make sure you feel healthy before going to the office.
+                  </P>
+                  <P>
+                    Since Futurice needs to track who went to the office, we need to be sure
+                    who went there and we need to be sure about you feeling healthy and do not
+                    have any of these symptoms: dry cough, sore throat, fever or general
+                    feeling of sickness.
+                  </P>
+                </Stack>
               </>
             )}
           </Card>

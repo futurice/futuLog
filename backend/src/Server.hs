@@ -4,7 +4,6 @@ import API
 import Auth (contextProxy, mkAuthServerContext)
 import qualified CSV
 import Control.Lens ((&), (.~), (?~))
-import Control.Monad ((<=<))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask)

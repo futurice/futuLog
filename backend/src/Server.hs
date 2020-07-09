@@ -44,14 +44,13 @@ apiHandler :: Server ProtectedAPI
 apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
-workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch :<|> getWorkmodes
+workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch
   where
     regWorkmode [] = pure NoContent
     regWorkmode (m : xs) = registerWorkmode email m >>= \case
       Right _ -> regWorkmode xs
       Left err -> throwError $ err400 {errBody = pack err}
     confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay
-    getWorkmodes office = getAllWorkmodes office <=< defaultDay
     queryBatch startDate endDate = do
       start <- defaultDay startDate
       end <- defaultDay endDate
@@ -78,11 +77,17 @@ officeHandler = getOffices :<|> getBooked
       getOfficeBooked office start end
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = \case
-  MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
-    Left err -> throwError $ err400 {errBody = err}
-    Right _ -> pure NoContent
-  _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}
+adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler
+  where
+    shiftCSVAddHandler = \case
+      MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
+        Left err -> throwError $ err400 {errBody = err}
+        Right _ -> pure NoContent
+      _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}
+    workmodeRangeHandler office startDate endDate = do
+      start <- defaultDay startDate
+      end <- defaultDay endDate
+      getAllWorkmodes office start end
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

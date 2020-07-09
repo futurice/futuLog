@@ -16,10 +16,11 @@ import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 
-getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> m [Text]
-getAllWorkmodes office day =
-  fmap fromOnly
-    <$> query' "SELECT user_email FROM workmodes WHERE workmode = 'Office' AND site = ? AND date = ?" (office, day)
+getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
+getAllWorkmodes office start end =
+  query'
+    "SELECT * FROM workmodes WHERE workmode = 'Office' AND site = ? AND date >= ? AND date <= ?"
+    (office, start, end)
 
 queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe UserWorkmode)
 queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)

@@ -126,9 +126,6 @@ export function createAPIClientService(baseUrl: string) {
         body: confirm,
       }),
 
-    // DEV/Admin only
-    getWorkmodes: () => fetchJSON<IUserWorkmodeDto[]>(`${baseUrl}/api/workmode/all`),
-
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
 
     getOfficeBookings: (site: string, startDate: string, endDate: string) =>

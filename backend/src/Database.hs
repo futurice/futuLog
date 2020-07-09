@@ -19,7 +19,7 @@ import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow,
 getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
 getAllWorkmodes office start end =
   query'
-    "SELECT * FROM workmodes WHERE workmode = 'Office' AND site = ? AND date >= ? AND date <= ?"
+    "SELECT * FROM workmodes WHERE workmode = 'Office' AND site = ? AND date >= ? AND date <= ? ORDER BY date ASC"
     (office, start, end)
 
 queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe UserWorkmode)

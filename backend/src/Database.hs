@@ -29,9 +29,6 @@ queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE 
 queryWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
 queryWorkmodes email start end = query' "SELECT * FROM workmodes WHERE user_email = ? AND date >= ? AND date <= ?" (email, start, end)
 
-confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Bool -> Day -> m ()
-confirmWorkmode email status day = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)
-
 getLastShiftsFor :: (MonadIO m, MonadReader Env m) => Text -> m [ShiftAssignment]
 getLastShiftsFor user =
   query'
@@ -82,10 +79,10 @@ saveWorkmode MkUser {email, first_name, last_name} MkRegisterWorkmode {site, dat
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode, client_name) VALUES (?, ?, ?, ?, ?)"
         (email, site, date, "Client" :: String, name)
-    (Office confirmed) ->
+    (Office _) ->
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
-        (email, site, date, "Office" :: String, confirmed)
+        (email, site, date, "Office" :: String, True)
   exec
     "INSERT INTO users (first_name, last_name, user_email) VALUES (?, ?, ?) ON CONFLICT (user_email) DO NOTHING"
     (first_name, last_name, email)

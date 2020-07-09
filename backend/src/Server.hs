@@ -19,7 +19,7 @@ import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
-import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeBooked, queryWorkmode, queryWorkmodes, saveShift)
+import Database (getAllWorkmodes, getLastShiftsFor, getOfficeBooked, queryWorkmode, queryWorkmodes, saveShift)
 import Logic (registerWorkmode)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
@@ -44,13 +44,12 @@ apiHandler :: Server ProtectedAPI
 apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
-workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch
+workmodeHandler user@(MkUser {email}) = regWorkmode :<|> queryWorkmode email :<|> queryBatch
   where
     regWorkmode [] = pure NoContent
     regWorkmode (m : xs) = registerWorkmode user m >>= \case
       Right _ -> regWorkmode xs
       Left err -> throwError $ err400 {errBody = pack err}
-    confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay
     queryBatch startDate endDate = do
       start <- defaultDay startDate
       end <- defaultDay endDate

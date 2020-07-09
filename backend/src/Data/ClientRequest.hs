@@ -1,9 +1,13 @@
+{-# LANGUAGE OverloadedLists #-}
+
 module Data.ClientRequest where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.Csv ((.=), DefaultOrdered (..), ToNamedRecord (..), namedRecord)
 import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
+import Data.Time.Format.ISO8601 (iso8601Show)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple.FromRow (FromRow (..), RowParser, field)
 import Database.PostgreSQL.Simple.Types (Null)
@@ -60,3 +64,14 @@ instance FromRow UserWorkmode where
       _ -> error $ "Could not deserialize working mode type: " <> mode
     where
       nullField = field :: RowParser Null
+
+instance DefaultOrdered UserWorkmode where
+  headerOrder _ = ["Email", "Date", "Office"]
+
+instance ToNamedRecord UserWorkmode where
+  toNamedRecord (MkUserWorkmode {userEmail, site, date}) =
+    namedRecord
+      [ "Email" .= userEmail,
+        "Date" .= iso8601Show date,
+        "Office" .= site
+      ]

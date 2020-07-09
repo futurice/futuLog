@@ -120,11 +120,8 @@ export function createAPIClientService(baseUrl: string) {
         body: requests,
       }),
 
-    confirmUserWorkmode: (confirm: boolean) =>
-      fetchJSON<void>(`${baseUrl}/api/workmode/confirm`, {
-        method: "POST",
-        body: confirm,
-      }),
+    // DEV/Admin only
+    getWorkmodes: () => fetchJSON<IUserWorkmodeDto[]>(`${baseUrl}/api/workmode/all`),
 
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
 

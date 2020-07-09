@@ -41,10 +41,10 @@ data UserWorkmode
 data Capacity
   = MkCapacity
       { date :: Day,
-        numBooked :: Int
+        people :: [Text]
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site

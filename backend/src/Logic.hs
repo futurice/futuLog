@@ -2,7 +2,7 @@ module Logic (registerWorkmode) where
 
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (MonadReader, ask)
-import Data.ClientRequest (RegisterWorkmode (..), numBooked)
+import Data.ClientRequest (RegisterWorkmode (..), people)
 import Data.Config (Shift (..), maxPeople, officeSite, shiftSite)
 import Data.Env (Env (..), ShiftAssignment (..))
 import Data.Maybe (listToMaybe)
@@ -42,7 +42,7 @@ checkOfficeCapacity user mode@(MkRegisterWorkmode {date, site = office}) = do
   occupancy <- getOfficeBooked office date date
   maxCapacity <- maxPeople . head . filter ((==) office . officeSite) . offices <$> ask
   case occupancy of
-    [x] | numBooked x < maxCapacity -> Right <$> saveWorkmode user mode
+    [x] | length (people x) < maxCapacity -> Right <$> saveWorkmode user mode
     [] -> Right <$> saveWorkmode user mode
     _ -> pure $ Left "Office already full on chosen day"
 

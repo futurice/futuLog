@@ -211,10 +211,10 @@ export const HomePage: React.FC = () => {
 
       <Card spacing="2rem" textAlign="center">
         <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-          <H2>Where will you work work in the next two weeks?</H2>
+          <H2>Where will you work in the next two weeks?</H2>
 
           <P>
-            Check your options based on your shift and plan where you will be working in the future.
+            Plan in advance where you want to work in the next weeks.
           </P>
 
           <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">

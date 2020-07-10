@@ -11,6 +11,7 @@ import {
   userQueryKey,
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
+import { AdminPage } from "app/ui/adminPage/AdminPage";
 import { InfoPage } from "app/ui/infoPage/InfoPage";
 import { UserPage } from "app/ui/userPage/UserPage";
 import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
@@ -23,6 +24,7 @@ export enum RoutePaths {
   Info = "/info",
   Planning = "/planning",
   User = "/user",
+  Admin = "/admin",
   // DEV
   Playground = "/playground",
 }
@@ -64,6 +66,7 @@ export const AppRoutes: React.FC = () => {
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
+            <Route exact path={RoutePaths.Admin} component={AdminPage} />
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />
             <Route exact path={RoutePaths.Planning} component={PlanningPage} />

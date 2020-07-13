@@ -3,7 +3,7 @@ import {
   Box, BoxProps, styled, Theme, withStyles,
   Tab as MuiTab,
   Tabs as MuiTabs,
-  TabProps as MuiTabProps
+  TabProps as MuiTabProps, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
 } from '@material-ui/core';
 
 import { colors } from '../ux/theme';

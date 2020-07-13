@@ -5,6 +5,7 @@ import { H2Center, P } from '../ux/text';
 import { Stack } from '../ux/containers';
 import { colors } from '../ux/theme';
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
+import { OfficeVisits } from './OfficeVisits';
 
 
 export interface ITabPanelProps {
@@ -42,10 +43,10 @@ function a11yProps(index: any) {
 
 
 export const AdminPage: React.FC = () => {
-  const [value, setValue] = React.useState(0);
+  const [tab, setTab] = React.useState(0);
 
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setValue(newValue);
+    setTab(newValue);
   };
 
   return (
@@ -70,7 +71,7 @@ export const AdminPage: React.FC = () => {
       </Stack>
       <TabsWrapper>
         <Tabs
-          value={value}
+          value={tab}
           onChange={handleTabChange}
           aria-label="Admin page tabs"
         >
@@ -79,13 +80,13 @@ export const AdminPage: React.FC = () => {
         </Tabs>
         <TabsPanelWrapper bgColor={`${colors['deep-blue-10']}`}>
           <TabPanel
-            value={value}
+            value={tab}
             index={0}
           >
-            Office visits
+            <OfficeVisits />
           </TabPanel>
           <TabPanel
-            value={value}
+            value={tab}
             index={1}
           >
             Person tracking

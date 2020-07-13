@@ -41,7 +41,7 @@ export const Tabs = withStyles({
 })((props: ICustomTabsProps) => <MuiTabs {...props} TabIndicatorProps={{ children: <span/> }}/>);
 
 
-export const Tab = styled((props: MuiTabProps) => <MuiTab {...props}/>)({
+export const Tab = styled((props: MuiTabProps) => <MuiTab {...props} disableRipple/>)({
   boxShadow: 'none',
   borderTopLeftRadius: '8px',
   borderTopRightRadius: '8px',
@@ -51,6 +51,7 @@ export const Tab = styled((props: MuiTabProps) => <MuiTab {...props}/>)({
   borderColor: colors['deep-blue-10'],
   borderStyle: 'solid',
   textTransform: 'unset',
+  transition: 'background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0s, border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0s',
 
   '&.Mui-selected': {
     backgroundColor: colors['deep-blue-10'],
@@ -58,5 +59,12 @@ export const Tab = styled((props: MuiTabProps) => <MuiTab {...props}/>)({
   },
   '&:nth-of-type(n+1)': {
     marginLeft: '0.25rem'
+  },
+  '&:focus': {
+    boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`
+  },
+  '&:hover': {
+    backgroundColor: colors['deep-blue-10'],
+    borderColor: colors['deep-blue-80']
   }
 });

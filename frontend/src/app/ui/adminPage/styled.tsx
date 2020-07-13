@@ -51,20 +51,26 @@ export const Tab = styled((props: MuiTabProps) => <MuiTab {...props} disableRipp
   borderColor: colors['deep-blue-10'],
   borderStyle: 'solid',
   textTransform: 'unset',
-  transition: 'background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0s, border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0s',
+  opacity: 0.6,
+  transition: 'background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),' +
+    ' border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),' +
+    ' opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
 
   '&.Mui-selected': {
     backgroundColor: colors['deep-blue-10'],
-    border: 'none'
+    border: 'none',
+    opacity: 1
   },
   '&:nth-of-type(n+1)': {
     marginLeft: '0.25rem'
   },
   '&:focus': {
-    boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`
+    boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`,
+    opacity: 1
   },
   '&:hover': {
     backgroundColor: colors['deep-blue-10'],
-    borderColor: colors['deep-blue-80']
+    borderColor: colors['deep-blue-80'],
+    opacity: 1
   }
 });

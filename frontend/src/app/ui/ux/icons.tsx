@@ -137,6 +137,6 @@ export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74" }) => (
 
 export const IconArrowDown: React.FC<IIcon> = ({ color = "#200A74" }) => (
   <svg width="14" height="9" viewBox="0 0 14 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M13 1.52273L7 7L1 1.52273" stroke={color} stroke-width="1.5"/>
+    <path d="M13 1.52273L7 7L1 1.52273" stroke={color} strokeWidth="1.5"/>
   </svg>
 );

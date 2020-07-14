@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@material-ui/core';
 
-import { H2Center, P } from '../ux/text';
+import { H2Center } from '../ux/text';
 import { Stack } from '../ux/containers';
 import { colors } from '../ux/theme';
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
@@ -27,7 +27,7 @@ export function TabPanel(props: ITabPanelProps) {
     >
       {value === index && (
         <Box p={3}>
-          <P>{children}</P>
+          <div>{children}</div>
         </Box>
       )}
     </div>

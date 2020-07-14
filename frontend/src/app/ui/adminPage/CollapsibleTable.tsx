@@ -16,26 +16,39 @@ import { TableCellProps } from '@material-ui/core/TableCell/TableCell';
 import { createData } from './OfficeVisits';
 import { IconArrowDown, IconArrowUp } from '../ux/icons';
 import { IconButton } from '../ux/buttons';
+import { colors } from '../ux/theme';
 
 
 const useRowStyles = makeStyles({
   root: {
     '& > *': {
-      borderBottom: 'unset',
+      borderBottom: 'none',
     },
-  },
+    '&:nth-child(2n+1)': {
+      borderTop: `1px solid ${colors['deep-blue-20']}`
+    }
+  }
 });
 
-const useTableStyles = makeStyles({
+const useTableContainerStyles = makeStyles({
   root: {
+    borderRadius: 'unset',
     boxShadow: 'none',
-    backgroundColor: 'transparent' // TODO
+    backgroundColor: 'transparent'
   }
-})
+});
+
+const useTableHeadCellStyles = makeStyles({
+  root: {
+    borderTop: `1px solid ${colors['deep-blue-30']}`,
+    borderBottom: `1px solid ${colors['deep-blue-30']}`,
+  }
+});
 
 
 export interface ICollapsibleTableHead extends TableCellProps {
   title: string
+  width?: string
 }
 
 export interface ICollapsibleTableChild {
@@ -76,20 +89,23 @@ function Row({
         <TableCell>{row.date}</TableCell>
         <TableCell>{row.office}</TableCell>
         <TableCell>{row.capacityUtilisation}</TableCell>
+        {/* TODO: Edit button will be down here */}
+        <TableCell/>
       </TableRow>
       {
         ChildComponent &&
-        <TableRow>
+        <TableRow className={classes.root}>
+          <TableCell style={{ padding: 0  }}/>
           <TableCell
-            style={{ paddingBottom: 0, paddingTop: 0 }}
-            colSpan={6}
+            style={{ padding: 0 }}
+            colSpan={3}
           >
             <Collapse
               in={open}
               timeout="auto"
               unmountOnExit
             >
-              <Box margin={1}>
+              <Box marginTop={2} marginBottom={4}>
                 <ChildComponent
                   head={childTableHead || []}
                   row={row || []}
@@ -109,16 +125,23 @@ export default function CollapsibleTable({
   parentTableHead,
   rows
 }: ICollapsibleTable) {
-  const classes = useTableStyles();
+  const tableContainerClasses = useTableContainerStyles();
+  const tableHeadClasses = useTableHeadCellStyles();
 
   return (
-    <TableContainer component={Paper}>
-      <Table className={classes.root} aria-label="collapsible table">
+    <TableContainer
+      className={tableContainerClasses.root}
+      component={Paper}
+    >
+      <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            <TableCell/>
-            {parentTableHead.map(({ align='left', title }: ICollapsibleTableHead) =>
-              <TableCell align={align}>{title}</TableCell>
+            {parentTableHead.map(({ align = 'left', title, width = '' }: ICollapsibleTableHead) =>
+              <TableCell
+                style={{ width }}
+                className={tableHeadClasses.root}
+                align={align}
+              >{title}</TableCell>
             )}
           </TableRow>
         </TableHead>

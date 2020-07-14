@@ -132,6 +132,11 @@ export function createAPIClientService(baseUrl: string) {
       fetchJSON<ICapacityDto[]>(
         `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
       ),
+
+    getOfficeBookingsInfo: (site: string, startDate: string, endDate: string) =>
+      fetchJSON<ICapacityDto[]>(
+        `${baseUrl}/api/admin/workmode/csv/${site}?${qsStringify({ startDate, endDate })}`
+      ),
   };
 
   return apiClient;

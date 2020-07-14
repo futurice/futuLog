@@ -136,8 +136,9 @@ export default function CollapsibleTable({
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            {parentTableHead.map(({ align = 'left', title, width = '' }: ICollapsibleTableHead) =>
+            {parentTableHead.map(({ align = 'left', title, width = '' }: ICollapsibleTableHead, i) =>
               <TableCell
+                key={title + i}
                 style={{ width }}
                 className={tableHeadClasses.root}
                 align={align}

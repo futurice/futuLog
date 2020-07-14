@@ -41,7 +41,7 @@ const useTableContainerStyles = makeStyles({
 const useTableHeadCellStyles = makeStyles({
   root: {
     borderTop: `1px solid ${colors['deep-blue-30']}`,
-    borderBottom: `1px solid ${colors['deep-blue-30']}`,
+    borderBottom: `1px solid ${colors['deep-blue-20']}`,
   }
 });
 

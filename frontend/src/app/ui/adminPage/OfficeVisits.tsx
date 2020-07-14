@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useQuery } from 'react-query';
 import {
   Table,
   TableBody,
@@ -10,6 +11,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
 import { colors } from '../ux/theme';
+import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
+import { useServices } from '../../services/services';
 
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -95,19 +98,30 @@ const Visitors = ({ row, head }: { row: ReturnType<typeof createData>, head: ICo
   const headCellClasses = useTableHeadCellStyles();
 
   return (
-    <Table className={tableClasses.root} size="small" aria-label="visitors">
+    <Table
+      className={tableClasses.root}
+      size="small"
+      aria-label="visitors"
+    >
       <TableHead>
         <TableRow>
           {
-            head.map(({ align = 'left', title } : ICollapsibleTableHead) =>
-              <TableCell className={headCellClasses.root} align={align}>{title}</TableCell>
+            head.map(({ align = 'left', title }: ICollapsibleTableHead) =>
+              <TableCell
+                className={headCellClasses.root}
+                align={align}
+              >{title}</TableCell>
             )}
         </TableRow>
       </TableHead>
       <TableBody>
         {row.visitors.map((visitorRow, i) => (
           <TableRow key={i + '1'}>
-            <TableCell className={cellClasses.root} component="th" scope="row">{i + 1}</TableCell>
+            <TableCell
+              className={cellClasses.root}
+              component="th"
+              scope="row"
+            >{i + 1}</TableCell>
             {/* TODO: when edit button is clicked checkbox column will be displayed */}
             {/*<TableCell className={cellClasses.root}>e</TableCell>*/}
             <TableCell className={cellClasses.root}>{visitorRow.name}</TableCell>
@@ -120,12 +134,41 @@ const Visitors = ({ row, head }: { row: ReturnType<typeof createData>, head: ICo
 }
 
 export const OfficeVisits: React.FC = () => {
+  const { apiClient } = useServices();
+
+  const [startDate, setStartDate] = useState('2020-07-01');
+  const [endDate, setEndDate] = useState('2020-07-14');
+  const [site, setSite] = useState('Stuttgart');
+
+  const officeBookingsRes = useQuery(
+    officeBookingsQueryKey(site, startDate, endDate),
+    () => apiClient.getOfficeBookingsInfo(site, startDate, endDate)
+  );
+
   return (
-    <CollapsibleTable
-      childComponent={Visitors}
-      childTableHead={childTableHead}
-      parentTableHead={parentTableHead}
-      rows={rows}
-    />
+    <RenderQuery
+      query={combineQueries({
+        officeBookings: officeBookingsRes
+      })}
+      onLoading={(data, children) => children(data || ({} as any), true)}
+      onError={(error, children) => children({} as any, false, error)}
+    >
+      {({ officeBookings }, isLoading: boolean, error?: Error) => {
+        console.log('officeBookings', officeBookings);
+        console.log('isLoading', isLoading);
+        console.log('error', error);
+        // TODO: unmock api
+        // TODO: count booked amount
+
+        return (
+          <CollapsibleTable
+            childComponent={Visitors}
+            childTableHead={childTableHead}
+            parentTableHead={parentTableHead}
+            rows={rows}
+          />
+        )
+      }}
+    </RenderQuery>
   );
 }

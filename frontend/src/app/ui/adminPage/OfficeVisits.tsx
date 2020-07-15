@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
+import { CSVLink } from 'react-csv';
 import {
   Table,
   TableBody,
@@ -169,6 +170,7 @@ export const OfficeVisits: React.FC = () => {
     () => apiClient.getOfficeBookingsInfo(site, startDate, endDate)
   );
 
+
   return (
     <>
       <Toolbar>
@@ -194,12 +196,22 @@ export const OfficeVisits: React.FC = () => {
           </Button>
         </ToolbarItem>
         <ToolbarItem>
-          <Button
-            color="primary"
-            variant="outlined"
+          {/* TODO: convert officeBookings in proper format for csv*/}
+          <CSVLink
+            style={{ textDecoration: 'none' }}
+            data={[]}
+            filename={`${site}_${startDate}_${endDate}.csv`}
+            rel="noreferrer noopener"
+            target="_blank"
           >
-            Export list
-          </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+            >
+              Export list
+            </Button>
+          </CSVLink>
+
         </ToolbarItem>
       </Toolbar>
       <RenderQuery

@@ -5,7 +5,7 @@ import { H2Center } from '../ux/text';
 import { Stack } from '../ux/containers';
 import { colors } from '../ux/theme';
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
-import { OfficeVisits } from './OfficeVisits';
+import { OverviewTable } from './OverviewTable';
 
 
 export interface ITabPanelProps {
@@ -83,13 +83,15 @@ export const AdminPage: React.FC = () => {
             value={tab}
             index={0}
           >
-            <OfficeVisits />
+            <OverviewTable/>
           </TabPanel>
           <TabPanel
             value={tab}
             index={1}
           >
-            Person tracking
+            <OverviewTable
+              isTracking={true}
+            />
           </TabPanel>
         </TabsPanelWrapper>
       </TabsWrapper>

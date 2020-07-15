@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core';
 import { TableCellProps } from '@material-ui/core/TableCell/TableCell';
 
-import { createData } from './OfficeVisits';
+import { createData } from './OverviewTable';
 import { IconArrowDown, IconArrowUp } from '../ux/icons';
 import { IconButton } from '../ux/buttons';
 import { colors } from '../ux/theme';

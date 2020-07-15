@@ -5,7 +5,8 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  TableHead
+  TableHead,
+  styled
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -13,6 +14,9 @@ import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
 import { colors } from '../ux/theme';
 import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
+import { Button } from '../ux/buttons';
+import { Flex } from '../ux/containers';
+import { P } from '../ux/text';
 
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -92,6 +96,26 @@ const useTableHeadCellStyles = makeStyles({
   }
 });
 
+const Toolbar = styled(Flex)({
+  marginBottom: '30px'
+});
+
+const ToolbarItem = styled(Flex)({
+  alignItems: 'flex-end',
+
+  '&:last-child': {
+    marginLeft: 'auto',
+  },
+
+  '& > *:nth-child(n+2)': {
+    marginLeft: '45px'
+  },
+  '& > *:last-child': {
+    marginLeft: '30px'
+  }
+});
+
+
 const Visitors = ({ row, head }: { row: ReturnType<typeof createData>, head: ICollapsibleTableHead[] }) => {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
@@ -146,29 +170,62 @@ export const OfficeVisits: React.FC = () => {
   );
 
   return (
-    <RenderQuery
-      query={combineQueries({
-        officeBookings: officeBookingsRes
-      })}
-      onLoading={(data, children) => children(data || ({} as any), true)}
-      onError={(error, children) => children({} as any, false, error)}
-    >
-      {({ officeBookings }, isLoading: boolean, error?: Error) => {
-        console.log('officeBookings', officeBookings);
-        console.log('isLoading', isLoading);
-        console.log('error', error);
-        // TODO: unmock api
-        // TODO: count booked amount
+    <>
+      <Toolbar>
+        <ToolbarItem>
+          <div>
+            <P>Where?</P>
+            <P>From ......... to .......... </P>
+          </div>
+          <div>
+            <P>Office</P>
+            <Button
+              variant="contained"
+              color="primary"
+            >
+              set office
+            </Button>
+          </div>
+          <Button
+            variant="contained"
+            color="primary"
+          >
+            Search
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            color="primary"
+            variant="outlined"
+          >
+            Export list
+          </Button>
+        </ToolbarItem>
+      </Toolbar>
+      <RenderQuery
+        query={combineQueries({
+          officeBookings: officeBookingsRes
+        })}
+        onLoading={(data, children) => children(data || ({} as any), true)}
+        onError={(error, children) => children({} as any, false, error)}
+      >
+        {({ officeBookings }, isLoading: boolean, error?: Error) => {
+          console.log('officeBookings', officeBookings);
+          console.log('isLoading', isLoading);
+          console.log('error', error);
+          // TODO: unmock api
+          // TODO: count booked amount
 
-        return (
-          <CollapsibleTable
-            childComponent={Visitors}
-            childTableHead={childTableHead}
-            parentTableHead={parentTableHead}
-            rows={rows}
-          />
-        )
-      }}
-    </RenderQuery>
+          return (
+            <CollapsibleTable
+              childComponent={Visitors}
+              childTableHead={childTableHead}
+              parentTableHead={parentTableHead}
+              rows={rows}
+            />
+          )
+        }}
+      </RenderQuery>
+    </>
   );
 }

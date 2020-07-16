@@ -3,7 +3,7 @@ import { AppBar, styled, Toolbar, IconButton } from "@material-ui/core";
 import { IUserDto } from "app/services/apiClientService";
 import { colors } from "app/ui/ux/theme";
 import { ButtonWithIcon, LinkButton } from "app/ui/ux/buttons";
-import { IconInfoBalloon, IconProfile } from "app/ui/ux/icons";
+import { IconInfoBalloon, IconProfile, IconTracking } from "app/ui/ux/icons";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { MediaQuery } from "app/ui/mediaQuery/MediaQuery";
@@ -86,21 +86,31 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       </AppTitleLink>
 
       {/* Mobile controls */}
+      {/* TODO @egor: add admin permission check for tracking button */}
       <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
         <ToolbarButtonContainer>
+          <LinkButton to={RoutePaths.Admin} component={IconButton} aria-label="Tracking">
+            <IconTracking />
+          </LinkButton>
+
           <LinkButton to={RoutePaths.Info} component={IconButton} aria-label="Info">
             <IconInfoBalloon />
           </LinkButton>
 
-          <LinkButton to={RoutePaths.User} component={IconButton} aria-label="Info">
+          <LinkButton to={RoutePaths.User} component={IconButton} aria-label="Logout">
             <IconProfile />
           </LinkButton>
         </ToolbarButtonContainer>
       </MediaQuery>
 
       {/* Desktop controls */}
+      {/* TODO @egor: add admin permission check for tracking button */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <ToolbarButtonContainer>
+          <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
+            Tracking
+          </LinkButton>
+
           <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
             Info
           </LinkButton>

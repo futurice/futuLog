@@ -8,7 +8,7 @@ import {
   IShiftAssignmentDto,
   IOfficeSpaceDto,
   IRegisterWorkmodeDto,
-  ICapacityDto,
+  IBookedDto,
 } from "app/services/apiClientService";
 import {
   RenderQuery,
@@ -50,10 +50,10 @@ const InlineIconButton = styled(IconButton)({
 const getOfficeCapacity = (
   office: IOfficeSpaceDto,
   date: string,
-  officeBookings: ICapacityDto[]
+  officeBookings: IBookedDto[]
 ) => {
   const booking = officeBookings.find((booking) => booking.date === date);
-  return booking ? office.maxPeople - booking.numBooked : office.maxPeople;
+  return booking ? office.maxPeople - booking.users.length : office.maxPeople;
 };
 
 export const HomePage: React.FC = () => {
@@ -214,7 +214,7 @@ export const HomePage: React.FC = () => {
           <H2>Where will you work work in the next two weeks?</H2>
 
           <P>
-            Check your options based on your shift and plan where you will be working in the future.
+            Plan in advance where you want to work in the next weeks.
           </P>
 
           <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">

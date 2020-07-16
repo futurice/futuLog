@@ -12,9 +12,9 @@ import {
   IWorkmodeDto,
   IShiftAssignmentDto,
   IOfficeSpaceDto,
-  ICapacityDto,
   IUserWorkmodeDto,
   IUserDto,
+  IBookedDto
 } from "app/services/apiClientService";
 import { useServices } from "app/services/services";
 import {
@@ -85,11 +85,11 @@ const ConfirmButtonContainer = styled("div")<Theme>(({ theme }) => ({
   },
 }));
 
-function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
+function getOfficeCapacity(office: IOfficeSpaceDto, bookings: IBookedDto[]) {
   if (!bookings.length) {
     return office.maxPeople;
   }
-  const capacities = bookings.map((booking) => office.maxPeople - booking.numBooked);
+  const capacities = bookings.map((booking) => office.maxPeople - booking.users.length);
   return Math.min(...capacities);
 }
 

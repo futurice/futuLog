@@ -44,10 +44,10 @@ apiHandler :: Server ProtectedAPI
 apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
-workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch
+workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch
   where
     regWorkmode [] = pure NoContent
-    regWorkmode (m : xs) = registerWorkmode email m >>= \case
+    regWorkmode (m : xs) = registerWorkmode user m >>= \case
       Right _ -> regWorkmode xs
       Left err -> throwError $ err400 {errBody = pack err}
     confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay

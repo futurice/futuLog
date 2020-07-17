@@ -1,6 +1,6 @@
 module Logic (registerWorkmode) where
 
-import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Data.ClientRequest (RegisterWorkmode (..), numBooked)
 import Data.Config (Shift (..), maxPeople, officeSite, shiftSite)
@@ -8,24 +8,29 @@ import Data.Env (Env (..), ShiftAssignment (..))
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Time.Calendar (dayOfWeek)
+import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (User (..))
 import Data.Workmode (Workmode (..))
 import Database (getLastShiftsFor, getOfficeBooked, saveWorkmode)
 
 registerWorkmode :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m (Either String ())
-registerWorkmode user@(MkUser {email}) mode@(MkRegisterWorkmode {workmode, site = office}) =
-  if (not $ isOffice workmode)
-    then Right <$> saveWorkmode user mode
-    else do
-      officeShifts <- getOfficeShifts office
-      if null officeShifts
-        then checkOfficeCapacity user mode
+registerWorkmode user@(MkUser {email}) mode@(MkRegisterWorkmode {workmode, site = office, date}) = do
+  today <- liftIO $ utctDay <$> getCurrentTime
+  if date < today
+    then pure $ Left "You can not change workmodes in the past, please ask an admin"
+    else
+      if (not $ isOffice workmode)
+        then Right <$> saveWorkmode user mode
         else do
-          shifts <- getLastShiftsFor email
-          case shifts of
-            [] -> pure $ Left "You are not signed into any shift, please set a shift first"
-            [shift] -> checkShift user mode shift
-            _ -> pure $ Left "You cannot visit the office, you have to stay home two weeks after changing shifts" --TODO: Check if person was in the office in the last two weeks
+          officeShifts <- getOfficeShifts office
+          if null officeShifts
+            then checkOfficeCapacity user mode
+            else do
+              shifts <- getLastShiftsFor email
+              case shifts of
+                [] -> pure $ Left "You are not signed into any shift, please set a shift first"
+                [shift] -> checkShift user mode shift
+                _ -> pure $ Left "You cannot visit the office, you have to stay home two weeks after changing shifts" --TODO: Check if person was in the office in the last two weeks
   where
     isOffice (Office _) = True
     isOffice _ = False

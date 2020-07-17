@@ -8,6 +8,7 @@ import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Format.ISO8601 (iso8601Show)
+import Data.User (User)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple.FromRow (FromRow (..), RowParser, field)
 import Database.PostgreSQL.Simple.Types (Null)
@@ -41,7 +42,7 @@ data UserWorkmode
 data Capacity
   = MkCapacity
       { date :: Day,
-        people :: [Text]
+        people :: [User]
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)

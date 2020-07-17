@@ -3,6 +3,7 @@ module Data.User where
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Swagger (ToSchema)
 import Data.Text (Text)
+import Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
 import GHC.Generics (Generic)
 
 data User
@@ -20,3 +21,6 @@ data User
 newtype AdminUser = MkAdmin User
   deriving stock (Show, Eq)
   deriving newtype (ToJSON, FromJSON, ToSchema)
+
+instance FromRow User where
+  fromRow = MkUser <$> field <*> field <*> field <*> pure "" <*> pure "" <*> pure ""

@@ -13,6 +13,7 @@ import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
+import Data.User (User (..))
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 
@@ -71,8 +72,8 @@ saveShift email office MkSetShift {shiftName = name} = do
         "INSERT INTO shift_assignments (user_email, assignment_date, site, shift_name) VALUES (?, current_date, ?, ?)"
         (email, office, name)
 
-saveWorkmode :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m ()
-saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
+saveWorkmode :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m ()
+saveWorkmode MkUser {email, first_name, last_name} MkRegisterWorkmode {site, date, workmode} = do
   exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
@@ -85,6 +86,9 @@ saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
         (email, site, date, "Office" :: String, confirmed)
+  exec
+    "INSERT INTO users (first_name, last_name, user_email) VALUES (?, ?, ?) ON CONFLICT (user_email) DO NOTHING"
+    (first_name, last_name, email)
   where
     mkSimpleQuery s =
       exec
@@ -114,6 +118,15 @@ initDatabase connectionString = do
           <> "assignment_date date not null, "
           <> "site text not null, "
           <> "shift_name text not null"
+          <> ")"
+      )
+  _ <- liftIO . withResource pool $ \conn ->
+    execute_
+      conn
+      ( "CREATE TABLE IF NOT EXISTS users ("
+          <> "first_name text not null, "
+          <> "last_name text not null, "
+          <> "user_email text PRIMARY KEY"
           <> ")"
       )
   pure pool

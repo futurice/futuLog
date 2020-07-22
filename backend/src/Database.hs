@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module Database where
 
 import Control.Monad (when)
@@ -6,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Capacity, RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
+import Data.ClientRequest (Capacity (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -15,7 +17,7 @@ import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
 import Data.User (User (..))
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
+import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 
 getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
 getAllWorkmodes office start end =
@@ -47,11 +49,28 @@ getLastShiftsFor user =
 shiftQuery :: Query
 shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assignment_date DESC LIMIT 1"
 
+-- TODO: Optimize
 getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]
 getOfficeBooked office start end =
-  query'
-    "SELECT date, COUNT(*) FROM workmodes WHERE site = ? AND date >= ? AND date <= ? AND workmode = 'Office' GROUP BY date ORDER BY date DESC"
-    (office, start, end)
+  do
+    days <-
+      fmap fromOnly
+        <$> query'
+          "SELECT DISTINCT date FROM workmodes WHERE site = ? AND date >= ? AND date <= ? AND workmode = 'Office' ORDER BY date DESC"
+          (office, start, end)
+    mapM
+      ( \day ->
+          (day,) . fmap fromOnly
+            <$> query' "SELECT DISTINCT user_email FROM workmodes WHERE site = ? AND date = ?" (office, day)
+      )
+      days
+    >>= mapM
+      ( \(day, emails :: [Text]) ->
+          MkCapacity day
+            <$> query'
+              "SELECT * FROM users WHERE user_email IN ?"
+              (Only $ In emails)
+      )
 
 saveShift :: (MonadIO m, MonadReader Env m) => Text -> Text -> SetShift -> m ()
 saveShift email office MkSetShift {shiftName = name} = do

@@ -80,7 +80,6 @@ function Row({
         <TableCell>
           <IconButton
             aria-label="expand row"
-            size="small"
             onClick={() => setOpen(!open)}
           >
             {open ? <IconArrowUp/> : <IconArrowDown/>}

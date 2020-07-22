@@ -53,7 +53,7 @@ const getOfficeCapacity = (
   officeBookings: ICapacityDto[]
 ) => {
   const booking = officeBookings.find((booking) => booking.date === date);
-  return booking ? office.maxPeople - booking.numBooked : office.maxPeople;
+  return booking ? office.maxPeople - booking.people.length : office.maxPeople;
 };
 
 export const HomePage: React.FC = () => {

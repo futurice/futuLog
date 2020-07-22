@@ -13,7 +13,7 @@ import {
 } from '@material-ui/core';
 import { TableCellProps } from '@material-ui/core/TableCell/TableCell';
 
-import { createData } from './OverviewTable';
+import { mapBookingsForUI } from './OverviewTable';
 import { IconArrowDown, IconArrowUp } from '../ux/icons';
 import { IconButton } from '../ux/buttons';
 import { colors } from '../ux/theme';
@@ -58,11 +58,11 @@ export interface ICollapsibleTableChild {
 
 export interface ICollapsibleTable extends ICollapsibleTableChild {
   parentTableHead: ICollapsibleTableHead[],
-  rows: ReturnType<typeof createData>[]
+  rows: ReturnType<typeof mapBookingsForUI>[]
 }
 
 export interface ICollapsibleTableCell extends ICollapsibleTableChild {
-  row: ReturnType<typeof createData>
+  row: ReturnType<typeof mapBookingsForUI>
 }
 
 
@@ -85,16 +85,18 @@ function Row({
             {open ? <IconArrowUp/> : <IconArrowDown/>}
           </IconButton>
         </TableCell>
-        <TableCell>{row.date}</TableCell>
-        <TableCell>{row.office}</TableCell>
-        <TableCell>{row.capacityUtilisation}</TableCell>
+        {
+          Object.values(row).map((value) => (
+            (typeof value === 'string' || typeof value === 'number' ) && <TableCell key={value}>{value}</TableCell>
+          ))
+        }
         {/* TODO: Edit button will be down here */}
         <TableCell/>
       </TableRow>
       {
         ChildComponent &&
         <TableRow className={classes.root}>
-          <TableCell style={{ padding: 0  }}/>
+          <TableCell style={{ padding: 0 }}/>
           <TableCell
             style={{ padding: 0 }}
             colSpan={3}
@@ -104,10 +106,13 @@ function Row({
               timeout="auto"
               unmountOnExit
             >
-              <Box marginTop={2} marginBottom={4}>
+              <Box
+                marginTop={2}
+                marginBottom={4}
+              >
                 <ChildComponent
-                  head={childTableHead || []}
-                  row={row || []}
+                  head={childTableHead}
+                  row={row}
                 />
               </Box>
             </Collapse>
@@ -146,9 +151,9 @@ export default function CollapsibleTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {rows.map((row, i) => (
             <Row
-              key={row.date}
+              key={i + '1'}
               row={row}
               childComponent={childComponent}
               childTableHead={childTableHead}
@@ -159,4 +164,3 @@ export default function CollapsibleTable({
     </TableContainer>
   );
 }
-

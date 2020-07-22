@@ -2,13 +2,13 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { createData } from './OverviewTable';
 import { colors } from '../ux/theme';
 import { ICollapsibleTableHead } from './CollapsibleTable';
+import { mapBookingsForUI } from './OverviewTable';
 
 
 interface IVisitorsTable {
-  row: ReturnType<typeof createData>,
+  row: ReturnType<typeof mapBookingsForUI>,
   head: ICollapsibleTableHead[]
 }
 
@@ -33,7 +33,7 @@ const useTableHeadCellStyles = makeStyles({
 });
 
 
-export function VisitorsTable ({ row, head }: IVisitorsTable) {
+export function VisitorsTable({ row, head }: IVisitorsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
@@ -49,6 +49,7 @@ export function VisitorsTable ({ row, head }: IVisitorsTable) {
           {
             head.map(({ align = 'left', title }: ICollapsibleTableHead) =>
               <TableCell
+                key={title}
                 className={headCellClasses.root}
                 align={align}
               >{title}</TableCell>
@@ -56,8 +57,8 @@ export function VisitorsTable ({ row, head }: IVisitorsTable) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {row.visitors.map((visitorRow, i) => (
-          <TableRow key={i + '1'}>
+        {row.visitors.map(({ name, email }, i) => (
+          <TableRow key={email}>
             <TableCell
               className={cellClasses.root}
               component="th"
@@ -65,8 +66,8 @@ export function VisitorsTable ({ row, head }: IVisitorsTable) {
             >{i + 1}</TableCell>
             {/* TODO: when edit button is clicked checkbox column will be displayed */}
             {/*<TableCell className={cellClasses.root}>e</TableCell>*/}
-            <TableCell className={cellClasses.root}>{visitorRow.name}</TableCell>
-            <TableCell className={cellClasses.root}>{visitorRow.email}</TableCell>
+            <TableCell className={cellClasses.root}>{name}</TableCell>
+            <TableCell className={cellClasses.root}>{email}</TableCell>
           </TableRow>
         ))}
       </TableBody>

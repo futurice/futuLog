@@ -27,7 +27,7 @@ export function TabPanel(props: ITabPanelProps) {
     >
       {value === index && (
         <Box p={3}>
-          <div>{children}</div>
+          {children}
         </Box>
       )}
     </div>
@@ -44,6 +44,8 @@ function a11yProps(index: any) {
 
 export const AdminPage: React.FC = () => {
   const [tab, setTab] = React.useState(0);
+
+  // TODO @egor: request users, offices for selects in the table toolbar, pass them inside
 
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTab(newValue);

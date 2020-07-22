@@ -89,7 +89,16 @@ export interface IOfficeSpaceDto {
 
 export interface ICapacityDto {
   date: string;
-  numBooked: number;
+  people: IPerson[];
+}
+
+export interface IPerson {
+  first_name: string;
+  last_name: string;
+  email: string;
+  portrait_full_url: string;
+  portrait_thumb_url: string;
+  portrait_badge_url: string;
 }
 
 export function createAPIClientService(baseUrl: string) {

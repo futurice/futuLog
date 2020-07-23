@@ -51,18 +51,19 @@ export interface ICollapsibleTableHead extends TableCellProps {
   width?: string
 }
 
-export interface ICollapsibleTableChild {
+interface ICollapsibleTableChild {
   childComponent?: React.ElementType,
   childTableHead?: ICollapsibleTableHead[]
 }
 
-export interface ICollapsibleTable extends ICollapsibleTableChild {
-  parentTableHead: ICollapsibleTableHead[],
-  rows: ReturnType<typeof mapBookingsForUI>[]
+interface ICollapsibleTableCell extends ICollapsibleTableChild {
+  row: ReturnType<typeof mapBookingsForUI>
 }
 
-export interface ICollapsibleTableCell extends ICollapsibleTableChild {
-  row: ReturnType<typeof mapBookingsForUI>
+export interface ICollapsibleTable extends ICollapsibleTableChild {
+  parentTableHead: ICollapsibleTableHead[],
+  rows: ReturnType<typeof mapBookingsForUI>[],
+  empty?: string
 }
 
 
@@ -87,7 +88,7 @@ function Row({
         </TableCell>
         {
           Object.values(row).map((value) => (
-            (typeof value === 'string' || typeof value === 'number' ) && <TableCell key={value}>{value}</TableCell>
+            (typeof value === 'string' || typeof value === 'number') && <TableCell key={value}>{value}</TableCell>
           ))
         }
         {/* TODO: Edit button will be down here */}
@@ -127,7 +128,8 @@ export default function CollapsibleTable({
   childComponent,
   childTableHead,
   parentTableHead,
-  rows
+  rows,
+  empty
 }: ICollapsibleTable) {
   const tableContainerClasses = useTableContainerStyles();
   const tableHeadClasses = useTableHeadCellStyles();
@@ -151,14 +153,24 @@ export default function CollapsibleTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, i) => (
-            <Row
-              key={i + '1'}
-              row={row}
-              childComponent={childComponent}
-              childTableHead={childTableHead}
-            />
-          ))}
+          {
+            rows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  {empty}
+                </TableCell>
+              </TableRow>
+            ) : (
+              rows.map((row, i) => (
+                <Row
+                  key={i + '1'}
+                  row={row}
+                  childComponent={childComponent}
+                  childTableHead={childTableHead}
+                />
+              ))
+            )
+          }
         </TableBody>
       </Table>
     </TableContainer>

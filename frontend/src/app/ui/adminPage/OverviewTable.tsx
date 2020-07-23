@@ -4,28 +4,12 @@ import { useQuery } from 'react-query';
 import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
 import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
-import { TableToolbar } from './Toolbar';
-import { VisitorsTable } from './VisitorsTable';
 import { ICapacityDto, IPerson } from '../../services/apiClientService';
+import { ICapacityDtoMapped, IOverviewTable, IPersonMapped, ISelectOptionNumber, ISelectOptionString } from './types';
+import { TrackingToolbar } from './TrackingToolbar';
+import { VisitorsToolbar } from './VisitorsToolbar';
+import { VisitorsTable } from './VisitorsTable';
 
-
-interface IOverviewTable {
-  isTracking?: boolean,
-  users?: string[],
-  offices?: string[]
-}
-
-export interface ICapacityDtoMapped {
-  date: string;
-  site: string;
-  visitors: IPersonMapped[];
-  utilisation: number;
-}
-
-export interface IPersonMapped {
-  name: string;
-  email: string;
-}
 
 const childTableHead: ICollapsibleTableHead[] = [
   {
@@ -91,40 +75,77 @@ export function OverviewTable({
   const { apiClient } = useServices();
   const [startDate, setStartDate] = useState('2020-07-01');
   const [endDate, setEndDate] = useState('2020-07-24');
-  const [site, setSite] = useState('Stuttgart');
+  const [currentSite, setCurrentSite] = React.useState('');
+  const [currentUser, setCurrentUser] = React.useState('');
+  const [range, setRange] = React.useState(0);
 
-  // TODO @egor: define event handler for changing a user, dates, range, office. Also check that you do need them here or inside of TableToolbar
-  // TODO @egor: pass user, dates, range, office accordingly to TableToolbar component
+  const handleSearch = () => {
+    console.log('click');
+  }
+
+  const handleSiteChange = (newSite: ISelectOptionString) => {
+    setCurrentSite(newSite.value);
+  }
+
+  const handleUserChange = (newUser: ISelectOptionString) => {
+    setCurrentUser(newUser.value);
+  }
+
+  const handleRangeChange = (newRange: ISelectOptionNumber) => {
+    setRange(newRange.value);
+    // TODO: calculate startDate + newRange and update endDate
+    // setEndDate();
+  }
+
+  const handleDateChange = (newDate: ISelectOptionString, type: string) => {
+    if (type === 'start') {
+      setStartDate(newDate.value);
+    } else {
+      setEndDate(newDate.value);
+    }
+  }
 
   const officeBookingsRes = useQuery(
-    officeBookingsQueryKey(site, startDate, endDate),
-    () => apiClient.getOfficeBookings(site, startDate, endDate)
+    officeBookingsQueryKey(currentSite, startDate, endDate),
+    () => apiClient.getOfficeBookings(currentSite, startDate, endDate)
   );
 
   const rows: ICapacityDtoMapped[] = useMemo(() => {
     const { data } = officeBookingsRes;
     const mappedBookings: ICapacityDtoMapped[] | undefined = data && data.map(
-      (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site }));
+      (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite }));
 
     return mappedBookings || [];
   }, [officeBookingsRes]);
 
   return (
     <>
-      {isTracking && (
-        <TableToolbar
-          startDate={startDate}
-          offices={offices}
-          users={users}
-        />
-      )}
-      {!isTracking && (
-        <TableToolbar
-          startDate={startDate}
-          endDate={endDate}
-          offices={offices}
-        />
-      )}
+      {
+        isTracking ? (
+          <TrackingToolbar
+            tableData={[]}
+            startDate={startDate}
+            range={range}
+            users={users}
+            currentUser={currentUser}
+            onDateChange={handleDateChange}
+            onUserChange={handleUserChange}
+            onRangeChange={handleRangeChange}
+            onSearch={handleSearch}
+          />
+        ) : (
+          <VisitorsToolbar
+            tableData={[]}
+            startDate={startDate}
+            endDate={endDate}
+            offices={offices}
+            currentSite={currentSite}
+            onSiteChange={handleSiteChange}
+            onDateChange={handleDateChange}
+            onSearch={handleSearch}
+          />
+        )
+      }
       <RenderQuery
         query={combineQueries({
           officeBookings: officeBookingsRes
@@ -136,13 +157,14 @@ export function OverviewTable({
           console.log('officeBookings', officeBookings);
           console.log('isLoading', isLoading);
           console.log('error', error);
-          // TODO @egor: count booked amount
+          // TODO @egor: empty and load table state
 
           return (
             <CollapsibleTable
               childComponent={VisitorsTable}
               childTableHead={childTableHead}
               parentTableHead={parentTableHead}
+              empty={'No results.'}
               rows={rows}
             />
           )

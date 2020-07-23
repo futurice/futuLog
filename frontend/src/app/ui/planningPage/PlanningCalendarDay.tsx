@@ -27,6 +27,7 @@ import {
 import { useQuery } from "react-query";
 import { Button, IconButton } from "app/ui/ux/buttons";
 import { dateRange, isWeekend } from "app/utils/dateUtils";
+import {OfficeController} from "app/ui/ux/officeController";
 
 interface IPlanningCalendarDay {
   date: dayjs.Dayjs;
@@ -226,8 +227,8 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                   ) : (
                     ""
                   )}
+                  <OfficeController userOffice={userOffice} officeBookings={officeBookings}/>
                 </OfficeInfoContainer>
-
                 {/*
                   NOTE: We use explicit `isExpanded` flag here due to collapsible
                   panels performing a transition animation. We want to hide the button

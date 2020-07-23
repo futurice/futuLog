@@ -1,11 +1,13 @@
-import { Button } from '../ux/buttons';
 import { CSVLink } from 'react-csv';
 import React from 'react';
+
+import { ICSVDataItem } from './types';
+import { Button } from '../ux/buttons';
 
 
 interface ICSVButton {
   filename: string;
-  data: any[];
+  data: ICSVDataItem[];
 }
 
 export function CSVButton ({ filename, data }: ICSVButton) {

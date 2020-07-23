@@ -1,4 +1,5 @@
 import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
+import React from 'react';
 
 export interface ISelectOptionString {
   label: string;
@@ -36,4 +37,11 @@ export interface IToolbar {
 
   onSearch: () => void;
   onDateChange: (newDate: ISelectOptionString, type: string) => void;
+}
+
+export interface ICSVDataItem {
+  date: string,
+  site: string,
+  name: string,
+  email: string
 }

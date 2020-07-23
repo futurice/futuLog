@@ -174,7 +174,9 @@ export default function Select() { //(entry: entryData, label: string){
           onClose={handleClose}
           onOpen={handleOpen}
           onChange={handleChange}
-          IconComponent={() => (<IconArrowUp color={colors['deep-blue-80']}/>)}
+          IconComponent={() => open ? (<img src="/Icon-arrow-down.png" />) : (<img src="/Icon-arrow-up.png"/>)}
+
+
           MenuProps={menuProps}
         >
           <MenuItem value="">

@@ -7,7 +7,7 @@ import { ICollapsibleTableHead } from './CollapsibleTable';
 import { mapBookingsForUI } from './OverviewTable';
 
 
-interface IVisitorsTable {
+interface IBookingsTable {
   row: ReturnType<typeof mapBookingsForUI>,
   head: ICollapsibleTableHead[]
 }
@@ -33,7 +33,7 @@ const useTableHeadCellStyles = makeStyles({
 });
 
 
-export function VisitorsTable({ row, head }: IVisitorsTable) {
+export function BookingsTable({ row, head }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();

@@ -1,14 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { ChangeEvent, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
 import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
 import { ICapacityDto, IPerson } from '../../services/apiClientService';
-import { ICapacityDtoMapped, IOverviewTable, IPersonMapped, ISelectOptionNumber, ISelectOptionString } from './types';
+import { ICapacityDtoMapped, IOverviewTable, IPersonMapped, ISelectOptionString } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
-import { VisitorsTable } from './VisitorsTable';
+import { BookingsTable } from './BookingsTable';
 
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -75,7 +75,7 @@ export function OverviewTable({
   const { apiClient } = useServices();
   const [startDate, setStartDate] = useState('2020-07-01');
   const [endDate, setEndDate] = useState('2020-07-24');
-  const [currentSite, setCurrentSite] = React.useState('');
+  const [currentSite, setCurrentSite] = React.useState(offices && offices[2].site || '');
   const [currentUser, setCurrentUser] = React.useState('');
   const [range, setRange] = React.useState(0);
 
@@ -83,20 +83,21 @@ export function OverviewTable({
     console.log('click');
   }
 
-  const handleSiteChange = (newSite: ISelectOptionString) => {
-    setCurrentSite(newSite.value);
+  const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    setCurrentSite(event.target.value as string);
   }
 
-  const handleUserChange = (newUser: ISelectOptionString) => {
-    setCurrentUser(newUser.value);
+  const handleUserChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    setCurrentUser(event.target.value as string);
   }
 
-  const handleRangeChange = (newRange: ISelectOptionNumber) => {
-    setRange(newRange.value);
+  const handleRangeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    setRange(event.target.value as number);
     // TODO: calculate startDate + newRange and update endDate
     // setEndDate();
   }
 
+  // TODO @egor calculate type based on click event and that onChange func accept params: { event, child }: ISelectOnChange
   const handleDateChange = (newDate: ISelectOptionString, type: string) => {
     if (type === 'start') {
       setStartDate(newDate.value);
@@ -123,7 +124,7 @@ export function OverviewTable({
       {
         isTracking ? (
           <TrackingToolbar
-            tableData={[]}
+            tableData={rows}
             startDate={startDate}
             range={range}
             users={users}
@@ -135,7 +136,7 @@ export function OverviewTable({
           />
         ) : (
           <VisitorsToolbar
-            tableData={[]}
+            tableData={rows}
             startDate={startDate}
             endDate={endDate}
             offices={offices}
@@ -161,7 +162,7 @@ export function OverviewTable({
 
           return (
             <CollapsibleTable
-              childComponent={VisitorsTable}
+              childComponent={BookingsTable}
               childTableHead={childTableHead}
               parentTableHead={parentTableHead}
               empty={'No results.'}

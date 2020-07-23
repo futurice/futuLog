@@ -1,12 +1,13 @@
-import React from 'react';
-import { styled } from '@material-ui/core';
+import React, { ChangeEvent } from 'react';
+import { FormControl, InputLabel, Select, styled } from '@material-ui/core';
 
 import { Flex } from '../ux/containers';
 import { P } from '../ux/text';
 import { Button } from '../ux/buttons';
-import { ISelectOptionString, IToolbar } from './types';
+import { ICSVDataItem, IPersonMapped, ISelectOptionString, IToolbar } from './types';
 import { CSVButton } from './CSVButton';
 import { IOfficeSpaceDto } from '../../services/apiClientService';
+import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
 
 
 interface IVisitorsToolbar extends IToolbar {
@@ -15,7 +16,7 @@ interface IVisitorsToolbar extends IToolbar {
   endDate?: string;
   currentSite?: string;
 
-  onSiteChange?: (newSite: ISelectOptionString) => void;
+  onSiteChange?: SelectInputProps['onChange'];
 }
 
 const Toolbar = styled(Flex)({
@@ -37,6 +38,23 @@ const ToolbarItem = styled(Flex)({
   }
 });
 
+export const SelectContainer = styled(Flex)({
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+const visitorsTableDataToCSV = (tableData: any[]) => {
+  return tableData.reduce((acc, { date, site, visitors }) => {
+    const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IPersonMapped) => ({
+      date: date || '',
+      site: site || '',
+      name: name || '',
+      email: email || ''
+    }));
+
+    return [ ...acc, ...extendedVisitors];
+  }, []);
+}
 
 export function VisitorsToolbar ({
   offices,
@@ -50,26 +68,39 @@ export function VisitorsToolbar ({
   onSearch
 }: IVisitorsToolbar) {
   const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
-  // TODO: convert officeBookings in proper format for csv
-  const csvData: any[] = tableData || [];
+  const csvData: ICSVDataItem[] = visitorsTableDataToCSV(tableData);
 
   return (
     <Toolbar>
       <ToolbarItem>
-        <ul>
-          <li>
-            <P>Start date</P>
-            <div>Select</div>
-          </li>
-          <li>
-            <P>Range</P>
-            <div>Select</div>
-          </li>
-          <li>
-            <P>Person</P>
-            <div>Select</div>
-          </li>
-        </ul>
+        <SelectContainer>
+          <P>From</P>
+          <div>Calendar</div>
+        </SelectContainer>
+        <SelectContainer>
+          <P>to</P>
+          <div>Calendar</div>
+        </SelectContainer>
+        <SelectContainer>
+          <FormControl>
+            <InputLabel htmlFor="site-select">Office</InputLabel>
+            <Select
+              native
+              value={currentSite}
+              onChange={onSiteChange}
+              name="site"
+              inputProps={{
+                id: 'site-select',
+              }}
+            >
+              {
+                officesOptions.map(({ value, label }) => (
+                  <option value={value}>{label}</option>
+                ))
+              }
+            </Select>
+          </FormControl>
+        </SelectContainer>
         <Button
           variant="contained"
           color="primary"

@@ -1,12 +1,14 @@
 import React from 'react';
-import { styled } from '@material-ui/core';
+import { FormControl, InputLabel, Select, styled } from '@material-ui/core';
 
 import { Flex } from '../ux/containers';
 import { P } from '../ux/text';
 import { Button } from '../ux/buttons';
-import { ISelectOptionNumber, ISelectOptionString, IToolbar } from './types';
+import { ICSVDataItem, IPersonMapped, IToolbar } from './types';
 import { CSVButton } from './CSVButton';
 import { IUsersDto } from '../../services/apiClientService';
+import { SelectContainer } from './VisitorsToolbar';
+import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
 
 
 interface ITrackingToolbar extends IToolbar {
@@ -15,8 +17,8 @@ interface ITrackingToolbar extends IToolbar {
   currentUser: string;
   range: number;
 
-  onUserChange: (newUser: ISelectOptionString) => void;
-  onRangeChange: (newRange: ISelectOptionNumber, type: string) => void;
+  onUserChange?: SelectInputProps['onChange']
+  onRangeChange?: SelectInputProps['onChange']
 }
 
 const Toolbar = styled(Flex)({
@@ -38,6 +40,19 @@ const ToolbarItem = styled(Flex)({
   }
 });
 
+const trackingTableDataToCSV = (tableData: any[]) => {
+  return tableData.reduce((acc, { date, site, visitors }) => {
+    const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IPersonMapped) => ({
+      date: date || '',
+      site: site || '',
+      name: name || '',
+      email: email || ''
+    }));
+
+    return [ ...acc, ...extendedVisitors];
+  }, []);
+}
+
 
 export function TrackingToolbar({
   users,
@@ -52,32 +67,57 @@ export function TrackingToolbar({
   onSearch
 }: ITrackingToolbar) {
   const usersOptions = (users || []).map(({ name }) => ({ value: name, label: name }));
-  // TODO: convert officeBookings in proper format for csv
-  const csvData: any[] = tableData || [];
+  // TODO @egor make constant range
+  const rangeOptions = [{ value: 14, label: '14 days' }, { value: 1, label: '1 day' }];
+  const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
 
   return (
     <Toolbar>
       <ToolbarItem>
-        <ul>
-          <li>
-            <P>Where?</P>
-            <div>
-              <P>From </P>
-              <div>Select</div>
-              <P>to </P>
-              <div>Select</div>
-            </div>
-          </li>
-          <li>
-            <P>Office</P>
-            <Button
-              variant="contained"
-              color="primary"
+        <SelectContainer>
+          <P>Start date</P>
+          <div>Calendar</div>
+        </SelectContainer>
+        <SelectContainer>
+          <FormControl>
+            <InputLabel htmlFor="range-select">Range</InputLabel>
+            <Select
+              native
+              value={range}
+              onChange={onRangeChange}
+              name="range"
+              inputProps={{
+                id: 'range-select',
+              }}
             >
-              set office
-            </Button>
-          </li>
-        </ul>
+              {
+                rangeOptions.map(({ value, label }) => (
+                  <option value={value}>{label}</option>
+                ))
+              }
+            </Select>
+          </FormControl>
+        </SelectContainer>
+        <SelectContainer>
+          <FormControl>
+            <InputLabel htmlFor="person-select">Person</InputLabel>
+            <Select
+              native
+              value={currentUser}
+              onChange={onUserChange}
+              name="person"
+              inputProps={{
+                id: 'person-select',
+              }}
+            >
+              {
+                usersOptions.map(({ value, label }) => (
+                  <option value={value}>{label}</option>
+                ))
+              }
+            </Select>
+          </FormControl>
+        </SelectContainer>
         <Button
           variant="contained"
           color="primary"

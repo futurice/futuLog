@@ -14,7 +14,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import {makeStyles} from '@material-ui/core/styles'
+import {makeStyles} from '@material-ui/core/styles';
+import {Select, selectProps, entryData} from 'app/ui/ux/dropdown';
 
 const divider = makeStyles({
   root:{
@@ -46,68 +47,54 @@ const list_holder = makeStyles({
   }
 })
 
-export interface entryData{
-  entryValue: string[];
-  entryText: string[];
-}
 interface OfficeControllerProps{
   userOffice: IOfficeSpaceDto,
   officeBookings:IBookedDto[]
 }
 
-class WhoIsInOfficeClass extends React.Component{
-  constructor(){
-    super()
-    // this being true results in the who is in the office section being shown
-    // false means results in the office being able to be selected
-    this.state = { whoIsInOfficeToggle: true}
+function officeStateSelector(officeState:boolean){
+  const office_list: string[] = ['Berlin', 'Helsinki', 'London', 'Munich', 'Oslo', 'Stockholm', 'Stuttgart', 'Tampere']
+  if (officeState) {
+    return (
+    <List className={list_holderClass.root}>
+    {officeBookings.map((users,index) => {
+      return (users.users.map((user, index2) => {
+        return <ListItem>
+          <ListItemAvatar>
+           <Avatar>
+            <img src={user.portrait_badge_url}/>
+           </Avatar>
+          </ListItemAvatar>
+          <ListItemText primary={user.first_name + user.last_name}/>
+        </ListItem>
+
+      }))
+    })
+  }</List> )}
+  else{
+    return (<Select entry={entryValue:office_list, entryText:office_list} label="Office List"/>)
   }
-
-  _toggleOfficeStates = (bool) => {
-    this.setState({
-      whoIsInOfficeToggle: bool
-    });
-
-
-  }
-
-
-
-
 }
-
+}
 
 export const OfficeController = ({userOffice, officeBookings} :OfficeControllerProps)=>
 {
+
+    const [officeState, setOfficeState] = React.useState(true);
+    const _toggleOfficeStates = (bool) => {
+      setOfficeState(bool);
+      };
     const dividerClass= divider();
     const centerClass = center();
     const list_holderClass = list_holder();
-    const office_list: string[] = ['Berlin', 'Helsinki', 'London', 'Munich', 'Oslo', 'Stockholm', 'Stuttgart', 'Tampere']
+
 
     return (<div><div className={centerClass.root}>
-      <ButtonDiscrete onClick={this.state._toggleOfficeStates.bind(null,true)}>Change Office</ButtonDiscrete>
+      <ButtonDiscrete onClick={_toggleOfficeStates(true)}>Change Office</ButtonDiscrete>
       <div className={dividerClass.root}/>
-      <ButtonDiscreteWithEndIcon onClick={this.state._toggleOfficeStates.bind(null,false)}> Who Booked</ButtonDiscreteWithEndIcon>
-      {//TODO turn this into its own function that is called here but written above
-        if (this.state.whoIsInOfficeToggle === true) {
-          <List className={list_holderClass.root}>
-          officeBookings.map((users,index) => {
-            return (users.users.map((user, index2) => {
-              return <ListItem>
-                <ListItemAvatar>
-                 <Avatar>
-                  <img src={user.portrait_badge_url}/>
-                 </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={user.first_name + user.last_name}/>
-              </ListItem>
-
-            }))
-          })
-          </List>
-        }else{
-          //TODO
-        }
+      <ButtonDiscreteWithEndIcon onClick={_toggleOfficeStates(false)}> Who Booked</ButtonDiscreteWithEndIcon>
+      {
+        officeStateSelector(officeState)
       }
       </div> </div>)
 }

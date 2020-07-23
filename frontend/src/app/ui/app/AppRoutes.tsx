@@ -9,6 +9,7 @@ import {
   officesQueryKey,
   userShiftQueryKey,
   userQueryKey,
+  usersQueryKey,
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { AdminPage } from "app/ui/adminPage/AdminPage";
@@ -43,11 +44,24 @@ export const AppRoutes: React.FC = () => {
   const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
   const userShiftRes = useQuery(userShiftQueryKey(), () => apiClientService.getUserShift());
   const officesRes = useQuery(officesQueryKey(), () => apiClientService.getOffices());
+  const usersRes = useQuery(usersQueryKey(), () => apiClientService.getUsers());
+  const mockedUsers = [
+    {
+      name: 'user 1'
+    },
+    {
+      name: 'user 2'
+    },
+    {
+      name: 'user 3'
+    }
+  ];
 
   return (
     <RenderQuery
       query={combineQueries({
         user: userRes,
+        users: usersRes,
         userShift: userShiftRes,
         offices: officesRes,
       })}
@@ -55,7 +69,7 @@ export const AppRoutes: React.FC = () => {
       onLoading={() => <h2>Loading user information..</h2>}
       onError={(error) => <h2>{error.message}</h2>}
     >
-      {({ user }) => (
+      {({ user, offices, users }) => (
         <SiteLayout user={user}>
           <Switch>
             <Route
@@ -66,7 +80,10 @@ export const AppRoutes: React.FC = () => {
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
-            <Route exact path={RoutePaths.Admin} component={AdminPage} />
+            <Route
+              exact
+              path={RoutePaths.Admin}
+              render={(props) => <AdminPage users={mockedUsers} offices={offices} {...props} /> } />
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />
             <Route exact path={RoutePaths.Planning} component={PlanningPage} />

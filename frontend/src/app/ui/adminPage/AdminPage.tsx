@@ -6,12 +6,18 @@ import { Stack } from '../ux/containers';
 import { colors } from '../ux/theme';
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
 import { OverviewTable } from './OverviewTable';
+import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
 
 
 export interface ITabPanelProps {
   children?: React.ReactNode;
   index: any;
   value: any;
+}
+
+export interface IAdminPage {
+  offices: IOfficeSpaceDto[];
+  users: IUsersDto[];
 }
 
 export function TabPanel(props: ITabPanelProps) {
@@ -42,10 +48,8 @@ function a11yProps(index: any) {
 }
 
 
-export const AdminPage: React.FC = () => {
+export const AdminPage: React.FC<IAdminPage> = ({ offices, users }) => {
   const [tab, setTab] = React.useState(0);
-
-  // TODO @egor: request users, offices for selects in the table toolbar, pass them inside
 
   const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTab(newValue);
@@ -85,7 +89,11 @@ export const AdminPage: React.FC = () => {
             value={tab}
             index={0}
           >
-            <OverviewTable/>
+            <OverviewTable
+              isTracking={false}
+              offices={offices}
+              users={users}
+            />
           </TabPanel>
           <TabPanel
             value={tab}
@@ -93,6 +101,8 @@ export const AdminPage: React.FC = () => {
           >
             <OverviewTable
               isTracking={true}
+              offices={offices}
+              users={users}
             />
           </TabPanel>
         </TabsPanelWrapper>

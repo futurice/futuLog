@@ -101,6 +101,11 @@ export interface IPerson {
   portrait_badge_url: string;
 }
 
+// TODO: @egor unmock interface when api will be ready
+export interface IUsersDto {
+  [key: string]: any;
+}
+
 export function createAPIClientService(baseUrl: string) {
   const apiClient = {
     getUser: () => fetchJSON<IUserDto>(`${baseUrl}/api/me`),
@@ -136,6 +141,8 @@ export function createAPIClientService(baseUrl: string) {
       }),
 
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
+
+    getUsers: () => fetchJSON<IUsersDto[]>(`${baseUrl}/api/uesr/all`),
 
     getOfficeBookings: (site: string, startDate: string, endDate: string) =>
       fetchJSON<ICapacityDto[]>(

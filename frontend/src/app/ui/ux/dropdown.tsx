@@ -16,17 +16,19 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
   border: `1px solid ${colors['deep-blue-80']}`,
   boxSizing: 'border-box',
   borderRadius: '4px',
+  backgroundColor: `${colors['deep-blue-80']}`,
   '&:hover': {
     border: '1px solid #6643EF',
-    backgroundColor: '#D2CEE3',
+    backgroundColor: `${colors['deep-blue-50']}`,
   },
   '&:active': {
-    backgroundColor: '#D2CEE3',
+    backgroundColor: `${colors['deep-blue-50']}`,
   },
   '&:disabled': {
     background: 'rgba(255, 255, 255, 0.5)',
     border: '1px solid rgba(166, 157, 199, 0.5)',
-    color: 'rgba(255, 255, 255, 0.5)'
+    color: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(32, 10, 116, 0.5)',
   },
   '&.MuiSelect-icon': {
     background: `${colors['deep-blue-80']}`,
@@ -51,6 +53,12 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
     '& li.Mui-selected:hover': {
       background: `${colors['deep-blue-80']}`
     }
+  },
+  icon: {
+    background: `${colors['deep-blue-80']}`,
+  },
+  '& .MuiSelect-selectMenu':{
+    backgroundColor: 'white'
   }
 });
 
@@ -93,6 +101,7 @@ const useStyles = makeStyles({
       paddingBottom: 12,
     },
     '& li:hover': {
+      color: 'white',
       background: `${colors['deep-blue-80']}`
     },
     '& li.Mui-selected': {
@@ -100,6 +109,7 @@ const useStyles = makeStyles({
       background: `${colors['deep-blue-50']}`
     },
     '& li.Mui-selected:hover': {
+      color: 'white',
       background: `${colors['deep-blue-80']}`
     },
   },
@@ -108,26 +118,37 @@ const useStyles = makeStyles({
     right: 12,
     position: 'absolute',
     userSelect: 'none',
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    background: `${colors['deep-blue-80']}`,
   },
   button: {
     display: 'block',
     marginTop: theme.spacing(2),
   },
+
 });
 
-// export interface entryData{
-//   entryValue: string[];
-//   entryText: string[];
-// }
+export interface entryData{
+  entryValue: string;
+  entryText: string;
+}
 
-export default function Select() { //(entry: entryData, label: string){
+function buildMenuItems(entry:entryData[]){
+  return(
+    entry.map((entrySet,index) => {
+      return (<MenuItem value={entrySet.entryValue}>{entrySet.entryText}</MenuItem>)
+    })
+
+  )
+}
+
+interface selectProps{
+  entry: entryData[],
+  label: string
+}
+
+export const Select = ({entry, label}: selectProps) => { //(entry: entryData, label: string)
   const classes = useStyles()
-  // const entryText = entry[0];
-  // const entryValue = entry[1];
-  // const entryLen = entryText.length;
-
-  // moves the menu below the select input
 
   const [val, setVal] = React.useState<string | number>('');
   const [open, setOpen] = React.useState(false);
@@ -156,7 +177,7 @@ export default function Select() { //(entry: entryData, label: string){
       vertical: 1, //'top',
       horizontal: 1 //'left'
     },
-    getContentAnchorEl: null
+    getContentAnchorEl: null,
   };
 
 
@@ -165,26 +186,18 @@ export default function Select() { //(entry: entryData, label: string){
   return (
     <div>
       <FormControl className={classes.formControl}>
-        <InputLabel id="demo-controlled-open-select-label">label</InputLabel>
         <DropDown
-          labelId="demo-controlled-open-select-label"
-          id="demo-controlled-open-select"
+          labelId={label}
+          id={label}
           value={val}
           open={open}
           onClose={handleClose}
           onOpen={handleOpen}
           onChange={handleChange}
           IconComponent={() => open ? (<img src="/Icon-arrow-down.png" />) : (<img src="/Icon-arrow-up.png"/>)}
-
-
           MenuProps={menuProps}
         >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
+          {buildMenuItems(entry)}
         </DropDown>
       </FormControl>
     </div>

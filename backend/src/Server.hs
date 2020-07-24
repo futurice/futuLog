@@ -19,7 +19,7 @@ import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
-import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeBooked, queryWorkmode, queryWorkmodes, saveShift)
+import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeBooked, getPeople, queryWorkmode, queryWorkmodes, saveShift)
 import Logic (registerWorkmode)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
@@ -77,7 +77,7 @@ officeHandler = getOffices :<|> getBooked
       getOfficeBooked office start end
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler
+adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler :<|> getPeople
   where
     shiftCSVAddHandler = \case
       MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case

@@ -49,6 +49,9 @@ getLastShiftsFor user =
 shiftQuery :: Query
 shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assignment_date DESC LIMIT 1"
 
+getPeople :: (MonadIO m, MonadReader Env m) => m [User]
+getPeople = query'_ "SELECT * FROM users"
+
 -- TODO: Optimize
 getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]
 getOfficeBooked office start end =

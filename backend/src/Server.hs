@@ -77,7 +77,7 @@ officeHandler = getOffices :<|> getBooked
       getOfficeBooked office start end
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler :<|> getPeople
+adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler :<|> getPeople :<|> bookingsHandler
   where
     shiftCSVAddHandler = \case
       MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
@@ -88,6 +88,10 @@ adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler :<|> getPeople
       start <- defaultDay startDate
       end <- defaultDay endDate
       getAllWorkmodes office start end
+    bookingsHandler email startDate endDate = do
+        start <- defaultDay startDate
+        end <- defaultDay endDate
+        queryWorkmodes email start end
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

@@ -69,7 +69,8 @@ export const AppRoutes: React.FC = () => {
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
-            { user.isAdmin && (
+            {/*// TODO @egor unmock true and set it to user.isAdmin  */}
+            { true && (
               <Route
                 exact
                 path={RoutePaths.Admin}

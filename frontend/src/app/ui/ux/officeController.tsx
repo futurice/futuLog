@@ -48,53 +48,63 @@ const list_holder = makeStyles({
 })
 
 interface OfficeControllerProps{
-  userOffice: IOfficeSpaceDto,
+  userOffice: IOfficeSpaceDto | undefined,
   officeBookings:IBookedDto[]
 }
 
-function officeStateSelector(officeState:boolean){
-  const office_list: string[] = ['Berlin', 'Helsinki', 'London', 'Munich', 'Oslo', 'Stockholm', 'Stuttgart', 'Tampere']
+function officeStateSelector(officeState:boolean, officeBookings:IBookedDto[], userOffice: IOfficeSpaceDto | undefined){
+  if (typeof officeBookings === 'undefined'){
+    const users = [{email: '', first_name: '', last_name: '', portrait_full_url: '',
+    portrait_thumb_url: '', portrait_badge_url: ''}]
+    const booking = {date: "", users: users}
+    officeBookings = [booking]
+  }
+  const list_holderClass = list_holder();
+  const officeEntries: entryData[] =[ {entryValue: 'Berlin', entryText:'Berlin'},
+      {entryValue: 'Helsinki', entryText:'Helsinki'}, {entryValue: 'Munich', entryText:'Munich'}, {entryValue: 'Oslo', entryText:'Oslo'},
+      {entryValue: 'Stockholm', entryText:'Stockholm'}, {entryValue: 'Stuttgart', entryText:'Stuttgart'}, {entryValue: 'Tampere', entryText:'Tampere'}
+    ]
   if (officeState) {
     return (
     <List className={list_holderClass.root}>
     {officeBookings.map((users,index) => {
       return (users.users.map((user, index2) => {
-        return <ListItem>
+        return (<ListItem>
           <ListItemAvatar>
            <Avatar>
             <img src={user.portrait_badge_url}/>
            </Avatar>
           </ListItemAvatar>
           <ListItemText primary={user.first_name + user.last_name}/>
-        </ListItem>
-
+        </ListItem>)
       }))
     })
   }</List> )}
   else{
-    return (<Select entry={entryValue:office_list, entryText:office_list} label="Office List"/>)
+    return (<Select entry={officeEntries} label="Office List"/>)
   }
-}
 }
 
 export const OfficeController = ({userOffice, officeBookings} :OfficeControllerProps)=>
 {
-
-    const [officeState, setOfficeState] = React.useState(true);
-    const _toggleOfficeStates = (bool) => {
-      setOfficeState(bool);
-      };
-    const dividerClass= divider();
     const centerClass = center();
-    const list_holderClass = list_holder();
+    const dividerClass= divider();
+    const [officeState, setOfficeState] = React.useState(true);
 
+    const toggleOfficeStatesTrue = () => {
+      setOfficeState(true);
+    };
+
+    const toggleOfficeStatesFalse = () => {
+      setOfficeState(false);
+    };
 
     return (<div><div className={centerClass.root}>
-      <ButtonDiscrete onClick={_toggleOfficeStates(true)}>Change Office</ButtonDiscrete>
+      <ButtonDiscrete onClick={toggleOfficeStatesFalse}>Change Office</ButtonDiscrete>
       <div className={dividerClass.root}/>
-      <ButtonDiscreteWithEndIcon onClick={_toggleOfficeStates(false)}> Who Booked</ButtonDiscreteWithEndIcon>
+      <ButtonDiscreteWithEndIcon onClick={toggleOfficeStatesTrue}> Who Booked</ButtonDiscreteWithEndIcon>
       {
-        officeStateSelector(officeState)
+        officeStateSelector(officeState, officeBookings, userOffice)
       }
       </div> </div>)
 }

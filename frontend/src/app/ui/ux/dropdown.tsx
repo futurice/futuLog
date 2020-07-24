@@ -142,7 +142,7 @@ function buildMenuItems(entry:entryData[]){
   )
 }
 
-interface selectProps{
+export interface selectProps{
   entry: entryData[],
   label: string
 }

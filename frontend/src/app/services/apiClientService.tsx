@@ -129,7 +129,7 @@ export function createAPIClientService(baseUrl: string) {
 
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
 
-    getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/uesr/all`),
+    getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
 
     getOfficeBookings: (site: string, startDate: string, endDate: string) =>
       fetchJSON<ICapacityDto[]>(

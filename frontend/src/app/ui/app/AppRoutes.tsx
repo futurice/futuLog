@@ -45,17 +45,6 @@ export const AppRoutes: React.FC = () => {
   const userShiftRes = useQuery(userShiftQueryKey(), () => apiClientService.getUserShift());
   const officesRes = useQuery(officesQueryKey(), () => apiClientService.getOffices());
   const usersRes = useQuery(usersQueryKey(), () => apiClientService.getUsers());
-  const mockedUsers = [
-    {
-      name: 'user 1'
-    },
-    {
-      name: 'user 2'
-    },
-    {
-      name: 'user 3'
-    }
-  ];
 
   return (
     <RenderQuery
@@ -84,7 +73,7 @@ export const AppRoutes: React.FC = () => {
               <Route
                 exact
                 path={RoutePaths.Admin}
-                render={(props) => <AdminPage users={mockedUsers} offices={offices} {...props} /> } />
+                render={(props) => <AdminPage users={users} offices={offices} {...props} /> } />
             )}
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />

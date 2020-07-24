@@ -111,8 +111,8 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
   exec
     ( "INSERT INTO users (first_name, last_name, user_email, portrait_full_url, portrait_thumb_url, portrait_badge_url, isAdmin) "
         <> "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (user_email) DO "
-        <> "UPDATE SET first_name = users.first_name, last_name = users.last_name, portrait_full_url = users.portrait_full_url, "
-        <> "portrait_thumb_url = users.portrait_thumb_url, portrait_badge_url = users.portrait_badge_url, isAdmin = users.isAdmin"
+        <> "UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, portrait_full_url = EXCLUDED.portrait_full_url, "
+        <> "portrait_thumb_url = EXCLUDED.portrait_thumb_url, portrait_badge_url = EXCLUDED.portrait_badge_url, isAdmin = EXCLUDED.isAdmin"
     )
     user
   where

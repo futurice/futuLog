@@ -49,6 +49,9 @@ getLastShiftsFor user =
 shiftQuery :: Query
 shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assignment_date DESC LIMIT 1"
 
+getPeople :: (MonadIO m, MonadReader Env m) => m [User]
+getPeople = query'_ "SELECT * FROM users"
+
 -- TODO: Optimize
 getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]
 getOfficeBooked office start end =
@@ -92,7 +95,7 @@ saveShift email office MkSetShift {shiftName = name} = do
         (email, office, name)
 
 saveWorkmode :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m ()
-saveWorkmode MkUser {email, first_name, last_name} MkRegisterWorkmode {site, date, workmode} = do
+saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = do
   exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
@@ -106,8 +109,12 @@ saveWorkmode MkUser {email, first_name, last_name} MkRegisterWorkmode {site, dat
         "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
         (email, site, date, "Office" :: String, confirmed)
   exec
-    "INSERT INTO users (first_name, last_name, user_email) VALUES (?, ?, ?) ON CONFLICT (user_email) DO NOTHING"
-    (first_name, last_name, email)
+    ( "INSERT INTO users (first_name, last_name, user_email, portrait_full_url, portrait_thumb_url, portrait_badge_url, isAdmin) "
+        <> "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (user_email) DO "
+        <> "UPDATE SET first_name = users.first_name, last_name = users.last_name, portrait_full_url = users.portrait_full_url "
+        <> "portrait_thumb_url = users.portrait_thumb_url, portrait_badge_url = users.portrait_badge_url, isAdmin = user.isAdmin"
+    )
+    user
   where
     mkSimpleQuery s =
       exec
@@ -145,7 +152,11 @@ initDatabase connectionString = do
       ( "CREATE TABLE IF NOT EXISTS users ("
           <> "first_name text not null, "
           <> "last_name text not null, "
-          <> "user_email text PRIMARY KEY"
+          <> "user_email text PRIMARY KEY, "
+          <> "portrait_full_url text not null, "
+          <> "portrait_thumb_url text not null, "
+          <> "portrait_badge_url text not null, "
+          <> "isAdmin boolean not null"
           <> ")"
       )
   pure pool

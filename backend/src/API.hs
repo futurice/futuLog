@@ -54,3 +54,4 @@ type OfficeAPI =
 type AdminAPI =
   "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent
     :<|> "workmode" :> "csv" :> Capture "office" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[CSV] [UserWorkmode]
+    :<|> "people" :> Get '[JSON] [User]

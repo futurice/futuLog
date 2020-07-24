@@ -6,7 +6,7 @@ import { DatePicker } from '@material-ui/pickers';
 import { Button } from '../ux/buttons';
 import { ICSVDataItem, IUserDtoMapped, IToolbar } from './types';
 import { CSVButton } from './CSVButton';
-import { IUsersDto } from '../../services/apiClientService';
+import { IUserDto } from '../../services/apiClientService';
 import { Toolbar, ToolbarItem } from './styled';
 import { Theme } from '../ux/theme';
 
@@ -18,7 +18,7 @@ const DAYS_RANGE_OPTIONS = [
 ];
 
 interface ITrackingToolbar extends IToolbar {
-  users?: IUsersDto[];
+  users?: IUserDto[];
 
   currentUser: string;
   range: number;
@@ -52,7 +52,9 @@ export function TrackingToolbar({
   onDateChange,
   onSearch
 }: ITrackingToolbar) {
-  const usersOptions = (users || []).map(({ name }) => ({ value: name, label: name }));
+  const usersOptions = (users || []).map(
+    ({ first_name, last_name, email }) => ({ value: email, label: `${first_name} ${last_name}` })
+  );
   const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
 

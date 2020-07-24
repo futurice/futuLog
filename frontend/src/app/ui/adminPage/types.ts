@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
-import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
+import { IOfficeSpaceDto, IUserDto } from '../../services/apiClientService';
 
 export interface IOverviewTable {
   isTracking: boolean;
-  users?: IUsersDto[];
+  users?: IUserDto[];
   offices?: IOfficeSpaceDto[];
 }
 

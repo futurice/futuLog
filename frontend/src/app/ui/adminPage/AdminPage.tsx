@@ -6,7 +6,7 @@ import { Stack } from '../ux/containers';
 import { colors } from '../ux/theme';
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
 import { OverviewTable } from './OverviewTable';
-import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
+import { IOfficeSpaceDto, IUserDto } from '../../services/apiClientService';
 
 
 export interface ITabPanelProps {
@@ -17,7 +17,7 @@ export interface ITabPanelProps {
 
 export interface IAdminPage {
   offices: IOfficeSpaceDto[];
-  users: IUsersDto[];
+  users: IUserDto[];
 }
 
 export function TabPanel(props: ITabPanelProps) {

@@ -86,7 +86,6 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       </AppTitleLink>
 
       {/* Mobile controls */}
-      {/* TODO @egor: add admin permission check for tracking button */}
       <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
         <ToolbarButtonContainer>
           { user.isAdmin && (
@@ -106,7 +105,6 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       </MediaQuery>
 
       {/* Desktop controls */}
-      {/* TODO @egor: add admin permission check for tracking button */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <ToolbarButtonContainer>
           { user.isAdmin && (

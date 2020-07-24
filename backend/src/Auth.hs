@@ -9,7 +9,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text (breakOn, isPrefixOf, replace, unpack)
 import Data.Text.Encoding (encodeUtf8)
-import Data.User (AdminUser (..), User (..))
+import Data.User (AdminUser (..), FUMUser (..), User (..))
 import qualified Data.Vault.Lazy as V
 import Network.HTTP.Client (Manager, httpLbs, parseRequest, responseBody)
 import qualified Network.HTTP.Client as C
@@ -32,15 +32,15 @@ contextProxy = Proxy
 mkAuthServerContext :: Manager -> Maybe User -> [Text] -> IO (Context ContextContent, Middleware)
 mkAuthServerContext m user admins = do
   key <- V.newKey
-  pure (authHandler key :. adminAuthHandler key admins :. EmptyContext, authMiddleware user key m)
+  pure (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware user key admins m)
 
 authHandler :: V.Key User -> AuthHandler Request User
 authHandler key = mkAuthHandler $ login key
 
-adminAuthHandler :: V.Key User -> [Text] -> AuthHandler Request AdminUser
-adminAuthHandler key admins = mkAuthHandler $ \req -> do
+adminAuthHandler :: V.Key User -> AuthHandler Request AdminUser
+adminAuthHandler key = mkAuthHandler $ \req -> do
   user <- login key req
-  if email user `elem` admins
+  if isAdmin user
     then pure $ MkAdmin user
     else throwError $ err401 {errBody = "User is not an admin"}
 
@@ -49,17 +49,17 @@ login key req = either throw401 pure (maybeToEither "No user data received from 
   where
     throw401 msg = throwError $ err401 {errBody = msg}
 
-authMiddleware :: Maybe User -> V.Key User -> Manager -> Middleware
-authMiddleware maybeUser key m app req respond = do
+authMiddleware :: Maybe User -> V.Key User -> [Text] -> Manager -> Middleware
+authMiddleware maybeUser key admins m app req respond = do
   eitherUser <- case maybeUser of
     Just x -> pure $ Right x
-    _ -> runExceptT $ verifyLogin m req
+    _ -> runExceptT $ verifyLogin m req admins
   case eitherUser of
     Left e -> respond $ responseLBS status401 [] $ pack e
     Right user -> app (req {vault = V.insert key user (vault req)}) respond
 
-verifyLogin :: Manager -> Request -> ExceptT String IO User
-verifyLogin manager req = do
+verifyLogin :: Manager -> Request -> [Text] -> ExceptT String IO User
+verifyLogin manager req admins = do
   cookieRaw <- liftEither $ maybeToEither "Missing cookie header" $ lookup "cookie" $ requestHeaders req
   cookie <- liftEither $ maybeToEither "Missing token in cookie" $ lookup "auth_pubtkt" $ parseCookiesText cookieRaw
   username <- getUsername cookie
@@ -67,7 +67,7 @@ verifyLogin manager req = do
   let request' = request {C.requestHeaders = C.requestHeaders request <> [(hCookie, "auth_pubtkt=" <> encodeUtf8 cookie)]}
   response <- liftIO $ httpLbs request' manager
   case decode (responseBody response) of
-    Just user -> pure user
+    Just (MkFUMUser a b email d e f) -> pure $ MkUser a b email d e f (email `elem` admins)
     Nothing -> throwError "Token not accepted by FUM"
   where
     cookie' c = replace "\"" "" c

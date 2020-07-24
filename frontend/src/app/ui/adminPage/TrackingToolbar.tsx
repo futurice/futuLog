@@ -1,15 +1,21 @@
 import React from 'react';
-import { FormControl, InputLabel, Select, styled } from '@material-ui/core';
+import { FormControl, Select, useMediaQuery } from '@material-ui/core';
+import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
+import { DatePicker } from '@material-ui/pickers';
 
-import { Flex } from '../ux/containers';
-import { P } from '../ux/text';
 import { Button } from '../ux/buttons';
 import { ICSVDataItem, IPersonMapped, IToolbar } from './types';
 import { CSVButton } from './CSVButton';
 import { IUsersDto } from '../../services/apiClientService';
-import { SelectContainer } from './VisitorsToolbar';
-import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
+import { Toolbar, ToolbarItem } from './styled';
+import { Theme } from '../ux/theme';
 
+
+const DAYS_RANGE_OPTIONS = [
+  { value: 1, label: '1 day' },
+  { value: 14, label: '14 days' },
+  { value: 30, label: '30 days' }
+];
 
 interface ITrackingToolbar extends IToolbar {
   users?: IUsersDto[];
@@ -21,25 +27,6 @@ interface ITrackingToolbar extends IToolbar {
   onRangeChange?: SelectInputProps['onChange']
 }
 
-const Toolbar = styled(Flex)({
-  marginBottom: '30px'
-});
-
-const ToolbarItem = styled(Flex)({
-  alignItems: 'flex-end',
-
-  '&:last-child': {
-    marginLeft: 'auto',
-  },
-
-  '& > *:nth-child(n+2)': {
-    marginLeft: '45px'
-  },
-  '& > *:last-child': {
-    marginLeft: '30px'
-  }
-});
-
 const trackingTableDataToCSV = (tableData: any[]) => {
   return tableData.reduce((acc, { date, site, visitors }) => {
     const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IPersonMapped) => ({
@@ -49,10 +36,9 @@ const trackingTableDataToCSV = (tableData: any[]) => {
       email: email || ''
     }));
 
-    return [ ...acc, ...extendedVisitors];
+    return [...acc, ...extendedVisitors];
   }, []);
 }
-
 
 export function TrackingToolbar({
   users,
@@ -67,57 +53,69 @@ export function TrackingToolbar({
   onSearch
 }: ITrackingToolbar) {
   const usersOptions = (users || []).map(({ name }) => ({ value: name, label: name }));
-  // TODO @egor make constant range
-  const rangeOptions = [{ value: 14, label: '14 days' }, { value: 1, label: '1 day' }];
   const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
 
   return (
     <Toolbar>
       <ToolbarItem>
-        <SelectContainer>
-          <P>Start date</P>
-          <div>Calendar</div>
-        </SelectContainer>
-        <SelectContainer>
-          <FormControl>
-            <InputLabel htmlFor="range-select">Range</InputLabel>
-            <Select
-              native
-              value={range}
-              onChange={onRangeChange}
-              name="range"
-              inputProps={{
-                id: 'range-select',
-              }}
-            >
-              {
-                rangeOptions.map(({ value, label }) => (
-                  <option value={value}>{label}</option>
-                ))
-              }
-            </Select>
-          </FormControl>
-        </SelectContainer>
-        <SelectContainer>
-          <FormControl>
-            <InputLabel htmlFor="person-select">Person</InputLabel>
-            <Select
-              native
-              value={currentUser}
-              onChange={onUserChange}
-              name="person"
-              inputProps={{
-                id: 'person-select',
-              }}
-            >
-              {
-                usersOptions.map(({ value, label }) => (
-                  <option value={value}>{label}</option>
-                ))
-              }
-            </Select>
-          </FormControl>
-        </SelectContainer>
+        <b>Start date</b>
+        <DatePicker
+          value={startDate}
+          format="D MMM YYYY"
+          variant={isMobile ? "dialog" : "inline"}
+          onChange={(date: any) =>
+            onDateChange(date, date)
+          }
+        />
+      </ToolbarItem>
+      <ToolbarItem>
+        <b>Range</b>
+        <FormControl>
+          <Select
+            native
+            value={range}
+            onChange={onRangeChange}
+            name="range"
+            inputProps={{
+              id: 'range-select',
+            }}
+          >
+            {
+              DAYS_RANGE_OPTIONS.map(({ value, label }) => (
+                <option
+                  key={value}
+                  value={value}
+                >{label}</option>
+              ))
+            }
+          </Select>
+        </FormControl>
+      </ToolbarItem>
+      <ToolbarItem>
+        <b>Person</b>
+        <FormControl>
+          <Select
+            native
+            value={currentUser}
+            onChange={onUserChange}
+            name="person"
+            inputProps={{
+              id: 'person-select',
+            }}
+          >
+            {
+              usersOptions.map(({ value, label }) => (
+                <option
+                  key={value}
+                  value={value}
+                >{label}</option>
+              ))
+            }
+          </Select>
+        </FormControl>
+      </ToolbarItem>
+      <ToolbarItem>
         <Button
           variant="contained"
           color="primary"

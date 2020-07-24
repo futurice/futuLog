@@ -1,46 +1,36 @@
-import React, { ChangeEvent } from 'react';
-import { FormControl, InputLabel, Select, styled } from '@material-ui/core';
+import React from 'react';
+import { FormControl, Select, styled, useMediaQuery } from '@material-ui/core';
+import { DatePicker } from '@material-ui/pickers';
+import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
+import dayjs from 'dayjs';
 
 import { Flex } from '../ux/containers';
-import { P } from '../ux/text';
 import { Button } from '../ux/buttons';
-import { ICSVDataItem, IPersonMapped, ISelectOptionString, IToolbar } from './types';
+import { ICSVDataItem, IPersonMapped, IToolbar } from './types';
 import { CSVButton } from './CSVButton';
 import { IOfficeSpaceDto } from '../../services/apiClientService';
-import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
+import { Theme } from '../ux/theme';
+import { Toolbar, ToolbarItem } from './styled';
 
 
 interface IVisitorsToolbar extends IToolbar {
   offices?: IOfficeSpaceDto[];
 
-  endDate?: string;
+  endDate: dayjs.Dayjs;
   currentSite?: string;
 
   onSiteChange?: SelectInputProps['onChange'];
 }
 
-const Toolbar = styled(Flex)({
-  marginBottom: '30px'
+const DatePickersContainer = styled(Flex)({
+  flexDirection: 'row',
+  alignItems: 'center',
 });
 
-const ToolbarItem = styled(Flex)({
-  alignItems: 'flex-end',
-
-  '&:last-child': {
-    marginLeft: 'auto',
-  },
-
-  '& > *:nth-child(n+2)': {
-    marginLeft: '45px'
-  },
-  '& > *:last-child': {
-    marginLeft: '30px'
-  }
-});
-
-export const SelectContainer = styled(Flex)({
-  display: 'flex',
-  flexDirection: 'column',
+const DatePickerContainer = styled("div")({
+  width: '50%',
+  paddingLeft: '0.5rem',
+  paddingRight: '0.5rem',
 });
 
 const visitorsTableDataToCSV = (tableData: any[]) => {
@@ -52,11 +42,11 @@ const visitorsTableDataToCSV = (tableData: any[]) => {
       email: email || ''
     }));
 
-    return [ ...acc, ...extendedVisitors];
+    return [...acc, ...extendedVisitors];
   }, []);
 }
 
-export function VisitorsToolbar ({
+export function VisitorsToolbar({
   offices,
   startDate,
   endDate,
@@ -69,38 +59,57 @@ export function VisitorsToolbar ({
 }: IVisitorsToolbar) {
   const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
   const csvData: ICSVDataItem[] = visitorsTableDataToCSV(tableData);
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
 
   return (
     <Toolbar>
       <ToolbarItem>
-        <SelectContainer>
-          <P>From</P>
-          <div>Calendar</div>
-        </SelectContainer>
-        <SelectContainer>
-          <P>to</P>
-          <div>Calendar</div>
-        </SelectContainer>
-        <SelectContainer>
-          <FormControl>
-            <InputLabel htmlFor="site-select">Office</InputLabel>
-            <Select
-              native
-              value={currentSite}
-              onChange={onSiteChange}
-              name="site"
-              inputProps={{
-                id: 'site-select',
-              }}
-            >
-              {
-                officesOptions.map(({ value, label }) => (
-                  <option value={value}>{label}</option>
-                ))
+        <b>When?</b>
+        <DatePickersContainer>
+          <span>From</span>
+          <DatePickerContainer>
+            <DatePicker
+              value={startDate}
+              format="D MMM YYYY"
+              variant={isMobile ? 'dialog' : 'inline'}
+              onChange={(date: any) =>
+                onDateChange(date, endDate.isBefore(date) ? date : endDate)
               }
-            </Select>
-          </FormControl>
-        </SelectContainer>
+            />
+          </DatePickerContainer>
+          <span>to</span>
+          <DatePickerContainer>
+            <DatePicker
+              value={endDate}
+              minDate={startDate}
+              variant={isMobile ? 'dialog' : 'inline'}
+              format="D MMM YYYY"
+              onChange={(date: any) => onDateChange(startDate, date)}
+            />
+          </DatePickerContainer>
+        </DatePickersContainer>
+      </ToolbarItem>
+      <ToolbarItem>
+        <b>Where?</b>
+        <FormControl>
+          <Select
+            native
+            value={currentSite}
+            onChange={onSiteChange}
+            name="site"
+            inputProps={{
+              id: 'site-select',
+            }}
+          >
+            {
+              officesOptions.map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))
+            }
+          </Select>
+        </FormControl>
+      </ToolbarItem>
+      <ToolbarItem>
         <Button
           variant="contained"
           color="primary"

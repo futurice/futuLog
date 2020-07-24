@@ -1,5 +1,6 @@
 import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
 import React from 'react';
+import dayjs from 'dayjs';
 
 export interface ISelectOptionString {
   label: string;
@@ -33,10 +34,10 @@ export interface IPersonMapped {
 export interface IToolbar {
   tableData: any;
 
-  startDate: string;
+  startDate: dayjs.Dayjs;
 
   onSearch: () => void;
-  onDateChange: (newDate: ISelectOptionString, type: string) => void;
+  onDateChange: (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => void;
 }
 
 export interface ICSVDataItem {

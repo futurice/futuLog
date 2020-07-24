@@ -3,10 +3,11 @@ import {
   Box, BoxProps, styled, Theme, withStyles,
   Tab as MuiTab,
   Tabs as MuiTabs,
-  TabProps as MuiTabProps, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails
+  TabProps as MuiTabProps
 } from '@material-ui/core';
 
 import { colors } from '../ux/theme';
+import { Flex } from '../ux/containers';
 
 
 interface ITabsPanelWrapper extends BoxProps {
@@ -72,5 +73,29 @@ export const Tab = styled((props: MuiTabProps) => <MuiTab {...props} disableRipp
     backgroundColor: colors['deep-blue-10'],
     borderColor: colors['deep-blue-80'],
     opacity: 1
+  }
+});
+
+export const Toolbar = styled(Flex)({
+  marginBottom: '35px',
+  marginTop: '5px',
+  alignItems: 'center'
+});
+
+export const ToolbarItem = styled(Flex)({
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+
+  '&:nth-child(n+2)': {
+    marginLeft: '40px'
+  },
+  '&:last-child': {
+    marginLeft: 'auto',
+  },
+  '& > button:first-child': {
+    marginLeft: '50px'
+  },
+  '& > * + div': {
+    marginTop: '10px'
   }
 });

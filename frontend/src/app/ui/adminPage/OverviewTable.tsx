@@ -1,11 +1,12 @@
-import React, { ChangeEvent, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
+import dayjs from 'dayjs';
 
 import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
 import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
 import { ICapacityDto, IPerson } from '../../services/apiClientService';
-import { ICapacityDtoMapped, IOverviewTable, IPersonMapped, ISelectOptionString } from './types';
+import { ICapacityDtoMapped, IOverviewTable, IPersonMapped } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
@@ -73,14 +74,25 @@ export function OverviewTable({
   offices
 }: IOverviewTable) {
   const { apiClient } = useServices();
-  const [startDate, setStartDate] = useState('2020-07-01');
-  const [endDate, setEndDate] = useState('2020-07-24');
-  const [currentSite, setCurrentSite] = React.useState(offices && offices[2].site || '');
+  const today = dayjs().utc().startOf('day');
+
+  const [startDate, setStartDate] = useState(() => today.startOf('week').add(1, 'day'));
+  const [endDate, setEndDate] = useState(() => today.startOf('week').add(1, 'day'));
+  const [currentSite, setCurrentSite] = React.useState((offices && offices[2].site) || '');
   const [currentUser, setCurrentUser] = React.useState('');
   const [range, setRange] = React.useState(0);
 
+  const startDateStr = startDate.format('YYYY-MM-DD');
+  const endDateStr = endDate.format('YYYY-MM-DD');
+
   const handleSearch = () => {
-    console.log('click');
+    // TODO: @egor implement api call
+    // due to range we need to swap startDate with endDate for the api call
+    console.log('api call with params',
+      currentUser,
+      startDate.subtract(range, 'day').format('YYYY-MM-DD'),
+      startDate.format('YYYY-MM-DD')
+    );
   }
 
   const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
@@ -93,22 +105,16 @@ export function OverviewTable({
 
   const handleRangeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setRange(event.target.value as number);
-    // TODO: calculate startDate + newRange and update endDate
-    // setEndDate();
   }
 
-  // TODO @egor calculate type based on click event and that onChange func accept params: { event, child }: ISelectOnChange
-  const handleDateChange = (newDate: ISelectOptionString, type: string) => {
-    if (type === 'start') {
-      setStartDate(newDate.value);
-    } else {
-      setEndDate(newDate.value);
-    }
+  const handleDateChange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
   }
 
   const officeBookingsRes = useQuery(
-    officeBookingsQueryKey(currentSite, startDate, endDate),
-    () => apiClient.getOfficeBookings(currentSite, startDate, endDate)
+    officeBookingsQueryKey(currentSite, startDateStr, endDateStr),
+    () => apiClient.getOfficeBookings(currentSite, startDateStr, endDateStr)
   );
 
   const rows: ICapacityDtoMapped[] = useMemo(() => {
@@ -122,7 +128,18 @@ export function OverviewTable({
   return (
     <>
       {
-        isTracking ? (
+        !isTracking ? (
+          <VisitorsToolbar
+            tableData={rows}
+            startDate={startDate}
+            endDate={endDate}
+            offices={offices}
+            currentSite={currentSite}
+            onDateChange={handleDateChange}
+            onSiteChange={handleSiteChange}
+            onSearch={handleSearch}
+          />
+        ): (
           <TrackingToolbar
             tableData={rows}
             startDate={startDate}
@@ -132,17 +149,6 @@ export function OverviewTable({
             onDateChange={handleDateChange}
             onUserChange={handleUserChange}
             onRangeChange={handleRangeChange}
-            onSearch={handleSearch}
-          />
-        ) : (
-          <VisitorsToolbar
-            tableData={rows}
-            startDate={startDate}
-            endDate={endDate}
-            offices={offices}
-            currentSite={currentSite}
-            onSiteChange={handleSiteChange}
-            onDateChange={handleDateChange}
             onSearch={handleSearch}
           />
         )

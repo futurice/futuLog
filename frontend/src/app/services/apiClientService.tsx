@@ -37,6 +37,7 @@ export interface IUserDto {
   portrait_full_url: string;
   portrait_thumb_url: string;
   portrait_badge_url: string;
+  isAdmin: boolean;
 }
 
 export interface IShiftAssignmentDto {
@@ -89,16 +90,7 @@ export interface IOfficeSpaceDto {
 
 export interface ICapacityDto {
   date: string;
-  people: IPerson[];
-}
-
-export interface IPerson {
-  first_name: string;
-  last_name: string;
-  email: string;
-  portrait_full_url: string;
-  portrait_thumb_url: string;
-  portrait_badge_url: string;
+  people: IUserDto[];
 }
 
 // TODO: @egor unmock interface when api will be ready

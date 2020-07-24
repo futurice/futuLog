@@ -89,9 +89,11 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       {/* TODO @egor: add admin permission check for tracking button */}
       <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
         <ToolbarButtonContainer>
-          <LinkButton to={RoutePaths.Admin} component={IconButton} aria-label="Tracking">
-            <IconTracking />
-          </LinkButton>
+          { user.isAdmin && (
+            <LinkButton to={RoutePaths.Admin} component={IconButton} aria-label="Tracking">
+              <IconTracking />
+            </LinkButton>
+          )}
 
           <LinkButton to={RoutePaths.Info} component={IconButton} aria-label="Info">
             <IconInfoBalloon />
@@ -107,10 +109,11 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       {/* TODO @egor: add admin permission check for tracking button */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <ToolbarButtonContainer>
-          <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
-            Tracking
-          </LinkButton>
-
+          { user.isAdmin && (
+            <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
+              Tracking
+            </LinkButton>
+          )}
           <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
             Info
           </LinkButton>

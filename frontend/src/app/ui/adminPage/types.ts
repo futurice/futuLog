@@ -1,16 +1,5 @@
-import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
-import React from 'react';
 import dayjs from 'dayjs';
-
-export interface ISelectOptionString {
-  label: string;
-  value: string;
-}
-
-export interface ISelectOptionNumber {
-  label: string;
-  value: number;
-}
+import { IOfficeSpaceDto, IUsersDto } from '../../services/apiClientService';
 
 export interface IOverviewTable {
   isTracking: boolean;
@@ -21,11 +10,11 @@ export interface IOverviewTable {
 export interface ICapacityDtoMapped {
   date: string;
   site: string;
-  visitors: IPersonMapped[];
+  visitors: IUserDtoMapped[];
   utilisation: number;
 }
 
-export interface IPersonMapped {
+export interface IUserDtoMapped {
   name: string;
   email: string;
 }

@@ -80,10 +80,12 @@ export const AppRoutes: React.FC = () => {
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
-            <Route
-              exact
-              path={RoutePaths.Admin}
-              render={(props) => <AdminPage users={mockedUsers} offices={offices} {...props} /> } />
+            { user.isAdmin && (
+              <Route
+                exact
+                path={RoutePaths.Admin}
+                render={(props) => <AdminPage users={mockedUsers} offices={offices} {...props} /> } />
+            )}
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />
             <Route exact path={RoutePaths.Planning} component={PlanningPage} />

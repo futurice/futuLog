@@ -5,8 +5,8 @@ import dayjs from 'dayjs';
 import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
 import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
-import { ICapacityDto, IPerson } from '../../services/apiClientService';
-import { ICapacityDtoMapped, IOverviewTable, IPersonMapped } from './types';
+import { ICapacityDto, IUserDto } from '../../services/apiClientService';
+import { ICapacityDtoMapped, IOverviewTable, IUserDtoMapped } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
@@ -55,7 +55,7 @@ export function mapBookingsForUI({
   site: string
 }): ICapacityDtoMapped {
   const { people, date } = bookings;
-  const mappedPeople: IPersonMapped[] = people.map((person: IPerson) => ({
+  const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
     name: `${person.first_name} ${person.last_name}`,
     email: person.email
   }));

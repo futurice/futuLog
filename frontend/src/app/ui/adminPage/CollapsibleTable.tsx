@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, styled } from '@material-ui/core/styles';
 import {
   Table,
   TableBody,
@@ -17,6 +17,7 @@ import { mapBookingsForUI } from './OverviewTable';
 import { IconArrowDown, IconArrowUp } from '../ux/icons';
 import { IconButton } from '../ux/buttons';
 import { colors } from '../ux/theme';
+import { P } from '../ux/text';
 
 
 const useRowStyles = makeStyles({
@@ -66,6 +67,23 @@ export interface ICollapsibleTable extends ICollapsibleTableChild {
   empty?: string
 }
 
+const TableEmpty = styled('div')({
+  paddingTop: '60px',
+  paddingBottom: '60px',
+  textAlign: 'center',
+
+  '& > p': {
+    color: colors['deep-blue-90'],
+    opacity: 0.6,
+    fontWeight: 'bold',
+  }
+});
+
+const TableEmptyContainer = ({ empty }: { empty: string | undefined }): JSX.Element => (
+  <TableEmpty>
+    <P>{empty}</P>
+  </TableEmpty>
+)
 
 function Row({
   row,
@@ -154,13 +172,7 @@ export default function CollapsibleTable({
         </TableHead>
         <TableBody>
           {
-            rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  {empty}
-                </TableCell>
-              </TableRow>
-            ) : (
+            rows.length !== 0 && (
               rows.map((row, i) => (
                 <Row
                   key={i + '1'}
@@ -173,6 +185,9 @@ export default function CollapsibleTable({
           }
         </TableBody>
       </Table>
+      {
+        rows.length === 0 && <TableEmptyContainer empty={empty} />
+      }
     </TableContainer>
   );
 }

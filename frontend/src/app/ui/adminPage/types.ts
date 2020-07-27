@@ -1,10 +1,17 @@
 import dayjs from 'dayjs';
+
 import { IOfficeSpaceDto, IUserDto } from '../../services/apiClientService';
+import { TableCellProps as MuiTableCellProps } from '@material-ui/core/TableCell/TableCell';
 
 export interface IOverviewTable {
   isTracking: boolean;
   users?: IUserDto[];
   offices?: IOfficeSpaceDto[];
+}
+
+export interface ICollapsibleTableHead extends MuiTableCellProps {
+  title: string
+  width?: string
 }
 
 export interface ICapacityDtoMapped {

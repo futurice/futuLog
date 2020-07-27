@@ -2,11 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import dayjs from 'dayjs';
 
-import CollapsibleTable, { ICollapsibleTableHead } from './CollapsibleTable';
+import CollapsibleTable from './CollapsibleTable';
 import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
 import { ICapacityDto, IUserDto } from '../../services/apiClientService';
-import { ICapacityDtoMapped, IOverviewTable, IUserDtoMapped } from './types';
+import { ICapacityDtoMapped, ICollapsibleTableHead, IOverviewTable, IUserDtoMapped } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';

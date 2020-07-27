@@ -3,11 +3,12 @@ import {
   Box, BoxProps, styled, Theme, withStyles,
   Tab as MuiTab,
   Tabs as MuiTabs,
-  TabProps as MuiTabProps
+  TabProps as MuiTabProps, TableCell as MuiTableCell
 } from '@material-ui/core';
 
 import { colors } from '../ux/theme';
 import { Flex } from '../ux/containers';
+import { TableCellProps as MuiTableCellProps } from '@material-ui/core/TableCell/TableCell';
 
 
 interface ITabsPanelWrapper extends BoxProps {
@@ -18,7 +19,6 @@ interface ICustomTabsProps {
   value: number;
   onChange: (event: React.ChangeEvent<{}>, newValue: number) => void;
 }
-
 
 export const TabsWrapper = styled('div')({
   display: 'flex',
@@ -98,4 +98,8 @@ export const ToolbarItem = styled(Flex)({
   '& > * + div': {
     marginTop: '10px'
   }
+});
+
+export const TableCell = styled((props: MuiTableCellProps) => <MuiTableCell {...props} />)({
+  color: colors['deep-blue-90'],
 });

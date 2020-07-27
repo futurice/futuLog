@@ -1,10 +1,11 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { Table, TableBody, TableHead, TableRow } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { colors } from '../ux/theme';
-import { ICollapsibleTableHead } from './CollapsibleTable';
 import { mapBookingsForUI } from './OverviewTable';
+import { TableCell } from './styled';
+import { ICollapsibleTableHead } from './types';
 
 
 interface IBookingsTable {
@@ -52,7 +53,9 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                 key={title}
                 className={headCellClasses.root}
                 align={align}
-              >{title}</TableCell>
+              >
+                {title}
+              </TableCell>
             )}
         </TableRow>
       </TableHead>

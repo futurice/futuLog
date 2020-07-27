@@ -172,8 +172,6 @@ export const Select = ({entry, label}: selectProps) => {
     getContentAnchorEl: null,
   };
 
-  console.log("open:::", open ? "true" : "false");
-
   return (
     <div>
       <FormControl className={classes.formControl}>

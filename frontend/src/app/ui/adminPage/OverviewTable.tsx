@@ -3,15 +3,14 @@ import { queryCache, useMutation, useQuery } from 'react-query';
 import dayjs from 'dayjs';
 
 import CollapsibleTable from './CollapsibleTable';
-import { officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
+import { officeBookingsQueryKey, userBookingsQueryKey } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
-import { ICapacityDto, IOfficeBookingsRequestDto, IUserDto } from '../../services/apiClientService';
+import { ICapacityDto, IOfficeBookingsRequestDto, IUserBookingsRequestDto, IUserDto } from '../../services/apiClientService';
 import { ICapacityDtoMapped, ICollapsibleTableHead, IOverviewTable, IUserDtoMapped } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
 import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
-import { H2Center } from '../ux/text';
 
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -88,10 +87,13 @@ export function OverviewTable({
   const endDateStr = endDate.format('YYYY-MM-DD');
 
   const handleSearch = (type: string) => {
-    // TODO: @egor implement api call
     // due to range we need to swap startDate with endDate for the api call
     if (type === 'user') {
-
+      mutateUserBookings({
+        user: currentUser,
+        startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
+        endDate: endDate.format('YYYY-MM-DD')
+      });
     } else {
       mutateOfficeBookings({
         site: currentSite,
@@ -123,6 +125,11 @@ export function OverviewTable({
     () => apiClient.getOfficeBookings({ site: currentSite, startDate: startDateStr, endDate: endDateStr })
   );
 
+  const userBookingsRes = useQuery(
+    userBookingsQueryKey(currentUser, startDateStr, endDateStr),
+    () => apiClient.getUserBookings({ user: currentUser, startDate: startDateStr, endDate: endDateStr })
+  );
+
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
     ({ site, startDate, endDate}: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
     {
@@ -130,13 +137,20 @@ export function OverviewTable({
     }
   );
 
+  const [mutateUserBookings, mutateUserBookingsRes] = useMutation(
+    ({ user, startDate, endDate}: IUserBookingsRequestDto) => apiClient.getUserBookings({ user, startDate, endDate}),
+    {
+      onSuccess: () => queryCache.refetchQueries(userBookingsQueryKey(currentUser, startDateStr, endDateStr)),
+    }
+  );
+
   const rows: ICapacityDtoMapped[] = useMemo(() => {
-    const { data } = officeBookingsRes;
+    const { data } = officeBookingsRes || userBookingsRes;
     const mappedBookings: ICapacityDtoMapped[] | undefined = data && data.map(
       (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite }));
 
     return mappedBookings || [];
-  }, [officeBookingsRes]);
+  }, [officeBookingsRes, userBookingsRes]);
 
   return (
     <>
@@ -166,32 +180,22 @@ export function OverviewTable({
           />
         )
       }
-      <RenderQuery
-        query={officeBookingsRes}
-        onError={(error) => <H2Center>{error.message}</H2Center>}
-        onLoading={(data, children) => children(data || [])}
-      >
-        {(officeBookings, isLoading: boolean, error?: Error) => {
-          console.log('officeBookings', officeBookings);
-          console.log('error', error);
-
-          return (
-            isLoading ? (
-              <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
-                <CenteredSpinner />
-              </CenteredSpinnerContainer>
-            ) : (
-              <CollapsibleTable
-                childComponent={BookingsTable}
-                childTableHead={childTableHead}
-                parentTableHead={parentTableHead}
-                empty={'No result for the selected parameters.'}
-                rows={rows}
-              />
-            )
-          )
-        }}
-      </RenderQuery>
+      {
+        mutateOfficeBookingsRes.status === 'loading' ||
+        mutateUserBookingsRes.status === 'loading' ? (
+          <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
+            <CenteredSpinner />
+          </CenteredSpinnerContainer>
+        ) : (
+          <CollapsibleTable
+            childComponent={BookingsTable}
+            childTableHead={childTableHead}
+            parentTableHead={parentTableHead}
+            empty={'No result for the selected parameters.'}
+            rows={rows}
+          />
+        )
+      }
     </>
   );
 }

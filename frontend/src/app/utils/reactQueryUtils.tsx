@@ -34,6 +34,12 @@ export const officeBookingsQueryKey = (
   endDate: string
 ): AnyQueryKey => ["officeBookings", site, startDate, endDate];
 
+export const userBookingsQueryKey = (
+  user: string,
+  startDate: string,
+  endDate: string
+): AnyQueryKey => ["userBookings", user, startDate, endDate];
+
 export function combineQueries<M>(queryMap: { [K in keyof M]: QueryResult<M[K]> }): QueryResult<M> {
   const queries = Object.values(queryMap) as QueryResult<any>[];
 

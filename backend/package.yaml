@@ -53,6 +53,7 @@ dependencies:
     - resource-pool
     - retry
     - servant
+    - servant-cassava
     - servant-multipart
     - servant-server
     - servant-swagger

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d8275d69b14c919573321d194243c48fd900bb2bd29e9d511f41abe68cdf6774
+-- hash: 5e5319f912554b47e83ff79e2552f0bc658d80e94b963463196e7d9d90422975
 
 name:           office-tracker
 version:        0.1.0.0
@@ -56,6 +56,7 @@ executable office-tracker
     , resource-pool
     , retry
     , servant
+    , servant-cassava
     , servant-multipart
     , servant-server
     , servant-swagger

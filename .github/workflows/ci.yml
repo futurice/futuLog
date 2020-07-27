@@ -19,7 +19,7 @@ jobs:
               uses: actions/cache@v1
               with:
                   path: /tmp/docker-cache
-                  key: docker-cache-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}
+                  key: docker-cache-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}-1
                   restore-keys: |
                       docker-cache-
 

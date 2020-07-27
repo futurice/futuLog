@@ -89,7 +89,7 @@ function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
   if (!bookings.length) {
     return office.maxPeople;
   }
-  const capacities = bookings.map((booking) => office.maxPeople - booking.numBooked);
+  const capacities = bookings.map((booking) => office.maxPeople - booking.people.length);
   return Math.min(...capacities);
 }
 

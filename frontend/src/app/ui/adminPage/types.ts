@@ -19,9 +19,8 @@ export interface IUserDtoMapped {
   email: string;
 }
 
-// TODO: @egor unmock interface types
 export interface IToolbar {
-  tableData: any;
+  tableData: ICapacityDtoMapped[];
 
   startDate: dayjs.Dayjs;
 

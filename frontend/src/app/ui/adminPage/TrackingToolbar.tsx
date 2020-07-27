@@ -4,7 +4,7 @@ import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
 import { DatePicker } from '@material-ui/pickers';
 
 import { Button } from '../ux/buttons';
-import { ICSVDataItem, IUserDtoMapped, IToolbar, ICapacityDtoMapped } from './types';
+import { ICSVDataItem, IUserDtoMapped, IToolbar, ITableDataDto } from './types';
 import { CSVButton } from './CSVButton';
 import { IUserDto } from '../../services/apiClientService';
 import { Toolbar, ToolbarItem } from './styled';
@@ -27,8 +27,8 @@ interface ITrackingToolbar extends IToolbar {
   onRangeChange?: SelectInputProps['onChange']
 }
 
-const trackingTableDataToCSV = (tableData: ICapacityDtoMapped[]) => {
-  return tableData.reduce((acc: ICSVDataItem[], { date, site, visitors }: ICapacityDtoMapped) => {
+const trackingTableDataToCSV = (tableData: ITableDataDto[]) => {
+  return tableData.reduce((acc: ICSVDataItem[], { date, site, visitors }: ITableDataDto) => {
     const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IUserDtoMapped) => ({
       date: date || '',
       site: site || '',

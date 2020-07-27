@@ -14,7 +14,7 @@ export interface ICollapsibleTableHead extends MuiTableCellProps {
   width?: string
 }
 
-export interface ICapacityDtoMapped {
+export interface ITableDataDto {
   date: string;
   site: string;
   visitors: IUserDtoMapped[];
@@ -27,7 +27,7 @@ export interface IUserDtoMapped {
 }
 
 export interface IToolbar {
-  tableData: ICapacityDtoMapped[];
+  tableData: ITableDataDto[];
 
   startDate: dayjs.Dayjs;
 

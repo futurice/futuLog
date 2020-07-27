@@ -11,13 +11,13 @@ import {
   Box
 } from '@material-ui/core';
 
-import { mapBookingsForUI } from './OverviewTable';
 import { IconArrowDown, IconArrowUp } from '../ux/icons';
 import { IconButton } from '../ux/buttons';
 import { colors } from '../ux/theme';
 import { P } from '../ux/text';
 import { TableCell } from './styled';
 import { ICollapsibleTableHead } from './types';
+import { mapBookingsForUI } from './OfficeVisitsPanel';
 
 
 const useRowStyles = makeStyles({

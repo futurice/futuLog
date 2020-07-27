@@ -5,8 +5,9 @@ import { H2Center } from '../ux/text';
 import { Stack } from '../ux/containers';
 import { colors } from '../ux/theme';
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
-import { OverviewTable } from './OverviewTable';
 import { IOfficeSpaceDto, IUserDto } from '../../services/apiClientService';
+import { OfficeVisitsPanel } from './OfficeVisitsPanel';
+import { PersonTrackingPanel } from './PersonTrackingPanel';
 
 
 export interface ITabPanelProps {
@@ -89,8 +90,7 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices, users }) => {
             value={tab}
             index={0}
           >
-            <OverviewTable
-              isTracking={false}
+            <OfficeVisitsPanel
               offices={offices}
               users={users}
             />
@@ -99,8 +99,7 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices, users }) => {
             value={tab}
             index={1}
           >
-            <OverviewTable
-              isTracking={true}
+            <PersonTrackingPanel
               offices={offices}
               users={users}
             />

@@ -93,6 +93,17 @@ export interface ICapacityDto {
   people: IUserDto[];
 }
 
+export interface IUserBookingsDto {
+  userEmail: string,
+  site: string,
+  date: string,
+  workmode: {
+    type: string,
+    confirmed: boolean,
+    name: string
+  }
+}
+
 export interface IOfficeBookingsRequestDto {
   site: string;
   startDate: string;

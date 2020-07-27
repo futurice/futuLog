@@ -3,15 +3,23 @@ import { queryCache, useMutation, useQuery } from 'react-query';
 import dayjs from 'dayjs';
 
 import CollapsibleTable from './CollapsibleTable';
-import { officeBookingsQueryKey, userBookingsQueryKey } from '../../utils/reactQueryUtils';
+import { officeBookingsQueryKey } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
-import { ICapacityDto, IOfficeBookingsRequestDto, IUserBookingsRequestDto, IUserDto } from '../../services/apiClientService';
-import { ICapacityDtoMapped, ICollapsibleTableHead, IOverviewTable, IUserDtoMapped } from './types';
-import { TrackingToolbar } from './TrackingToolbar';
+import {
+  ICapacityDto,
+  IOfficeBookingsRequestDto,
+  IOfficeSpaceDto,
+  IUserDto
+} from '../../services/apiClientService';
+import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from './types';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
 import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
 
+interface IOfficeVisitsPanel {
+  users?: IUserDto[];
+  offices?: IOfficeSpaceDto[];
+}
 
 const childTableHead: ICollapsibleTableHead[] = [
   {
@@ -54,7 +62,7 @@ export function mapBookingsForUI({
 }: {
   bookings: ICapacityDto,
   site: string
-}): ICapacityDtoMapped {
+}): ITableDataDto {
   const { people, date } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
     name: `${person.first_name} ${person.last_name}`,
@@ -69,50 +77,31 @@ export function mapBookingsForUI({
   };
 }
 
-export function OverviewTable({
-  isTracking,
+export function OfficeVisitsPanel({
   users,
   offices
-}: IOverviewTable) {
+}: IOfficeVisitsPanel) {
   const { apiClient } = useServices();
   const today = dayjs().utc().startOf('day');
 
   const [startDate, setStartDate] = useState(() => today.startOf('week').add(1, 'day'));
   const [endDate, setEndDate] = useState(() => today.startOf('week').add(1, 'day'));
   const [currentSite, setCurrentSite] = React.useState((offices && offices[2].site) || '');
-  const [currentUser, setCurrentUser] = React.useState('');
-  const [range, setRange] = React.useState(0);
 
   const startDateStr = startDate.format('YYYY-MM-DD');
   const endDateStr = endDate.format('YYYY-MM-DD');
 
   const handleSearch = (type: string) => {
     // due to range we need to swap startDate with endDate for the api call
-    if (type === 'user') {
-      mutateUserBookings({
-        user: currentUser,
-        startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD')
-      });
-    } else {
-      mutateOfficeBookings({
-        site: currentSite,
-        startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
-        endDate: startDate.format('YYYY-MM-DD')
-      });
-    }
+    mutateOfficeBookings({
+      site: currentSite,
+      startDate: startDate.format('YYYY-MM-DD'),
+      endDate: endDate.format('YYYY-MM-DD')
+    });
   }
 
   const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setCurrentSite(event.target.value as string);
-  }
-
-  const handleUserChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    setCurrentUser(event.target.value as string);
-  }
-
-  const handleRangeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    setRange(event.target.value as number);
   }
 
   const handleDateChange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -125,11 +114,6 @@ export function OverviewTable({
     () => apiClient.getOfficeBookings({ site: currentSite, startDate: startDateStr, endDate: endDateStr })
   );
 
-  const userBookingsRes = useQuery(
-    userBookingsQueryKey(currentUser, startDateStr, endDateStr),
-    () => apiClient.getUserBookings({ user: currentUser, startDate: startDateStr, endDate: endDateStr })
-  );
-
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
     ({ site, startDate, endDate}: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
     {
@@ -137,52 +121,28 @@ export function OverviewTable({
     }
   );
 
-  const [mutateUserBookings, mutateUserBookingsRes] = useMutation(
-    ({ user, startDate, endDate}: IUserBookingsRequestDto) => apiClient.getUserBookings({ user, startDate, endDate}),
-    {
-      onSuccess: () => queryCache.refetchQueries(userBookingsQueryKey(currentUser, startDateStr, endDateStr)),
-    }
-  );
-
-  const rows: ICapacityDtoMapped[] = useMemo(() => {
-    const { data } = officeBookingsRes || userBookingsRes;
-    const mappedBookings: ICapacityDtoMapped[] | undefined = data && data.map(
+  const rows: ITableDataDto[] = useMemo(() => {
+    const { data } = officeBookingsRes;
+    const mappedBookings: ITableDataDto[] | undefined = data && data.map(
       (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite }));
 
     return mappedBookings || [];
-  }, [officeBookingsRes, userBookingsRes]);
+  }, [officeBookingsRes]);
 
   return (
     <>
+      <VisitorsToolbar
+        tableData={rows}
+        startDate={startDate}
+        endDate={endDate}
+        offices={offices}
+        currentSite={currentSite}
+        onDateChange={handleDateChange}
+        onSiteChange={handleSiteChange}
+        onSearch={handleSearch}
+      />
       {
-        !isTracking ? (
-          <VisitorsToolbar
-            tableData={rows}
-            startDate={startDate}
-            endDate={endDate}
-            offices={offices}
-            currentSite={currentSite}
-            onDateChange={handleDateChange}
-            onSiteChange={handleSiteChange}
-            onSearch={handleSearch}
-          />
-        ): (
-          <TrackingToolbar
-            tableData={rows}
-            startDate={startDate}
-            range={range}
-            users={users}
-            currentUser={currentUser}
-            onDateChange={handleDateChange}
-            onUserChange={handleUserChange}
-            onRangeChange={handleRangeChange}
-            onSearch={handleSearch}
-          />
-        )
-      }
-      {
-        mutateOfficeBookingsRes.status === 'loading' ||
-        mutateUserBookingsRes.status === 'loading' ? (
+        mutateOfficeBookingsRes.status === 'loading' ? (
           <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
             <CenteredSpinner />
           </CenteredSpinnerContainer>

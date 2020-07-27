@@ -3,9 +3,9 @@ import { Table, TableBody, TableHead, TableRow } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { colors } from '../ux/theme';
-import { mapBookingsForUI } from './OverviewTable';
 import { TableCell } from './styled';
 import { ICollapsibleTableHead } from './types';
+import { mapBookingsForUI } from './OfficeVisitsPanel';
 
 
 interface IBookingsTable {

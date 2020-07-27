@@ -8,6 +8,7 @@ import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.User (User)
 import Servant.API
+import Servant.CSV.Cassava (CSV)
 import Servant.Multipart (Mem, MultipartData, MultipartForm)
 import Servant.Swagger.UI (SwaggerSchemaUI)
 
@@ -38,7 +39,6 @@ type WorkmodeAPI =
     :<|> "confirm" :> QueryParam "date" Day :> ReqBody '[JSON] Bool :> Post '[JSON] NoContent
     :<|> "get" :> Capture "date" Day :> Get '[JSON] (Maybe UserWorkmode)
     :<|> "batch" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]
-    :<|> "all" :> Capture "office" Text :> QueryParam "date" Day :> Get '[JSON] [Text]
 
 type ShiftAPI =
   "get" :> Get '[JSON] (Maybe ShiftAssignment)
@@ -51,4 +51,8 @@ type OfficeAPI =
   "all" :> Get '[JSON] [OfficeSpace]
     :<|> Capture "site" Text :> "booked" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [Capacity]
 
-type AdminAPI = "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent
+type AdminAPI =
+  "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent
+    :<|> "workmode" :> "csv" :> Capture "office" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[CSV] [UserWorkmode]
+    :<|> "people" :> Get '[JSON] [User]
+    :<|> "bookings" :> Capture "user" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]

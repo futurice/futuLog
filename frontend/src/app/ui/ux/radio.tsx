@@ -1,12 +1,10 @@
-import React from 'react';
+import React from "react";
 import { styled } from "@material-ui/core/styles";
-import Radio, {RadioProps as MuiRadioProps} from '@material-ui/core/Radio';
+import { Radio as RadioMui } from "@material-ui/core";
+import { RadioProps as MuiRadioProps } from "@material-ui/core/Radio";
 import { colors } from "./theme";
 
-export type RadioProps = MuiRadioProps
-
-export const RadioBox = styled((props: MuiRadioProps) => <Radio {...props} disableRipple/>)({
-      // color: `${colors["deep-blue-80"]}`,
+export const Radio = styled((props: MuiRadioProps) => <RadioMui {...props} disableRipple/>)({
     '&:checked':{
       color: `${colors["deep-blue-80"]}`,
     },
@@ -19,6 +17,4 @@ export const RadioBox = styled((props: MuiRadioProps) => <Radio {...props} disab
     '&.MuiIconButton-colorSecondary':{
       color:`${colors["deep-blue-80"]}`,
     },
-
-
 });

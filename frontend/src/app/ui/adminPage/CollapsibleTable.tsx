@@ -3,7 +3,7 @@ import { makeStyles, styled } from '@material-ui/core/styles';
 import {
   Table,
   TableBody,
-  TableCell,
+  TableCell as MuiTableCell,
   TableRow,
   TableHead,
   TableContainer,
@@ -11,7 +11,7 @@ import {
   Collapse,
   Box
 } from '@material-ui/core';
-import { TableCellProps } from '@material-ui/core/TableCell/TableCell';
+import { TableCellProps as MuiTableCellProps } from '@material-ui/core/TableCell/TableCell';
 
 import { mapBookingsForUI } from './OverviewTable';
 import { IconArrowDown, IconArrowUp } from '../ux/icons';
@@ -19,6 +19,10 @@ import { IconButton } from '../ux/buttons';
 import { colors } from '../ux/theme';
 import { P } from '../ux/text';
 
+
+const TableCell = styled((props: MuiTableCellProps) => <MuiTableCell {...props} />)({
+  color: colors['deep-blue-90'],
+});
 
 const useRowStyles = makeStyles({
   root: {
@@ -47,7 +51,7 @@ const useTableHeadCellStyles = makeStyles({
 });
 
 
-export interface ICollapsibleTableHead extends TableCellProps {
+export interface ICollapsibleTableHead extends MuiTableCellProps {
   title: string
   width?: string
 }

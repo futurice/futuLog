@@ -7,7 +7,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import { makeStyles } from "@material-ui/core/styles";
 import { colors, theme } from "./theme";
-import { IconArrowUp } from "./icons";
+import { IconArrowUp, IconArrowDown } from "./icons";
 
 
 export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
@@ -17,7 +17,7 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
   borderRadius: "4px",
   backgroundColor: `${colors["deep-blue-80"]}`,
   "&:hover": {
-    border: "1px solid #6643EF",
+    border: `1px solid ${colors["deep-blue-50"]}`,
     backgroundColor: `${colors["deep-blue-50"]}`,
   },
   "&:active": {
@@ -44,6 +44,9 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
     },
     "& li:hover": {
       background: `${colors["deep-blue-80"]}`
+    },
+    "& li:active": {
+      background: `${colors["deep-blue-50"]}`
     },
     "& li.Mui-selected": {
       color: `${colors["white"]}`,
@@ -126,24 +129,24 @@ const useStyles = makeStyles({
 });
 
 export interface entryData{
-  entryValue: string;
-  entryText: string;
+  value: string;
+  text: string;
 }
 
 function buildMenuItems(entry:entryData[]){
   return(
-    entry.map((entrySet,index) => {
-      return (<MenuItem value={entrySet.entryValue}>{entrySet.entryText}</MenuItem>)
-    })
+    entry.map(({value, text}) =>
+      (<MenuItem value={value}>{text}</MenuItem>)
+    )
   )
 }
 
-interface selectProps{
+interface ISelectProps{
   entry: entryData[],
   label: string
 }
 
-export const Select = ({entry, label}: selectProps) => {
+export const Select: React.FC<ISelectProps> = ({entry, label}) => {
   const classes = useStyles()
   const [val, setVal] = React.useState<string | number>("");
   const [open, setOpen] = React.useState(false);
@@ -161,7 +164,7 @@ export const Select = ({entry, label}: selectProps) => {
       list: classes.list
     },
     anchorOrigin: {
-      vertical: 1,
+      vertical: 35,
       horizontal: 1,
     },
     transformOrigin: {
@@ -169,6 +172,7 @@ export const Select = ({entry, label}: selectProps) => {
       horizontal: 1,
     },
     getContentAnchorEl: null,
+    border: `1px solid ${colors["deep-blue-80"]}`,
   };
 
   return (
@@ -182,7 +186,7 @@ export const Select = ({entry, label}: selectProps) => {
           onClose={handleClose}
           onOpen={handleOpen}
           onChange={handleChange}
-          IconComponent={() => open ? (<img src="/Icon-arrow-down.png" />) : (<img src="/Icon-arrow-up.png"/>)}
+          IconComponent={() => open ? (<IconArrowDown color={colors.white}/>) : (<IconArrowUp color={colors.white}/>)}
           MenuProps={menuProps}
         >
           {buildMenuItems(entry)}

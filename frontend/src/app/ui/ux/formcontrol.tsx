@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { styled } from "@material-ui/core/styles";
 import { FormControl as FormControlMui } from "@material-ui/core/";
 import { FormControlProps as MuiFormControlProps } from "@material-ui/core/FormControl";
-import { makeStyles } from "@material-ui/core/styles";
 import { colors, theme } from "./theme";
 
 export const FormControl= styled((props: MuiFormControlProps) => <FormControlMui {...props} />)({

@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { styled } from "@material-ui/core/styles";
 import { Select as MuiSelect } from "@material-ui/core";
 import { SelectProps as MuiSelectProps } from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
 import { makeStyles } from "@material-ui/core/styles";
-import { colors, theme } from "./theme";
+import { colors} from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
 
 

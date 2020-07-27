@@ -18,6 +18,7 @@ import { UserPage } from "app/ui/userPage/UserPage";
 import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
 import { PlanningPage } from "app/ui/planningPage/PlanningPage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
+import { CenteredSpinner } from "../ux/spinner";
 
 export enum RoutePaths {
   Home = "/",
@@ -54,8 +55,7 @@ export const AppRoutes: React.FC = () => {
         userShift: userShiftRes,
         offices: officesRes,
       })}
-      // TODO: Present initial loading state
-      onLoading={() => <h2>Loading user information..</h2>}
+      onLoading={() => <CenteredSpinner />}
       onError={(error) => <h2>{error.message}</h2>}
     >
       {({ user, offices, users }) => (

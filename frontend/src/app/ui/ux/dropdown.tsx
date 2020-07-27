@@ -4,13 +4,12 @@ import { Select as MuiSelect } from "@material-ui/core";
 import { SelectProps as MuiSelectProps } from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
 import { makeStyles } from "@material-ui/core/styles";
 import { colors, theme } from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
 
 
-export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
+export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
   border: `1px solid ${colors["deep-blue-80"]}`,
   boxSizing: "border-box",
@@ -65,33 +64,6 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
 });
 
 const useStyles = makeStyles({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-    color: `${colors["deep-blue-80"]}`,
-    border: `1px solid ${colors["deep-blue-80"]}`,
-    boxSizing: "border-box",
-    borderRadius: "4px",
-    "&:hover": {
-      border: `1px solid ${colors["deep-blue-50"]}`,
-      backgroundColor: `${colors["deep-blue-80"]}`,
-    },
-    "&:active": {
-      backgroundColor: `${colors["deep-blue-80"]}`,
-    },
-    "&:disabled": {
-      background: "rgba(255, 255, 255, 0.5)",
-      border: "1px solid rgba(166, 157, 199, 0.5)",
-      color: "rgba(255, 255, 255, 0.5)"
-    },
-    "&.MuiSelect-icon": {
-      background: `${colors["deep-blue-80"]}`,
-      color: `${colors.white}`,
-    },
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
   list: {
     paddingTop: 0,
     paddingBottom: 0,
@@ -113,18 +85,6 @@ const useStyles = makeStyles({
       color: `${colors.white}`,
       background: `${colors["deep-blue-80"]}`
     },
-  },
-  icon:{
-    color: `${colors["deep-blue-50"]}`,
-    right: 12,
-    position: "absolute",
-    userSelect: "none",
-    pointerEvents: "none",
-    background: `${colors["deep-blue-80"]}`,
-  },
-  button: {
-    display: "block",
-    marginTop: theme.spacing(2),
   },
 });
 
@@ -176,9 +136,7 @@ export const Select: React.FC<ISelectProps> = ({entry, label}) => {
   };
 
   return (
-    <div>
-      <FormControl className={classes.formControl}>
-        <DropDown
+        <StyledSelect
           labelId={label}
           id={label}
           value={val}
@@ -190,8 +148,6 @@ export const Select: React.FC<ISelectProps> = ({entry, label}) => {
           MenuProps={menuProps}
         >
           {buildMenuItems(entry)}
-        </DropDown>
-      </FormControl>
-    </div>
+        </StyledSelect>
   );
 }

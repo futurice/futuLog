@@ -1,16 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery } from 'react-query';
+import { queryCache, useMutation, useQuery } from 'react-query';
 import dayjs from 'dayjs';
 
 import CollapsibleTable from './CollapsibleTable';
-import { combineQueries, officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
+import { officeBookingsQueryKey, RenderQuery } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
-import { ICapacityDto, IUserDto } from '../../services/apiClientService';
+import { ICapacityDto, IOfficeBookingsRequestDto, IUserDto } from '../../services/apiClientService';
 import { ICapacityDtoMapped, ICollapsibleTableHead, IOverviewTable, IUserDtoMapped } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
 import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
+import { H2Center } from '../ux/text';
 
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -86,14 +87,18 @@ export function OverviewTable({
   const startDateStr = startDate.format('YYYY-MM-DD');
   const endDateStr = endDate.format('YYYY-MM-DD');
 
-  const handleSearch = () => {
+  const handleSearch = (type: string) => {
     // TODO: @egor implement api call
     // due to range we need to swap startDate with endDate for the api call
-    console.log('api call with params',
-      currentUser,
-      startDate.subtract(range, 'day').format('YYYY-MM-DD'),
-      startDate.format('YYYY-MM-DD')
-    );
+    if (type === 'user') {
+
+    } else {
+      mutateOfficeBookings({
+        site: currentSite,
+        startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
+        endDate: startDate.format('YYYY-MM-DD')
+      });
+    }
   }
 
   const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
@@ -115,7 +120,14 @@ export function OverviewTable({
 
   const officeBookingsRes = useQuery(
     officeBookingsQueryKey(currentSite, startDateStr, endDateStr),
-    () => apiClient.getOfficeBookings(currentSite, startDateStr, endDateStr)
+    () => apiClient.getOfficeBookings({ site: currentSite, startDate: startDateStr, endDate: endDateStr })
+  );
+
+  const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
+    ({ site, startDate, endDate}: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
+    {
+      onSuccess: () => queryCache.refetchQueries(officeBookingsQueryKey(currentSite, startDateStr, endDateStr)),
+    }
   );
 
   const rows: ICapacityDtoMapped[] = useMemo(() => {
@@ -155,13 +167,11 @@ export function OverviewTable({
         )
       }
       <RenderQuery
-        query={combineQueries({
-          officeBookings: officeBookingsRes
-        })}
-        onLoading={(data, children) => children(data || ({} as any), true)}
-        onError={(error, children) => children({} as any, false, error)}
+        query={officeBookingsRes}
+        onError={(error) => <H2Center>{error.message}</H2Center>}
+        onLoading={(data, children) => children(data || [])}
       >
-        {({ officeBookings }, isLoading: boolean, error?: Error) => {
+        {(officeBookings, isLoading: boolean, error?: Error) => {
           console.log('officeBookings', officeBookings);
           console.log('error', error);
 

@@ -113,7 +113,7 @@ export function VisitorsToolbar({
         <Button
           variant="contained"
           color="primary"
-          onClick={() => onSearch()}
+          onClick={() => onSearch('site')}
         >
           Search
         </Button>

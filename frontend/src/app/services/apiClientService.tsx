@@ -93,6 +93,12 @@ export interface ICapacityDto {
   people: IUserDto[];
 }
 
+export interface IOfficeBookingsRequestDto {
+  site: string;
+  startDate: string;
+  endDate: string;
+}
+
 export function createAPIClientService(baseUrl: string) {
   const apiClient = {
     getUser: () => fetchJSON<IUserDto>(`${baseUrl}/api/me`),
@@ -131,7 +137,7 @@ export function createAPIClientService(baseUrl: string) {
 
     getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
 
-    getOfficeBookings: (site: string, startDate: string, endDate: string) =>
+    getOfficeBookings: ({ site, startDate, endDate}: IOfficeBookingsRequestDto) =>
       fetchJSON<ICapacityDto[]>(
         `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
       ),

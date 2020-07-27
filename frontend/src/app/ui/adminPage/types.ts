@@ -31,7 +31,7 @@ export interface IToolbar {
 
   startDate: dayjs.Dayjs;
 
-  onSearch: () => void;
+  onSearch: (type: string) => void;
   onDateChange: (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => void;
 }
 

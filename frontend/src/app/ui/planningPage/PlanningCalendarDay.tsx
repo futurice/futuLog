@@ -122,7 +122,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings(userOffice!.site, startDateStr, endDateStr)
+    () => apiClient.getOfficeBookings({ site: userOffice!.site, startDate: startDateStr, endDate: endDateStr })
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {

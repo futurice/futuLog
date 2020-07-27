@@ -121,7 +121,7 @@ export function TrackingToolbar({
         <Button
           variant="contained"
           color="primary"
-          onClick={() => onSearch()}
+          onClick={() => onSearch('user')}
         >
           Search
         </Button>

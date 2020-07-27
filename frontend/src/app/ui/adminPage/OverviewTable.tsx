@@ -10,6 +10,7 @@ import { ICapacityDtoMapped, IOverviewTable, IUserDtoMapped } from './types';
 import { TrackingToolbar } from './TrackingToolbar';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
+import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
 
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -162,18 +163,22 @@ export function OverviewTable({
       >
         {({ officeBookings }, isLoading: boolean, error?: Error) => {
           console.log('officeBookings', officeBookings);
-          console.log('isLoading', isLoading);
           console.log('error', error);
-          // TODO @egor: empty and load table state
 
           return (
-            <CollapsibleTable
-              childComponent={BookingsTable}
-              childTableHead={childTableHead}
-              parentTableHead={parentTableHead}
-              empty={'No results.'}
-              rows={rows}
-            />
+            isLoading ? (
+              <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
+                <CenteredSpinner />
+              </CenteredSpinnerContainer>
+            ) : (
+              <CollapsibleTable
+                childComponent={BookingsTable}
+                childTableHead={childTableHead}
+                parentTableHead={parentTableHead}
+                empty={'No result for the selected parameters.'}
+                rows={rows}
+              />
+            )
           )
         }}
       </RenderQuery>

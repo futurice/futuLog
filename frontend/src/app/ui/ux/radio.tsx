@@ -5,16 +5,16 @@ import { RadioProps as MuiRadioProps } from "@material-ui/core/Radio";
 import { colors } from "./theme";
 
 export const Radio = styled((props: MuiRadioProps) => <RadioMui {...props} disableRipple/>)({
-    '&:checked':{
+    "&:checked":{
       color: `${colors["deep-blue-80"]}`,
     },
-    '&:Mui-checked':{
+    "&:Mui-checked":{
       color: `${colors["deep-blue-80"]}`,
     },
-    '&.MuiRadio-colorSecondary.Mui-checked':{
+    "&.MuiRadio-colorSecondary.Mui-checked":{
       color:`${colors["deep-blue-80"]}`,
     },
-    '&.MuiIconButton-colorSecondary':{
+    "&.MuiIconButton-colorSecondary":{
       color:`${colors["deep-blue-80"]}`,
     },
 });

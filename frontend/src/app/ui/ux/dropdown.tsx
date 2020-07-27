@@ -31,12 +31,12 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
   },
   "&.MuiSelect-icon": {
     background: `${colors["deep-blue-80"]}`,
-    color: `${colors["white"]}`,
+    color: `${colors.white}`,
   },
   list: {
     paddingTop: 0,
     paddingBottom: 0,
-    background: `${colors["white"]}`,
+    background: `${colors.white}`,
     "& li": {
       fontWeight: 200,
       paddingTop: 12,
@@ -49,7 +49,7 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
       background: `${colors["deep-blue-50"]}`
     },
     "& li.Mui-selected": {
-      color: `${colors["white"]}`,
+      color: `${colors.white}`,
       background: `${colors["deep-blue-50"]}`
     },
     "& li.Mui-selected:hover": {
@@ -60,7 +60,7 @@ export const DropDown = styled((props: MuiSelectProps) => <MuiSelect {...props} 
     background: `${colors["deep-blue-80"]}`,
   },
   "& .MuiSelect-selectMenu":{
-    backgroundColor: `${colors["white"]}`,
+    backgroundColor: `${colors.white}`,
   }
 });
 
@@ -86,7 +86,7 @@ const useStyles = makeStyles({
     },
     "&.MuiSelect-icon": {
       background: `${colors["deep-blue-80"]}`,
-      color: `${colors["white"]}`,
+      color: `${colors.white}`,
     },
   },
   selectEmpty: {
@@ -95,22 +95,22 @@ const useStyles = makeStyles({
   list: {
     paddingTop: 0,
     paddingBottom: 0,
-    background: `${colors["white"]}`,
+    background: `${colors.white}`,
     "& li": {
       fontWeight: 200,
       paddingTop: 12,
       paddingBottom: 12,
     },
     "& li:hover": {
-      color: `${colors["white"]}`,
+      color: `${colors.white}`,
       background: `${colors["deep-blue-80"]}`
     },
     "& li.Mui-selected": {
-      color: `${colors["white"]}`,
+      color: `${colors.white}`,
       background: `${colors["deep-blue-50"]}`
     },
     "& li.Mui-selected:hover": {
-      color: `${colors["white"]}`,
+      color: `${colors.white}`,
       background: `${colors["deep-blue-80"]}`
     },
   },

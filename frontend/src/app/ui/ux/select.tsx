@@ -7,12 +7,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import { colors} from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
 
-
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
   border: `1px solid ${colors["deep-blue-80"]}`,
   boxSizing: "border-box",
-  borderRadius: "4px",
   backgroundColor: `${colors["deep-blue-80"]}`,
   "&:hover": {
     border: `1px solid ${colors["deep-blue-50"]}`,
@@ -20,6 +18,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
   },
   "&:active": {
     backgroundColor: `${colors["deep-blue-50"]}`,
+    border: `2px solid ${colors["deep-blue-50"]}`,
   },
   "&:disabled": {
     background: "rgba(255, 255, 255, 0.5)",
@@ -67,22 +66,25 @@ const useStyles = makeStyles({
     paddingTop: 0,
     paddingBottom: 0,
     background: `${colors.white}`,
+    borderRadius:"4px",
+    border: `1px solid ${colors["deep-blue-80"]}`,
     "& li": {
       fontWeight: 200,
       paddingTop: 12,
       paddingBottom: 12,
     },
     "& li:hover": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-80"]}`
+      color: `${colors["deep-blue-80"]}`,
+      background: `${colors["deep-blue-20"]}`,
     },
     "& li.Mui-selected": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-50"]}`
+      color: `${colors["deep-blue-80"]}`,
+      background: `${colors.white}`,
+      fontWeight: "bold",
     },
     "& li.Mui-selected:hover": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-80"]}`
+      color: `${colors["deep-blue-80"]}`,
+      background: `${colors["deep-blue-80"]}`,
     },
   },
 });
@@ -105,7 +107,11 @@ interface ISelectProps{
   label: string
 }
 
-export const Select: React.FC<ISelectProps> = ({entry, label}) => {
+export const Select: React.FC<ISelectProps & MuiSelectProps> = ({
+  entry,
+  label,
+  ...props
+ }) => {
   const classes = useStyles()
   const [val, setVal] = React.useState<string | number>("");
   const [open, setOpen] = React.useState(false);
@@ -145,6 +151,7 @@ export const Select: React.FC<ISelectProps> = ({entry, label}) => {
           onChange={handleChange}
           IconComponent={() => open ? (<IconArrowDown color={colors.white}/>) : (<IconArrowUp color={colors.white}/>)}
           MenuProps={menuProps}
+          {...props}
         >
           {buildMenuItems(entry)}
         </StyledSelect>

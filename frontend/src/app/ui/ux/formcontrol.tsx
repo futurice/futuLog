@@ -6,7 +6,7 @@ import { colors, theme } from "./theme";
 
 export const FormControl= styled((props: MuiFormControlProps) => <FormControlMui {...props} />)({
   margin: theme.spacing(1),
-  minWidth: 120,
+  minWidth: 150,
   color: `${colors["deep-blue-80"]}`,
   border: `1px solid ${colors["deep-blue-80"]}`,
   boxSizing: "border-box",

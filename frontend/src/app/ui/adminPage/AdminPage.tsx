@@ -90,19 +90,13 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices, users }) => {
             value={tab}
             index={0}
           >
-            <OfficeVisitsPanel
-              offices={offices}
-              users={users}
-            />
+            <OfficeVisitsPanel offices={offices}/>
           </TabPanel>
           <TabPanel
             value={tab}
             index={1}
           >
-            <PersonTrackingPanel
-              offices={offices}
-              users={users}
-            />
+            <PersonTrackingPanel usersa={users}/>
           </TabPanel>
         </TabsPanelWrapper>
       </TabsWrapper>

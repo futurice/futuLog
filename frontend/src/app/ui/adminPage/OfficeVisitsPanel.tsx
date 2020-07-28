@@ -11,10 +11,11 @@ import {
   IOfficeSpaceDto,
   IUserDto
 } from '../../services/apiClientService';
-import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from './types';
+import { ITableDataDto, ICollapsibleTableHead } from './types';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
 import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
+import { mapBookingsForUI } from './common';
 
 interface IOfficeVisitsPanel {
   users?: IUserDto[];
@@ -56,29 +57,7 @@ const parentTableHead: ICollapsibleTableHead[] = [
   }
 ];
 
-export function mapBookingsForUI({
-  bookings,
-  site
-}: {
-  bookings: ICapacityDto,
-  site: string
-}): ITableDataDto {
-  const { people, date } = bookings;
-  const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
-    name: `${person.first_name} ${person.last_name}`,
-    email: person.email
-  }));
-
-  return {
-    date: date,
-    site,
-    visitors: mappedPeople,
-    utilisation: mappedPeople.length
-  };
-}
-
 export function OfficeVisitsPanel({
-  users,
   offices
 }: IOfficeVisitsPanel) {
   const { apiClient } = useServices();
@@ -91,8 +70,7 @@ export function OfficeVisitsPanel({
   const startDateStr = startDate.format('YYYY-MM-DD');
   const endDateStr = endDate.format('YYYY-MM-DD');
 
-  const handleSearch = (type: string) => {
-    // due to range we need to swap startDate with endDate for the api call
+  const handleSearch = () => {
     mutateOfficeBookings({
       site: currentSite,
       startDate: startDate.format('YYYY-MM-DD'),

@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { colors } from '../ux/theme';
 import { TableCell } from './styled';
 import { ICollapsibleTableHead } from './types';
-import { mapBookingsForUI } from './OfficeVisitsPanel';
+import { mapBookingsForUI } from './common';
 
 
 interface IBookingsTable {

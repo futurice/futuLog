@@ -17,7 +17,7 @@ import { colors } from '../ux/theme';
 import { P } from '../ux/text';
 import { TableCell } from './styled';
 import { ICollapsibleTableHead } from './types';
-import { mapBookingsForUI } from './OfficeVisitsPanel';
+import { mapBookingsForUI } from './common';
 
 
 const useRowStyles = makeStyles({

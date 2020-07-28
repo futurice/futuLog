@@ -124,20 +124,50 @@ export const IconLogoLight: React.FC<IIcon> = ({ color = "#fff" }) => (
 );
 
 export const IconClose: React.FC<IIcon> = ({ color = "#200A74" }) => (
-  <svg fill="none" height="18" viewBox="0 0 18 18" width="18" xmlns="http://www.w3.org/2000/svg">
-    <path d="m1 1 16 16m-16 0 16-16" stroke={color} strokeWidth="1.5" />
+  <svg
+    fill="none"
+    height="18"
+    viewBox="0 0 18 18"
+    width="18"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="m1 1 16 16m-16 0 16-16"
+      stroke={color}
+      strokeWidth="1.5"
+    />
   </svg>
 );
 
 export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74" }) => (
-  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1 7.00071L7 1.52344L13 7.00071" stroke={color} strokeWidth="1.5"/>
+  <svg
+    width="14"
+    height="8"
+    viewBox="0 0 14 8"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+     d="M1 7.00071L7 1.52344L13 7.00071"
+     stroke={color}
+     strokeWidth="1.5"
+    />
   </svg>
 );
 
 export const IconArrowDown: React.FC<IIcon> = ({color = "#200A74"}) => (
-  <svg width="14" height="9" viewBox="0 0 14 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13 1.52273L7 7L1 1.52273" stroke={color} strokeWidth="1.5"/>
-</svg>
+  <svg
+    width="14"
+    height="9"
+    viewBox="0 0 14 9"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M13 1.52273L7 7L1 1.52273"
+      stroke={color}
+      strokeWidth="1.5"
+    />
+  </svg>
 
 )

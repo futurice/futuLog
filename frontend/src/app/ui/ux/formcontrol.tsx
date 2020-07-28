@@ -7,4 +7,10 @@ import { colors, theme } from "./theme";
 export const FormControl= styled((props: MuiFormControlProps) => <FormControlMui {...props} variant="outlined" />)({
   margin: theme.spacing(1),
   minWidth: 150,
+  "& .MuiInput-underline:before":{
+    display:"none",
+  },
+  "& .MuiInput-underline:after":{
+    display:"none",
+  },
 });

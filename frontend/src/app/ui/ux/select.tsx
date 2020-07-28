@@ -4,21 +4,31 @@ import { Select as MuiSelect } from "@material-ui/core";
 import { SelectProps as MuiSelectProps } from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import { makeStyles } from "@material-ui/core/styles";
-import { colors} from "./theme";
+import { colors } from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
 
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
   border: `1px solid ${colors["deep-blue-80"]}`,
-  boxSizing: "border-box",
   backgroundColor: `${colors["deep-blue-80"]}`,
+  borderRadius: '4px',
   "&:hover": {
     border: `1px solid ${colors["deep-blue-50"]}`,
     backgroundColor: `${colors["deep-blue-50"]}`,
   },
   "&:active": {
     backgroundColor: `${colors["deep-blue-50"]}`,
-    border: `2px solid ${colors["deep-blue-50"]}`,
+    border: `1px solid ${colors["deep-blue-50"]}`,
+  },
+  "&:active-within": {
+    backgroundColor: `${colors["deep-blue-50"]}`,
+    border: `1px solid ${colors["deep-blue-50"]}`,
+  },
+  "&:focus":{
+    border: `1px solid ${colors["deep-blue-50"]}`,
+  },
+  "&:focus-within":{
+    border: `1px solid ${colors["deep-blue-50"]}`,
   },
   "&:disabled": {
     background: "rgba(255, 255, 255, 0.5)",
@@ -26,39 +36,13 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     color: "rgba(255, 255, 255, 0.5)",
     backgroundColor: "rgba(32, 10, 116, 0.5)",
   },
-  "&.MuiSelect-icon": {
-    background: `${colors["deep-blue-80"]}`,
-    color: `${colors.white}`,
-  },
-  list: {
-    paddingTop: 0,
-    paddingBottom: 0,
-    background: `${colors.white}`,
-    "& li": {
-      fontWeight: 200,
-      paddingTop: 12,
-      paddingBottom: 12,
-    },
-    "& li:hover": {
-      background: `${colors["deep-blue-20"]}`
-    },
-    "& li:active": {
-      background: `${colors["deep-blue-50"]}`
-    },
-    "& li.Mui-selected": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-50"]}`
-    },
-    "& li.Mui-selected:hover": {
-      background: `${colors["deep-blue-20"]}`
-    }
-  },
-  icon: {
-    background: `${colors["deep-blue-80"]}`,
-  },
   "& .MuiSelect-selectMenu":{
     backgroundColor: `${colors.white}`,
-  }
+    borderRadius: '3px 0px 0px 3px',
+  },
+  "& .MuiSelect-selectMenu:focus":{
+      border:`1px solid ${colors["deep-blue-50"]}`
+  },
 });
 
 const useStyles = makeStyles({
@@ -72,6 +56,8 @@ const useStyles = makeStyles({
       fontWeight: 200,
       paddingTop: 12,
       paddingBottom: 12,
+      borderRadius: "3px",
+      minWidth: 148,
     },
     "& li:hover": {
       color: `${colors["deep-blue-80"]}`,
@@ -85,6 +71,12 @@ const useStyles = makeStyles({
     "& li.Mui-selected:hover": {
       color: `${colors["deep-blue-80"]}`,
       background: `${colors["deep-blue-20"]}`,
+    },
+    "& li:last-child":{
+      borderRadius: "0px 0px 3px 3px",
+    },
+    "& li:first-child":{
+      borderRadius: "3px 3px 0px 0px",
     },
   },
 });
@@ -129,12 +121,12 @@ export const Select: React.FC<ISelectProps & MuiSelectProps> = ({
       list: classes.list
     },
     anchorOrigin: {
-      vertical: 55,
-      horizontal: 1,
+      vertical: 34,
+      horizontal: -1,
     },
     transformOrigin: {
-      vertical: 1,
-      horizontal: 1,
+      vertical: 0,
+      horizontal: 0,
     },
     getContentAnchorEl: null,
     border: `1px solid ${colors["deep-blue-80"]}`,
@@ -149,8 +141,9 @@ export const Select: React.FC<ISelectProps & MuiSelectProps> = ({
           onClose={handleClose}
           onOpen={handleOpen}
           onChange={handleChange}
-          IconComponent={() => open ? (<IconArrowDown color={colors.white}/>) : (<IconArrowUp color={colors.white}/>)}
+          IconComponent={() => open ? <IconArrowUp color={colors.white}/> : <IconArrowDown color={colors.white}/>}
           MenuProps={menuProps}
+          variant="standard"
           {...props}
         >
           {buildMenuItems(entry)}

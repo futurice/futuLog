@@ -64,8 +64,9 @@ export function BookingsTable({ row, head }: IBookingsTable) {
           <TableRow key={email}>
             <TableCell
               className={cellClasses.root}
-              component="th"
+              component="td"
               scope="row"
+              style={{ paddingLeft: '20px' }}
             >{i + 1}</TableCell>
             {/* TODO: when edit button is clicked checkbox column will be displayed */}
             {/*<TableCell className={cellClasses.root}>e</TableCell>*/}

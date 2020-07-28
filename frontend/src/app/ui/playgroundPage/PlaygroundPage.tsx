@@ -1,8 +1,5 @@
 import React from "react";
-import dayjs from "dayjs";
-import { PlanningCalendarDay } from "app/ui/planningPage/PlanningCalendarDay";
 import { Box } from "@material-ui/core";
-import { Workmode } from "app/services/apiClientService";
 import { FormControl } from '../ux/formcontrol';
 import { Select } from '../ux/select';
 

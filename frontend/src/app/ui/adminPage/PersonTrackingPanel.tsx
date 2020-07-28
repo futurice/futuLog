@@ -13,6 +13,7 @@ import { officeBookingsQueryKey, userBookingsQueryKey } from '../../utils/reactQ
 import { useServices } from '../../services/services';
 import {
   ICapacityDto,
+  IOfficeBookingsRequestDto,
   IOfficeSpaceDto,
   IUserBookingsRequestDto,
   IUserDto
@@ -131,6 +132,12 @@ export function PersonTrackingPanel({
       startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
       endDate: startDate.format('YYYY-MM-DD')
     });
+
+    // mutateOfficeBookings({
+    //   site: currentSite,
+    //   startDate: startDate.format('YYYY-MM-DD'),
+    //   endDate: endDate.format('YYYY-MM-DD')
+    // });
   }
 
   const handleRangeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
@@ -149,10 +156,12 @@ export function PersonTrackingPanel({
   );
 
   // Fetch all offices where fetched user was
-  const officeBookingsRes = useQuery(
-    officeBookingsQueryKey('Berlin', startDateStr, endDateStr),
-    // () => apiClient.getOfficeBookings({ site: currentUser.site, startDate: startDateStr, endDate: endDateStr })
-    () => apiClient.getOfficeBookings({ site: 'Berlin', startDate: startDateStr, endDate: endDateStr })
+  // TODO unmock currenSite
+  const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
+      ({ site, startDate, endDate}: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
+      {
+        onSuccess: () => queryCache.refetchQueries(officeBookingsQueryKey('Stuttgart', startDateStr, endDateStr)),
+      }
   );
 
   const [mutateUserBookings, mutateUserBookingsRes] = useMutation(
@@ -163,13 +172,13 @@ export function PersonTrackingPanel({
   );
 
   const rows: ITableDataDto[] = useMemo(() => {
-    const { data } = officeBookingsRes;
+    const { data } = mutateOfficeBookingsRes;
     const mappedBookings: ITableDataDto[] | undefined = data && data.map(
       // (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentUser.site }));
       (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: 'Berlin' }));
 
     return mappedBookings || [];
-  }, [officeBookingsRes]);
+  }, [mutateOfficeBookingsRes]);
 
   return (
     <>

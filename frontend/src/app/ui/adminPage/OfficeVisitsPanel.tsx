@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { queryCache, useMutation, useQuery } from 'react-query';
+import { queryCache, useMutation } from 'react-query';
 import dayjs from 'dayjs';
 
 import CollapsibleTable from './CollapsibleTable';
@@ -24,7 +24,7 @@ interface IOfficeVisitsPanel {
 
 const childTableHead: ICollapsibleTableHead[] = [
   {
-    title: 'nr'
+    title: 'nr.'
   },
   {
     title: 'Name'
@@ -87,11 +87,6 @@ export function OfficeVisitsPanel({
     setEndDate(endDate);
   }
 
-  const officeBookingsRes = useQuery(
-    officeBookingsQueryKey(currentSite, startDateStr, endDateStr),
-    () => apiClient.getOfficeBookings({ site: currentSite, startDate: startDateStr, endDate: endDateStr })
-  );
-
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
     ({ site, startDate, endDate}: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
     {
@@ -100,12 +95,12 @@ export function OfficeVisitsPanel({
   );
 
   const rows: ITableDataDto[] = useMemo(() => {
-    const { data } = officeBookingsRes;
+    const { data } = mutateOfficeBookingsRes;
     const mappedBookings: ITableDataDto[] | undefined = data && data.map(
       (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite }));
 
     return mappedBookings || [];
-  }, [officeBookingsRes]);
+  }, [mutateOfficeBookingsRes]);
 
   return (
     <>

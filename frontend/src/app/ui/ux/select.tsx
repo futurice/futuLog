@@ -40,7 +40,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
       paddingBottom: 12,
     },
     "& li:hover": {
-      background: `${colors["deep-blue-80"]}`
+      background: `${colors["deep-blue-20"]}`
     },
     "& li:active": {
       background: `${colors["deep-blue-50"]}`
@@ -50,7 +50,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
       background: `${colors["deep-blue-50"]}`
     },
     "& li.Mui-selected:hover": {
-      background: `${colors["deep-blue-80"]}`
+      background: `${colors["deep-blue-20"]}`
     }
   },
   icon: {
@@ -84,7 +84,7 @@ const useStyles = makeStyles({
     },
     "& li.Mui-selected:hover": {
       color: `${colors["deep-blue-80"]}`,
-      background: `${colors["deep-blue-80"]}`,
+      background: `${colors["deep-blue-20"]}`,
     },
   },
 });
@@ -129,7 +129,7 @@ export const Select: React.FC<ISelectProps & MuiSelectProps> = ({
       list: classes.list
     },
     anchorOrigin: {
-      vertical: 35,
+      vertical: 55,
       horizontal: 1,
     },
     transformOrigin: {

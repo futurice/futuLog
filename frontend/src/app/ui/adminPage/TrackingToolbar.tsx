@@ -57,6 +57,7 @@ export function TrackingToolbar({
   );
   const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
+  const startDateStr = startDate.format('YYYY-MM-DD');
 
   return (
     <Toolbar>
@@ -129,7 +130,7 @@ export function TrackingToolbar({
       <ToolbarItem>
         <CSVButton
           data={csvData}
-          filename={`${currentUser}_${startDate}_${range}_day(-s)`}
+          filename={`${currentUser}_${startDateStr}_${range}_day(-s)`}
         />
       </ToolbarItem>
     </Toolbar>

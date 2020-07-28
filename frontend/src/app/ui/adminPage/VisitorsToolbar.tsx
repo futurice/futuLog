@@ -60,6 +60,8 @@ export function VisitorsToolbar({
   const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
   const csvData: ICSVDataItem[] = visitorsTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
+  const startDateStr = startDate.format('YYYY-MM-DD');
+  const endDateStr = endDate.format('YYYY-MM-DD');
 
   return (
     <Toolbar>
@@ -121,7 +123,7 @@ export function VisitorsToolbar({
       <ToolbarItem>
         <CSVButton
           data={csvData}
-          filename={`${currentSite}_${startDate}_${endDate}`}
+          filename={`${currentSite}_${startDateStr}_${endDateStr}`}
         />
       </ToolbarItem>
     </Toolbar>

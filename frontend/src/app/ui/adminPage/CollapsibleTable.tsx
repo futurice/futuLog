@@ -47,18 +47,19 @@ const useTableHeadCellStyles = makeStyles({
 });
 
 interface ICollapsibleTableChild {
-  childComponent?: React.ElementType,
-  childTableHead?: ICollapsibleTableHead[]
+  childComponent?: React.ElementType;
+  childTableHead?: ICollapsibleTableHead[];
 }
 
 interface ICollapsibleTableCell extends ICollapsibleTableChild {
-  row: ReturnType<typeof mapBookingsForUI>
+  row: ReturnType<typeof mapBookingsForUI>;
+  colSpan?: number;
 }
 
 interface ICollapsibleTable extends ICollapsibleTableChild {
-  parentTableHead: ICollapsibleTableHead[],
-  rows: ReturnType<typeof mapBookingsForUI>[],
-  empty?: string
+  parentTableHead: ICollapsibleTableHead[];
+  rows: ReturnType<typeof mapBookingsForUI>[];
+  empty?: string;
 }
 
 const TableEmpty = styled('div')({
@@ -82,7 +83,8 @@ const TableEmptyContainer = ({ empty }: { empty: string | undefined }): JSX.Elem
 function Row({
   row,
   childComponent: ChildComponent,
-  childTableHead
+  childTableHead,
+  colSpan
 }: ICollapsibleTableCell) {
   const [open, setOpen] = React.useState(false);
   const classes = useRowStyles();
@@ -112,7 +114,7 @@ function Row({
           <TableCell style={{ padding: 0 }}/>
           <TableCell
             style={{ padding: 0 }}
-            colSpan={3}
+            colSpan={colSpan}
           >
             <Collapse
               in={open}
@@ -173,6 +175,7 @@ export default function CollapsibleTable({
                   row={row}
                   childComponent={childComponent}
                   childTableHead={childTableHead}
+                  colSpan={parentTableHead.length - 2}
                 />
               ))
             )

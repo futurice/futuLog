@@ -33,7 +33,7 @@ interface IPersonTrackingPanel {
 
 const childTableHead: ICollapsibleTableHead[] = [
   {
-    title: 'nr'
+    title: 'nr.'
   },
   {
     title: 'Name'
@@ -50,15 +50,19 @@ const parentTableHead: ICollapsibleTableHead[] = [
   },
   {
     title: 'Date',
-    width: '18%'
-  },
-  {
-    title: 'Office',
     width: '15%'
   },
   {
+    title: 'Office',
+    width: '10%'
+  },
+  {
+    title: 'Person',
+    width: '10%'
+  },
+  {
     title: 'Capacity utilisation',
-    width: '12%'
+    width: '10%'
   },
   {
     title: '',

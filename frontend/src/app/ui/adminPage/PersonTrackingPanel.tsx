@@ -50,7 +50,7 @@ const parentTableHead: ICollapsibleTableHead[] = [
   },
   {
     title: 'Date',
-    width: '15%'
+    width: '10%'
   },
   {
     title: 'Office',
@@ -58,7 +58,7 @@ const parentTableHead: ICollapsibleTableHead[] = [
   },
   {
     title: 'Person',
-    width: '10%'
+    width: '15%'
   },
   {
     title: 'Capacity utilisation',

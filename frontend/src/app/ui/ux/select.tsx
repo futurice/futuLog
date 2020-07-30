@@ -48,6 +48,9 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
   "& .MuiSelect-icon":{
     top:"unset",
   },
+  "&:hover .SVGpath":{
+    fill: `${colors["deep-blue-50"]}`,
+  },
   "& .MuiSelect-root":{
     minWidth:"150px",
   }

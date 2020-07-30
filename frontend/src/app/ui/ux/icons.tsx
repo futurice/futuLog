@@ -167,7 +167,8 @@ export const IconArrowDown: React.FC<IIcon> = ({color = "#200A74", targetClass="
     className={targetClass}>
       <path
        d="M0 0H36C38.2091 0 40 1.79086 40 4V36C40 38.2091 38.2091 40 36 40H0V0Z"
-       fill="#200A74"/>
+       fill="#200A74"
+       className="SVGpath"/>
       <path d="M26 17.5227L20 23L14 17.5227"
         stroke={color}
         stroke-width="1.5"/>

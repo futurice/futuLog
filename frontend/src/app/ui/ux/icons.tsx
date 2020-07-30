@@ -3,6 +3,7 @@ import React from "react";
 interface IIcon {
   color?: string;
   backgroundColor?: string;
+  targetClass?: string;
 }
 
 export const IconHome: React.FC<IIcon> = ({ color = "#ff465a" }) => (
@@ -139,35 +140,38 @@ export const IconClose: React.FC<IIcon> = ({ color = "#200A74" }) => (
   </svg>
 );
 
-export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74" }) => (
+export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74", targetClass="MuiSvgIcon-root MuiSelect-icon" }) => (
   <svg
-    width="55"
-    height="8"
-    viewBox="0 0 10 8"
+    width="40"
+    height="32"
+    viewBox="0 4 40 32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-     d="M1 7.00071L7 1.52344L13 7.00071"
-     stroke={color}
-     strokeWidth="1.5"
-    />
-  </svg>
+    className={targetClass}>
+      <path
+       d="M0 0H36C38.2091 0 40 1.79086 40 4V36C40 38.2091 38.2091 40 36 40H0V0Z"
+       fill="#6643ef"/>
+      <path d="M14 23.0007L20 17.5234L26 23.0007"
+        stroke={color}
+        stroke-width="1.5"/>
+</svg>
 );
 
-export const IconArrowDown: React.FC<IIcon> = ({color = "#200A74"}) => (
+export const IconArrowDown: React.FC<IIcon> = ({color = "#200A74", targetClass="MuiSvgIcon-root MuiSelect-icon"}) => (
   <svg
-    width="55"
-    height="9"
-    viewBox="0 0 10 9"
+    width="40"
+    height="32"
+    viewBox="0 4 40 32"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M13 1.52273L7 7L1 1.52273"
-      stroke={color}
-      strokeWidth="1.5"
-    />
-  </svg>
+    className={targetClass}>
+      <path
+       d="M0 0H36C38.2091 0 40 1.79086 40 4V36C40 38.2091 38.2091 40 36 40H0V0Z"
+       fill="#200A74"/>
+      <path d="M26 17.5227L20 23L14 17.5227"
+        stroke={color}
+        stroke-width="1.5"/>
+</svg>
+
 
 )

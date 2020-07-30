@@ -141,7 +141,7 @@ export const IconClose: React.FC<IIcon> = ({ color = "#200A74" }) => (
 
 export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74" }) => (
   <svg
-    width="75"
+    width="55"
     height="8"
     viewBox="0 0 10 8"
     fill="none"
@@ -157,7 +157,7 @@ export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74" }) => (
 
 export const IconArrowDown: React.FC<IIcon> = ({color = "#200A74"}) => (
   <svg
-    width="75"
+    width="55"
     height="9"
     viewBox="0 0 10 9"
     fill="none"

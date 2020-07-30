@@ -12,27 +12,26 @@ type ISelectProps = MuiSelectProps;
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
   border: `1px solid ${colors["deep-blue-80"]}`,
-  backgroundColor: `${colors["deep-blue-80"]}`,
   borderRadius: "4px",
   "&:hover": {
     border: `1px solid ${colors["deep-blue-50"]}`,
-    backgroundColor: `${colors["deep-blue-50"]}`,
     boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
   },
   "&:active": {
-    backgroundColor: `${colors["deep-blue-50"]}`,
     border: `1px solid ${colors["deep-blue-50"]}`,
     boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
-  },
-  "&:active-within": {
-    backgroundColor: `${colors["deep-blue-50"]}`,
-    border: `1px solid ${colors["deep-blue-50"]}`,
   },
   "&:focus": {
     border: `1px solid ${colors["deep-blue-50"]}`,
   },
   "&:focus-within": {
     border: `1px solid ${colors["deep-blue-50"]}`,
+  },
+  "&:focus .MuiSelect-icon":{
+    borderLeft: `1px solid ${colors["deep-blue-50"]}`,
+  },
+  "&:focus-within .MuiSelect-icon": {
+    borderLeft: `1px solid ${colors["deep-blue-50"]}`,
   },
   "&:disabled": {
     background: "rgba(255, 255, 255, 0.5)",
@@ -43,9 +42,6 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
   "& .MuiSelect-selectMenu": {
     backgroundColor: `${colors.white}`,
     borderRadius: "3px 0px 0px 3px",
-  },
-  "& .MuiSelect-selectMenu:focus": {
-    border: `1px solid ${colors["deep-blue-50"]}`
   },
   "& .MuiSelect-icon": {
     top: "unset",
@@ -70,7 +66,7 @@ const useStyles = makeStyles({
       paddingTop: 12,
       paddingBottom: 12,
       borderRadius: "3px",
-      minWidth: 148,
+      minWidth: 150,
     },
     "& li:hover": {
       color: `${colors["deep-blue-80"]}`,

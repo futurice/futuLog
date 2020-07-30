@@ -15,10 +15,12 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
   "&:hover": {
     border: `1px solid ${colors["deep-blue-50"]}`,
     backgroundColor: `${colors["deep-blue-50"]}`,
+    boxShadow: '2px 2px 4px rgba(10, 3, 37, 0.2)',
   },
   "&:active": {
     backgroundColor: `${colors["deep-blue-50"]}`,
     border: `1px solid ${colors["deep-blue-50"]}`,
+    boxShadow: '2px 2px 4px rgba(10, 3, 37, 0.2)',
   },
   "&:active-within": {
     backgroundColor: `${colors["deep-blue-50"]}`,

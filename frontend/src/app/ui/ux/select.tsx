@@ -2,10 +2,12 @@ import React from "react";
 import { styled } from "@material-ui/core/styles";
 import { Select as MuiSelect } from "@material-ui/core";
 import { SelectProps as MuiSelectProps } from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import { makeStyles } from "@material-ui/core/styles";
+
 import { colors } from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
+
+type ISelectProps = MuiSelectProps;
 
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
@@ -26,10 +28,10 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     backgroundColor: `${colors["deep-blue-50"]}`,
     border: `1px solid ${colors["deep-blue-50"]}`,
   },
-  "&:focus":{
+  "&:focus": {
     border: `1px solid ${colors["deep-blue-50"]}`,
   },
-  "&:focus-within":{
+  "&:focus-within": {
     border: `1px solid ${colors["deep-blue-50"]}`,
   },
   "&:disabled": {
@@ -38,15 +40,15 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     color: "rgba(255, 255, 255, 0.5)",
     backgroundColor: "rgba(32, 10, 116, 0.5)",
   },
-  "& .MuiSelect-selectMenu":{
+  "& .MuiSelect-selectMenu": {
     backgroundColor: `${colors.white}`,
     borderRadius: "3px 0px 0px 3px",
   },
-  "& .MuiSelect-selectMenu:focus":{
-      border:`1px solid ${colors["deep-blue-50"]}`
+  "& .MuiSelect-selectMenu:focus": {
+    border: `1px solid ${colors["deep-blue-50"]}`
   },
-  "& .MuiSelect-icon":{
-    top:"unset",
+  "& .MuiSelect-icon": {
+    top: "unset",
   },
   "&:hover .SVGpath":{
     fill: `${colors["deep-blue-50"]}`,
@@ -61,7 +63,7 @@ const useStyles = makeStyles({
     paddingTop: 0,
     paddingBottom: 0,
     background: `${colors.white}`,
-    borderRadius:"4px",
+    borderRadius: "4px",
     border: `1px solid ${colors["deep-blue-80"]}`,
     "& li": {
       fontWeight: 200,
@@ -83,50 +85,23 @@ const useStyles = makeStyles({
       color: `${colors["deep-blue-80"]}`,
       background: `${colors["deep-blue-20"]}`,
     },
-    "& li:last-child":{
+    "& li:last-child": {
       borderRadius: "0px 0px 3px 3px",
     },
-    "& li:first-child":{
+    "& li:first-child": {
       borderRadius: "3px 3px 0px 0px",
     },
   },
 });
 
-export interface entryData{
-  value: string;
-  text: string;
-}
 
-function buildMenuItems(entry:entryData[]){
-  return(
-    entry.map(({value, text}) =>
-      (<MenuItem value={value}>{text}</MenuItem>)
-    )
-  )
-}
-
-interface ISelectProps{
-  entry: entryData[],
-  label: string
-}
-
-export const Select: React.FC<ISelectProps & MuiSelectProps> = ({
-  entry,
-  label,
+export const Select: React.FC<ISelectProps> = ({
+  children,
   ...props
- }) => {
+}) => {
   const classes = useStyles()
-  const [val, setVal] = React.useState<string | number>("");
   const [open, setOpen] = React.useState(false);
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setVal(event.target.value as number);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const handleOpen = () => {
-    setOpen(true);
-  };
+
   const menuProps = {
     classes: {
       list: classes.list
@@ -143,21 +118,34 @@ export const Select: React.FC<ISelectProps & MuiSelectProps> = ({
     border: `1px solid ${colors["deep-blue-80"]}`,
   };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
   return (
-        <StyledSelect
-          labelId={label}
-          id={label}
-          value={val}
-          open={open}
-          onClose={handleClose}
-          onOpen={handleOpen}
-          onChange={handleChange}
-          IconComponent={() => open ? <IconArrowUp color={colors.white}/> : <IconArrowDown color={colors.white}/>}
-          MenuProps={menuProps}
-          variant="standard"
-          {...props}
-        >
-          {buildMenuItems(entry)}
-        </StyledSelect>
+    <StyledSelect
+      open={open}
+      onClose={handleClose}
+      onOpen={handleOpen}
+      IconComponent={() => open ?
+        <IconArrowUp
+          classNames={"MuiSvgIcon-root MuiSelect-icon"}
+          color={colors.white}
+        />
+        : <IconArrowDown
+          classNames={"MuiSvgIcon-root MuiSelect-icon"}
+          color={colors.white}
+        />
+      }
+      MenuProps={menuProps}
+      variant="standard"
+      {...props}
+    >
+      {children}
+    </StyledSelect>
   );
 }

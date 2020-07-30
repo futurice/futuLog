@@ -1,17 +1,57 @@
+#version: "3.8"
+#services:
+#    office-tracker:
+#        build: .
+#        image: futurice/office-tracker:latest
+#        tty: true
+#        command: ./office-tracker --devEmail office-tracker@futurice.com
+#        environment:
+#            DB_URL: postgresql://postgres:example_password@db:5432/office
+#        ports:
+#            - "8000:8000"
+#        depends_on:
+#            - db
+#
+#    db:
+#        image: postgres:12.3
+#        environment:
+#            POSTGRES_DB: office
+#            POSTGRES_PASSWORD: example_password
 version: "3.8"
 services:
-    office-tracker:
+    office-tracker-1:
         build: .
         image: futurice/office-tracker:latest
         tty: true
-        command: ./office-tracker --devEmail office-tracker@futurice.com
+        command: ./office-tracker --devEmail office-tracker-1@futurice.com
         environment:
             DB_URL: postgresql://postgres:example_password@db:5432/office
         ports:
             - "8000:8000"
         depends_on:
             - db
-
+    office-tracker-2:
+        build: .
+        image: futurice/office-tracker:latest
+        tty: true
+        command: ./office-tracker --devEmail office-tracker-2@futurice.com
+        environment:
+            DB_URL: postgresql://postgres:example_password@db:5432/office
+        ports:
+            - "8001:8000"
+        depends_on:
+            - db
+    office-tracker-3:
+        build: .
+        image: futurice/office-tracker:latest
+        tty: true
+        command: ./office-tracker --devEmail office-tracker-3@futurice.com
+        environment:
+            DB_URL: postgresql://postgres:example_password@db:5432/office
+        ports:
+            - "8002:8000"
+        depends_on:
+            - db
     db:
         image: postgres:12.3
         environment:

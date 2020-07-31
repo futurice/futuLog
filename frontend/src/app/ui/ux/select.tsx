@@ -82,7 +82,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
 
   "& .MuiSelect-root": {
     boxSizing: "border-box",
-    maxWidth: "200px",
+    width: "200px",
   }
 });
 
@@ -98,6 +98,7 @@ const useStyles = makeStyles({
     "& option": {
       fontWeight: 200,
       padding: "10px 8px",
+      minWidth: "198px",
 
       transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
         "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",

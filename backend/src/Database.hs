@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Capacity (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
+import Data.ClientRequest (Capacity (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), Contact(..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -31,11 +31,21 @@ queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE 
 queryWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
 queryWorkmodes email start end = query' "SELECT * FROM workmodes WHERE user_email = ? AND date >= ? AND date <= ?" (email, start, end)
 
-queryContacts :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
+queryContacts :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Contact]
 queryContacts email start end =
-  query' ("SELECT * FROM workmodes WHERE workmode = 'Office' AND date IN ("
-    <> "SELECT date FROM workmodes WHERE workmode = 'Office' AND user_email = ? AND date >= ? AND date <= ?"
-    <> ") ORDER BY date DESC") (email, start, end)
+  query'
+    "SELECT site, date FROM workmodes WHERE workmode = 'Office' AND user_email = ? AND date >= ? AND date <= ? ORDER BY date DESC"
+    (email, start, end)
+    >>= mapM
+      ( \t@(site, date) ->
+          MkContact site date
+            <$> query'
+              ( "SELECT * FROM users WHERE user_email IN ("
+                  <> "SELECT user_email FROM workmodes WHERE workmode = 'Office' AND site = ? AND date = ?"
+                  <> ")"
+              )
+              t
+      )
 
 confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Bool -> Day -> m ()
 confirmWorkmode email status day = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)

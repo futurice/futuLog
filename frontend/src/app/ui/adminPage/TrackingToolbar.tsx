@@ -99,8 +99,25 @@ export function TrackingToolbar({
       <ToolbarItem>
         <b>Person</b>
         <FormControl>
-          {/* TODO: use Autocomplete component instead of Select (https://material-ui.com/components/autocomplete/)
-              TODO: installed via 'npm install @material-ui/lab -d' */}
+          {/* TODO: use Autocomplete component instead of Select (https://material-ui.com/components/autocomplete/)*/}
+          {/*<Autocomplete*/}
+          {/*  {...defaultProps}*/}
+          {/*  id="person-select"*/}
+          {/*  disableCloseOnSelect*/}
+          {/*  value={value}*/}
+          {/*  onChange={(event: any, newValue: FilmOptionType | null) => {*/}
+          {/*    setValue(newValue);*/}
+          {/*  }}*/}
+          {/*  getOptionLabel={({ label }) => label}*/}
+          {/*  renderOption={({ label }) => (*/}
+          {/*    <React.Fragment>*/}
+          {/*      {label}*/}
+          {/*    </React.Fragment>*/}
+          {/*  )}*/}
+          {/*  renderInput={(params) => (*/}
+          {/*    <TextField {...params} margin="normal" />*/}
+          {/*  )}*/}
+          {/*/>*/}
           <Select
             value={currentUser}
             onChange={onUserChange}

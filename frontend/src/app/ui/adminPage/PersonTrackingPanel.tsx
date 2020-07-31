@@ -1,14 +1,9 @@
-/*
-* TODO WIP: to be able to send user and dates and get a response in the following
-* TODO WIP: format [{ date: '', people: []}], like it's done in OfficeVisitsPanel.tsx
-* */
-
 import React, { useMemo, useState } from 'react';
 import { queryCache, useMutation } from 'react-query';
 import dayjs from 'dayjs';
 
 import CollapsibleTable from './CollapsibleTable';
-import { userBookingsQueryKey, userContactsQueryKey } from '../../utils/reactQueryUtils';
+import { userContactsQueryKey } from '../../utils/reactQueryUtils';
 import { useServices } from '../../services/services';
 import {
   ICapacityDto,

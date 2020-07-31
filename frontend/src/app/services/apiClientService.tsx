@@ -160,19 +160,9 @@ export function createAPIClientService(baseUrl: string) {
         `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
       ),
 
-    getUserBookings: ({ user, startDate, endDate }: IUserDataRequestDto) =>
-      fetchJSON<IUserBookingsDto[]>(
-        `${baseUrl}/api/admin/bookings/${user}?${qsStringify({ startDate, endDate })}`
-      ),
-
     getUserContacts: ({ user, startDate, endDate }: IUserDataRequestDto) =>
       fetchJSON<ICapacityDto[]>(
-        `${baseUrl}/api/admin/contacts/${user}?${qsStringify({ startDate, endDate })}`
-      ),
-
-    getOfficeBookingsInfo: (site: string, startDate: string, endDate: string) =>
-      fetchJSON<ICapacityDto[]>(
-        `${baseUrl}/api/admin/workmode/csv/${site}?${qsStringify({ startDate, endDate })}`
+        `${baseUrl}/api/admin/contacts/${e(user)}?${qsStringify({ startDate, endDate })}`
       ),
   };
 

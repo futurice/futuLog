@@ -6,42 +6,42 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import { colors } from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
-import { Flex } from './containers';
+import { Flex } from "./containers";
 
 type ISelectProps = MuiSelectProps;
 
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
-  border: 'none',
-  transition: 'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
-    'box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
-    'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+  border: "none",
+  transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+    "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+    "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
 
   "& .MuiInputBase-input": {
-    padding: '8px 40px 8px 8px',
+    padding: "8px 40px 8px 8px",
     border: `2px solid ${colors["deep-blue-80"]}`,
     borderRadius: "4px",
 
-    transition: 'box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
-      'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+    transition: "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+      "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
   },
 
   "& .MuiSelect-icon": {
-    width: '36px',
-    height: '37px',
-    top: 'unset',
-    right: '0',
+    width: "36px",
+    height: "37px",
+    top: "unset",
+    right: "0",
 
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
 
     border: `2px solid ${colors["deep-blue-80"]}`,
     backgroundColor: colors["deep-blue-80"],
-    borderTopRightRadius: '5px',
-    borderBottomRightRadius: '5px',
+    borderTopRightRadius: "5px",
+    borderBottomRightRadius: "5px",
 
-    transition: 'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
-      'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+    transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+      "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
   },
 
   "&:hover .MuiInputBase-input": {
@@ -68,10 +68,10 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
   "&.Mui-disabled": {
     opacity: 0.5,
 
-    '&:hover': {
+    "&:hover": {
       "& .MuiInputBase-input": {
         border: `2px solid ${colors["deep-blue-80"]}`,
-        boxShadow: 'none',
+        boxShadow: "none",
       },
       "& .MuiSelect-icon": {
         backgroundColor: colors["deep-blue-80"],
@@ -97,10 +97,10 @@ const useStyles = makeStyles({
 
     "& option": {
       fontWeight: 200,
-      padding: '10px 8px',
+      padding: "10px 8px",
 
-      transition: 'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
-        'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+      transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+        "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
     },
 
     "& option:last-child": {

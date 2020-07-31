@@ -38,7 +38,7 @@ queryContacts email start end =
     (email, start, end)
     >>= mapM
       ( \t@(site, date) ->
-          MkContact site date
+          MkContact date site
             <$> query'
               ( "SELECT * FROM users WHERE user_email IN ("
                   <> "SELECT user_email FROM workmodes WHERE workmode = 'Office' AND site = ? AND date = ?"

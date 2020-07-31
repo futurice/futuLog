@@ -61,6 +61,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     "& .MuiInputBase-input": {
       border: `2px solid ${colors["deep-blue-50"]}`,
       boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+      backgroundColor: colors.white,
     },
 
     "& .MuiSelect-icon": {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl, Select, useMediaQuery } from '@material-ui/core';
+import { useMediaQuery } from '@material-ui/core';
 import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
 import { DatePicker } from '@material-ui/pickers';
 
@@ -9,6 +9,8 @@ import { CSVButton } from './CSVButton';
 import { IUserDto } from '../../services/apiClientService';
 import { Toolbar, ToolbarItem } from './styled';
 import { Theme } from '../ux/theme';
+import { FormControl } from '../ux/formcontrol';
+import { Select } from '../ux/select';
 
 
 const DAYS_RANGE_OPTIONS = [
@@ -76,7 +78,6 @@ export function TrackingToolbar({
         <b>Range</b>
         <FormControl>
           <Select
-            native
             value={range}
             onChange={onRangeChange}
             name="range"
@@ -99,12 +100,11 @@ export function TrackingToolbar({
         <b>Person</b>
         <FormControl>
           <Select
-            native
             value={currentUser}
             onChange={onUserChange}
             name="person"
             inputProps={{
-              id: 'person-select',
+              id: 'person-select'
             }}
           >
             {

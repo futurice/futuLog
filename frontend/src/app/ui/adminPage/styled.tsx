@@ -97,6 +97,10 @@ export const ToolbarItem = styled(Flex)({
   },
   '& > * + div': {
     marginTop: '10px'
+  },
+  '& .MuiFormControl-root': {
+    marginLeft: '0',
+    marginRight: '0'
   }
 });
 

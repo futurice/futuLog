@@ -13,6 +13,8 @@ type ISelectProps = MuiSelectProps;
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
   border: "none",
+  backgroundColor: colors.white,
+
   transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
     "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
     "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControl, Select, styled, useMediaQuery } from '@material-ui/core';
+import { styled, useMediaQuery } from '@material-ui/core';
 import { DatePicker } from '@material-ui/pickers';
 import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
 import dayjs from 'dayjs';
@@ -11,6 +11,8 @@ import { CSVButton } from './CSVButton';
 import { IOfficeSpaceDto } from '../../services/apiClientService';
 import { Theme } from '../ux/theme';
 import { Toolbar, ToolbarItem } from './styled';
+import { FormControl } from '../ux/formcontrol';
+import { Select } from '../ux/select';
 
 
 interface IVisitorsToolbar extends IToolbar {
@@ -95,7 +97,6 @@ export function VisitorsToolbar({
         <b>Where?</b>
         <FormControl>
           <Select
-            native
             value={currentSite}
             onChange={onSiteChange}
             name="site"

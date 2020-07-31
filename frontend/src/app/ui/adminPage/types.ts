@@ -11,8 +11,9 @@ export interface ICollapsibleTableHead extends MuiTableCellProps {
 export interface ITableDataDto {
   date: string;
   site: string;
+  person?: string;
   visitors: IUserDtoMapped[];
-  utilisation: number;
+  utilisation: string;
 }
 
 export interface IUserDtoMapped {

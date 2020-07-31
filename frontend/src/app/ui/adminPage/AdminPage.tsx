@@ -96,7 +96,7 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices, users }) => {
             value={tab}
             index={1}
           >
-            <PersonTrackingPanel usersa={users}/>
+            <PersonTrackingPanel users={users} offices={offices || []}/>
           </TabPanel>
         </TabsPanelWrapper>
       </TabsWrapper>

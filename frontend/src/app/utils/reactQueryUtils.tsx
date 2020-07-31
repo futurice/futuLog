@@ -34,6 +34,12 @@ export const officeBookingsQueryKey = (
   endDate: string
 ): AnyQueryKey => ["officeBookings", site, startDate, endDate];
 
+export const userContactsQueryKey = (
+  user: string,
+  startDate: string,
+  endDate: string
+): AnyQueryKey => ["userContacts", user, startDate, endDate];
+
 export const userBookingsQueryKey = (
   user: string,
   startDate: string,

@@ -11,15 +11,13 @@ import {
   IOfficeSpaceDto,
   IUserDto
 } from '../../services/apiClientService';
-import { ITableDataDto, ICollapsibleTableHead } from './types';
+import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from './types';
 import { VisitorsToolbar } from './VisitorsToolbar';
 import { BookingsTable } from './BookingsTable';
 import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
-import { mapBookingsForUI } from './common';
 
 interface IOfficeVisitsPanel {
-  users?: IUserDto[];
-  offices?: IOfficeSpaceDto[];
+  offices: IOfficeSpaceDto[];
 }
 
 const childTableHead: ICollapsibleTableHead[] = [
@@ -56,6 +54,30 @@ const parentTableHead: ICollapsibleTableHead[] = [
     width: '55%'
   }
 ];
+
+export function mapBookingsForUI({
+  bookings,
+  site,
+  offices
+}: {
+  bookings: ICapacityDto,
+  site: string,
+  offices: IOfficeSpaceDto[]
+}): ITableDataDto {
+  const { people, date } = bookings;
+  const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
+    name: `${person.first_name} ${person.last_name}`,
+    email: person.email
+  }));
+  const { maxPeople } = offices.filter((office) => office.site === site)[0];
+
+  return {
+    date: date,
+    site,
+    visitors: mappedPeople,
+    utilisation: `${mappedPeople.length} people (max ${maxPeople})`
+  };
+}
 
 export function OfficeVisitsPanel({
   offices
@@ -97,7 +119,7 @@ export function OfficeVisitsPanel({
   const rows: ITableDataDto[] = useMemo(() => {
     const { data } = mutateOfficeBookingsRes;
     const mappedBookings: ITableDataDto[] | undefined = data && data.map(
-      (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite }));
+      (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite, offices }));
 
     return mappedBookings || [];
   }, [mutateOfficeBookingsRes]);

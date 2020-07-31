@@ -110,7 +110,7 @@ export interface IOfficeBookingsRequestDto {
   endDate: string;
 }
 
-export interface IUserBookingsRequestDto {
+export interface IUserDataRequestDto {
   user: string;
   startDate: string;
   endDate: string;
@@ -159,9 +159,14 @@ export function createAPIClientService(baseUrl: string) {
         `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
       ),
 
-    getUserBookings: ({ user, startDate, endDate }: IUserBookingsRequestDto) =>
-      fetchJSON<ICapacityDto[]>(
+    getUserBookings: ({ user, startDate, endDate }: IUserDataRequestDto) =>
+      fetchJSON<IUserBookingsDto[]>(
         `${baseUrl}/api/admin/bookings/${user}?${qsStringify({ startDate, endDate })}`
+      ),
+
+    getUserContacts: ({ user, startDate, endDate }: IUserDataRequestDto) =>
+      fetchJSON<ICapacityDto[]>(
+        `${baseUrl}/api/admin/contacts/${user}?${qsStringify({ startDate, endDate })}`
       ),
 
     getOfficeBookingsInfo: (site: string, startDate: string, endDate: string) =>

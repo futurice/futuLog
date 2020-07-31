@@ -17,7 +17,7 @@ import { colors } from '../ux/theme';
 import { P } from '../ux/text';
 import { TableCell } from './styled';
 import { ICollapsibleTableHead } from './types';
-import { mapBookingsForUI } from './common';
+import { mapBookingsForUI } from './OfficeVisitsPanel';
 
 
 const useRowStyles = makeStyles({
@@ -102,7 +102,7 @@ function Row({
         </TableCell>
         {
           Object.values(row).map((value) => (
-            (typeof value === 'string' || typeof value === 'number') && <TableCell key={value}>{value}</TableCell>
+            <TableCell key={value}>{value}</TableCell>
           ))
         }
         {/* TODO: Edit button will be down here */}

@@ -31,6 +31,12 @@ queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE 
 queryWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
 queryWorkmodes email start end = query' "SELECT * FROM workmodes WHERE user_email = ? AND date >= ? AND date <= ?" (email, start, end)
 
+queryContacts :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
+queryContacts email start end =
+  query' ("SELECT * FROM workmodes WHERE workmode = 'Office' AND date IN ("
+    <> "SELECT date FROM workmodes WHERE workmode = 'Office' AND user_email = ? AND date >= ? AND date <= ?"
+    <> ") ORDER BY date DESC") (email, start, end)
+
 confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Bool -> Day -> m ()
 confirmWorkmode email status day = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)
 

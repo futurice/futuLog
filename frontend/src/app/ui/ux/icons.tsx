@@ -3,7 +3,6 @@ import React from "react";
 interface IIcon {
   color?: string;
   backgroundColor?: string;
-  classNames?: string;
 }
 
 export const IconHome: React.FC<IIcon> = ({ color = "#ff465a" }) => (
@@ -185,9 +184,8 @@ export const IconClose: React.FC<IIcon> = ({ color = "#200A74" }) => (
   </svg>
 );
 
-export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74", classNames }) => (
+export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74" }) => (
   <svg
-    className={classNames}
     width="14"
     height="8"
     viewBox="0 0 14 8"
@@ -202,9 +200,8 @@ export const IconArrowUp: React.FC<IIcon> = ({ color = "#200A74", classNames }) 
   </svg>
 );
 
-export const IconArrowDown: React.FC<IIcon> = ({ color = "#200A74", classNames }) => (
+export const IconArrowDown: React.FC<IIcon> = ({ color = "#200A74" }) => (
   <svg
-    className={classNames}
     width="14"
     height="9"
     viewBox="0 0 14 9"

@@ -174,18 +174,15 @@ export const Select: React.FC<ISelectProps> = ({
       onClose={handleClose}
       onOpen={handleOpen}
       IconComponent={() => open ?
-        <Flex className={"MuiSelect-icon"}>
-          <IconArrowUp
-            classNames={"MuiSvgIcon-root"}
-            color={colors.white}
-          />
-        </Flex>
-        : <Flex className={"MuiSelect-icon"}>
-          <IconArrowDown
-            classNames={"MuiSvgIcon-root"}
-            color={colors.white}
-          />
-        </Flex>
+        (
+          <Flex className={"MuiSelect-icon"}>
+            <IconArrowUp color={colors.white}/>
+          </Flex>
+        ) : (
+          <Flex className={"MuiSelect-icon"}>
+            <IconArrowDown color={colors.white}/>
+          </Flex>
+        )
       }
       MenuProps={menuProps}
       variant="standard"

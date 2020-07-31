@@ -2,63 +2,87 @@ import React from "react";
 import { styled } from "@material-ui/core/styles";
 import { Select as MuiSelect } from "@material-ui/core";
 import { SelectProps as MuiSelectProps } from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import { makeStyles } from "@material-ui/core/styles";
-import { colors} from "./theme";
-import { IconArrowUp, IconArrowDown } from "./icons";
 
+import { colors } from "./theme";
+import { IconArrowUp, IconArrowDown } from "./icons";
+import { Flex } from "./containers";
+
+type ISelectProps = MuiSelectProps;
 
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
-  border: `1px solid ${colors["deep-blue-80"]}`,
-  boxSizing: "border-box",
-  borderRadius: "4px",
-  backgroundColor: `${colors["deep-blue-80"]}`,
-  "&:hover": {
-    border: `1px solid ${colors["deep-blue-50"]}`,
-    backgroundColor: `${colors["deep-blue-50"]}`,
+  border: "none",
+  transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+    "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+    "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+
+  "& .MuiInputBase-input": {
+    padding: "8px 40px 8px 8px",
+    border: `2px solid ${colors["deep-blue-80"]}`,
+    borderRadius: "4px",
+
+    transition: "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+      "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
   },
-  "&:active": {
-    backgroundColor: `${colors["deep-blue-50"]}`,
+
+  "& .MuiSelect-icon": {
+    width: "36px",
+    height: "37px",
+    top: "unset",
+    right: "0",
+
+    justifyContent: "center",
+    alignItems: "center",
+
+    border: `2px solid ${colors["deep-blue-80"]}`,
+    backgroundColor: colors["deep-blue-80"],
+    borderTopRightRadius: "5px",
+    borderBottomRightRadius: "5px",
+
+    transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+      "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
   },
-  "&:disabled": {
-    background: "rgba(255, 255, 255, 0.5)",
-    border: "1px solid rgba(166, 157, 199, 0.5)",
-    color: "rgba(255, 255, 255, 0.5)",
-    backgroundColor: "rgba(32, 10, 116, 0.5)",
+
+  "&:hover .MuiInputBase-input": {
+    border: `2px solid ${colors["deep-blue-50"]}`,
+    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
   },
-  "&.MuiSelect-icon": {
-    background: `${colors["deep-blue-80"]}`,
-    color: `${colors.white}`,
+
+  "&:hover .MuiSelect-icon": {
+    backgroundColor: colors["deep-blue-50"],
+    border: `2px solid ${colors["deep-blue-50"]}`,
   },
-  list: {
-    paddingTop: 0,
-    paddingBottom: 0,
-    background: `${colors.white}`,
-    "& li": {
-      fontWeight: 200,
-      paddingTop: 12,
-      paddingBottom: 12,
+
+  "&.Mui-focused": {
+    "& .MuiInputBase-input": {
+      border: `2px solid ${colors["deep-blue-50"]}`,
+      boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
     },
-    "& li:hover": {
-      background: `${colors["deep-blue-80"]}`
-    },
-    "& li:active": {
-      background: `${colors["deep-blue-50"]}`
-    },
-    "& li.Mui-selected": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-50"]}`
-    },
-    "& li.Mui-selected:hover": {
-      background: `${colors["deep-blue-80"]}`
+
+    "& .MuiSelect-icon": {
+      border: `2px solid ${colors["deep-blue-50"]}`,
     }
   },
-  icon: {
-    background: `${colors["deep-blue-80"]}`,
+
+  "&.Mui-disabled": {
+    opacity: 0.5,
+
+    "&:hover": {
+      "& .MuiInputBase-input": {
+        border: `2px solid ${colors["deep-blue-80"]}`,
+        boxShadow: "none",
+      },
+      "& .MuiSelect-icon": {
+        backgroundColor: colors["deep-blue-80"],
+        border: `2px solid ${colors["deep-blue-80"]}`,
+      },
+    }
   },
-  "& .MuiSelect-selectMenu":{
-    backgroundColor: `${colors.white}`,
+
+  "& .MuiSelect-root": {
+    boxSizing: "border-box",
+    width: "200px",
   }
 });
 
@@ -66,87 +90,105 @@ const useStyles = makeStyles({
   list: {
     paddingTop: 0,
     paddingBottom: 0,
-    background: `${colors.white}`,
-    "& li": {
+
+    backgroundColor: colors.white,
+    borderRadius: "4px",
+    border: `1px solid ${colors["deep-blue-80"]}`,
+
+    "& option": {
       fontWeight: 200,
-      paddingTop: 12,
-      paddingBottom: 12,
+      padding: "10px 8px",
+      minWidth: "198px",
+
+      transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
+        "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
     },
-    "& li:hover": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-80"]}`
+
+    "& option:last-child": {
+      borderRadius: "0px 0px 4px 4px",
     },
-    "& li.Mui-selected": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-50"]}`
+    "& option:first-child": {
+      borderRadius: "4px 4px 0px 0px",
     },
-    "& li.Mui-selected:hover": {
-      color: `${colors.white}`,
-      background: `${colors["deep-blue-80"]}`
+
+    "& option:hover": {
+      backgroundColor: colors["deep-blue-20"],
+      color: colors["deep-blue-80"],
+    },
+
+    "& option:active": {
+      fontWeight: "bold",
+    },
+
+    "& option:.Mui-selected": {
+      color: `${colors["deep-blue-80"]}`,
+      backgroundColor: `${colors.white}`,
+      fontWeight: "bold",
+    },
+
+    "& option.Mui-selected:hover": {
+      color: `${colors["deep-blue-80"]}`,
+      backgroundColor: `${colors["deep-blue-20"]}`,
     },
   },
 });
 
-export interface entryData{
-  value: string;
-  text: string;
-}
 
-function buildMenuItems(entry:entryData[]){
-  return(
-    entry.map(({value, text}) =>
-      (<MenuItem value={value}>{text}</MenuItem>)
-    )
-  )
-}
-
-interface ISelectProps{
-  entry: entryData[],
-  label: string
-}
-
-export const Select: React.FC<ISelectProps> = ({entry, label}) => {
+export const Select: React.FC<ISelectProps> = ({
+  children,
+  ...props
+}) => {
   const classes = useStyles()
-  const [val, setVal] = React.useState<string | number>("");
   const [open, setOpen] = React.useState(false);
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setVal(event.target.value as number);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const handleOpen = () => {
-    setOpen(true);
-  };
+
   const menuProps = {
     classes: {
       list: classes.list
     },
     anchorOrigin: {
-      vertical: 35,
-      horizontal: 1,
+      vertical: 40,
+      horizontal: 0,
     },
     transformOrigin: {
-      vertical: 1,
-      horizontal: 1,
+      vertical: 0,
+      horizontal: 0,
     },
     getContentAnchorEl: null,
     border: `1px solid ${colors["deep-blue-80"]}`,
   };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
   return (
-        <StyledSelect
-          labelId={label}
-          id={label}
-          value={val}
-          open={open}
-          onClose={handleClose}
-          onOpen={handleOpen}
-          onChange={handleChange}
-          IconComponent={() => open ? (<IconArrowDown color={colors.white}/>) : (<IconArrowUp color={colors.white}/>)}
-          MenuProps={menuProps}
-        >
-          {buildMenuItems(entry)}
-        </StyledSelect>
+    <StyledSelect
+      open={open}
+      onClose={handleClose}
+      onOpen={handleOpen}
+      IconComponent={() => open ?
+        <Flex className={"MuiSelect-icon"}>
+          <IconArrowUp
+            classNames={"MuiSvgIcon-root"}
+            color={colors.white}
+          />
+        </Flex>
+        : <Flex className={"MuiSelect-icon"}>
+          <IconArrowDown
+            classNames={"MuiSvgIcon-root"}
+            color={colors.white}
+          />
+        </Flex>
+      }
+      MenuProps={menuProps}
+      variant="standard"
+      {...props}
+    >
+      {children}
+    </StyledSelect>
   );
 }

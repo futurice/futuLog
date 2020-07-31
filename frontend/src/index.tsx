@@ -12,9 +12,7 @@ const services = createServices();
 window.__services = services;
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App services={services} />
-  </React.StrictMode>,
+  <App services={services} />,
   document.getElementById("root")
 );
 

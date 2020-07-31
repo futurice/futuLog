@@ -56,3 +56,4 @@ type AdminAPI =
     :<|> "workmode" :> "csv" :> Capture "office" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[CSV] [UserWorkmode]
     :<|> "people" :> Get '[JSON] [User]
     :<|> "bookings" :> Capture "user" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]
+    :<|> "contacts" :> Capture "user" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]

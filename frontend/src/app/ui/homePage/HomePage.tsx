@@ -8,7 +8,7 @@ import {
   IShiftAssignmentDto,
   IOfficeSpaceDto,
   IRegisterWorkmodeDto,
-  ICapacityDto,
+  ICapacityDto
 } from "app/services/apiClientService";
 import {
   RenderQuery,
@@ -74,7 +74,7 @@ export const HomePage: React.FC = () => {
   const officeBookingsRes = useQuery(
     userShift && officeBookingsQueryKey(userShift.site, date, date),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings(userShift!.site, date, date)
+    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date})
   );
 
   const [registerWorkmode] = useMutation(

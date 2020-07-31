@@ -9,13 +9,16 @@ import {
   officesQueryKey,
   userShiftQueryKey,
   userQueryKey,
+  usersQueryKey,
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
+import { AdminPage } from "app/ui/adminPage/AdminPage";
 import { InfoPage } from "app/ui/infoPage/InfoPage";
 import { UserPage } from "app/ui/userPage/UserPage";
 import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
 import { PlanningPage } from "app/ui/planningPage/PlanningPage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
+import { CenteredSpinner } from "../ux/spinner";
 
 export enum RoutePaths {
   Home = "/",
@@ -23,6 +26,7 @@ export enum RoutePaths {
   Info = "/info",
   Planning = "/planning",
   User = "/user",
+  Admin = "/admin",
   // DEV
   Playground = "/playground",
 }
@@ -41,19 +45,20 @@ export const AppRoutes: React.FC = () => {
   const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
   const userShiftRes = useQuery(userShiftQueryKey(), () => apiClientService.getUserShift());
   const officesRes = useQuery(officesQueryKey(), () => apiClientService.getOffices());
+  const usersRes = useQuery(usersQueryKey(), () => apiClientService.getUsers());
 
   return (
     <RenderQuery
       query={combineQueries({
         user: userRes,
+        users: usersRes,
         userShift: userShiftRes,
         offices: officesRes,
       })}
-      // TODO: Present initial loading state
-      onLoading={() => <h2>Loading user information..</h2>}
+      onLoading={() => <CenteredSpinner />}
       onError={(error) => <h2>{error.message}</h2>}
     >
-      {({ user }) => (
+      {({ user, offices, users }) => (
         <SiteLayout user={user}>
           <Switch>
             <Route
@@ -64,6 +69,12 @@ export const AppRoutes: React.FC = () => {
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
+            { user.isAdmin && (
+              <Route
+                exact
+                path={RoutePaths.Admin}
+                render={(props) => <AdminPage users={users} offices={offices} {...props} /> } />
+            )}
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />
             <Route exact path={RoutePaths.Planning} component={PlanningPage} />

@@ -19,6 +19,8 @@ export const userWorkmodesQueryKey = (startDate: string, endDate: string): AnyQu
 export const siteShiftQueryKey = (site: string): AnyQueryKey => ["siteShifts", site];
 // IOfficeSpaceDto[]
 export const officesQueryKey = () => "offices";
+// IUserDto[]
+export const usersQueryKey  = () => "users";
 // number
 export const officeCapacityQueryKey = (site: string, date: string): AnyQueryKey => [
   "officeCapacity",
@@ -31,6 +33,18 @@ export const officeBookingsQueryKey = (
   startDate: string,
   endDate: string
 ): AnyQueryKey => ["officeBookings", site, startDate, endDate];
+
+export const userContactsQueryKey = (
+  user: string,
+  startDate: string,
+  endDate: string
+): AnyQueryKey => ["userContacts", user, startDate, endDate];
+
+export const userBookingsQueryKey = (
+  user: string,
+  startDate: string,
+  endDate: string
+): AnyQueryKey => ["userBookings", user, startDate, endDate];
 
 export function combineQueries<M>(queryMap: { [K in keyof M]: QueryResult<M[K]> }): QueryResult<M> {
   const queries = Object.values(queryMap) as QueryResult<any>[];

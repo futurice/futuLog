@@ -11,6 +11,18 @@
     url("./assets/fonts/Font Futurice 2017/Futurice-Bold/Futurice-Bold.woff") format("woff");
 }
 
+html, body {
+  height: 100%;
+}
+
+#root {
+  height: 100%;
+}
+
+.App, .SiteLayout {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: "Roboto", sans-serif;

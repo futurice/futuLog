@@ -13,6 +13,9 @@ type ISelectProps = MuiSelectProps;
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
   border: "none",
+  backgroundColor: colors.white,
+  borderRadius: "4px",
+
   transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
     "box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms," +
     "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
@@ -58,6 +61,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     "& .MuiInputBase-input": {
       border: `2px solid ${colors["deep-blue-50"]}`,
       boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+      backgroundColor: colors.white,
     },
 
     "& .MuiSelect-icon": {
@@ -120,7 +124,7 @@ const useStyles = makeStyles({
       fontWeight: "bold",
     },
 
-    "& option:.Mui-selected": {
+    "& option.Mui-selected": {
       color: `${colors["deep-blue-80"]}`,
       backgroundColor: `${colors.white}`,
       fontWeight: "bold",
@@ -171,18 +175,15 @@ export const Select: React.FC<ISelectProps> = ({
       onClose={handleClose}
       onOpen={handleOpen}
       IconComponent={() => open ?
-        <Flex className={"MuiSelect-icon"}>
-          <IconArrowUp
-            classNames={"MuiSvgIcon-root"}
-            color={colors.white}
-          />
-        </Flex>
-        : <Flex className={"MuiSelect-icon"}>
-          <IconArrowDown
-            classNames={"MuiSvgIcon-root"}
-            color={colors.white}
-          />
-        </Flex>
+        (
+          <Flex className={"MuiSelect-icon"}>
+            <IconArrowUp color={colors.white}/>
+          </Flex>
+        ) : (
+          <Flex className={"MuiSelect-icon"}>
+            <IconArrowDown color={colors.white}/>
+          </Flex>
+        )
       }
       MenuProps={menuProps}
       variant="standard"

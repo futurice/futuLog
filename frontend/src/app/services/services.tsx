@@ -33,9 +33,7 @@ export interface IServices {
 export function createServices(): IServices {
   const services = {
     history: createHistoryService(),
-    apiClient: createAPIClientService(
-      process.env.NODE_ENV === "production" ? "" : "http://localhost:5000"
-    ),
+    apiClient: createAPIClientService(""),
     queryCache: makeQueryCache(),
     localStorage: localStorage,
   };

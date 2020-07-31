@@ -37,6 +37,7 @@ export interface IUserDto {
   portrait_full_url: string;
   portrait_thumb_url: string;
   portrait_badge_url: string;
+  isAdmin: boolean;
 }
 
 export interface IShiftAssignmentDto {
@@ -88,17 +89,32 @@ export interface IOfficeSpaceDto {
 }
 
 export interface ICapacityDto {
+  site?: string;
   date: string;
-  people: IPerson[];
+  people: IUserDto[];
 }
 
-export interface IPerson {
-  first_name: string;
-  last_name: string;
-  email: string;
-  portrait_full_url: string;
-  portrait_thumb_url: string;
-  portrait_badge_url: string;
+export interface IUserBookingsDto {
+  userEmail: string,
+  site: string,
+  date: string,
+  workmode: {
+    type: string,
+    confirmed: boolean,
+    name: string
+  }
+}
+
+export interface IOfficeBookingsRequestDto {
+  site: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface IUserDataRequestDto {
+  user: string;
+  startDate: string;
+  endDate: string;
 }
 
 export function createAPIClientService(baseUrl: string) {
@@ -137,9 +153,16 @@ export function createAPIClientService(baseUrl: string) {
 
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
 
-    getOfficeBookings: (site: string, startDate: string, endDate: string) =>
+    getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
+
+    getOfficeBookings: ({ site, startDate, endDate}: IOfficeBookingsRequestDto) =>
       fetchJSON<ICapacityDto[]>(
         `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
+      ),
+
+    getUserContacts: ({ user, startDate, endDate }: IUserDataRequestDto) =>
+      fetchJSON<ICapacityDto[]>(
+        `${baseUrl}/api/admin/contacts/${e(user)}?${qsStringify({ startDate, endDate })}`
       ),
   };
 

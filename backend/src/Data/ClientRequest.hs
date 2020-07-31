@@ -47,6 +47,15 @@ data Capacity
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
+data Contact
+    = MkContact
+        { date :: Day
+        , site :: Text
+        , people :: [User]
+        }
+    deriving stock (Generic, Show, Eq)
+    deriving anyclass (FromJSON, ToJSON, ToSchema)
+
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site
 

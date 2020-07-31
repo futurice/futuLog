@@ -2,7 +2,7 @@ module Logic (registerWorkmode) where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
-import Data.ClientRequest (RegisterWorkmode (..), people)
+import Data.ClientRequest (RegisterWorkmode (..), Capacity(people))
 import Data.Config (Shift (..), maxPeople, officeSite, shiftSite)
 import Data.Env (Env (..), ShiftAssignment (..))
 import Data.Maybe (listToMaybe)

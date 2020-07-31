@@ -18,7 +18,7 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
 
   "& .MuiInputBase-input": {
-    padding: '8px 60px 8px 8px',
+    padding: '8px 40px 8px 8px',
     border: `2px solid ${colors["deep-blue-80"]}`,
     borderRadius: "4px",
 
@@ -80,13 +80,10 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     }
   },
 
-  // "& .MuiSelect-selectMenu": {
-  //   backgroundColor: `${colors.white}`,
-  //   borderRadius: "3px 0px 0px 3px",
-  // },
-  // "& .MuiSelect-root":{
-  //   minWidth:"150px",
-  // }
+  "& .MuiSelect-root": {
+    boxSizing: "border-box",
+    maxWidth: "200px",
+  }
 });
 
 const useStyles = makeStyles({

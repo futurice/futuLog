@@ -25,7 +25,9 @@ export const PlaygroundPage: React.FC = () => {
             value={value}
             onChange={onChange}
           >
-            <option value={0}>None</option>
+            <option value={0}>NoneNoneNoneNoneNoneNoneNoneNone</option>
+            <option value={1}>NoneNoneNoneNoneNoneNoneNoneNone</option>
+            <option value={2}>NoneNoneNoneNoneNoneNoneNoneNonasdasdasdasdae</option>
           </Select>
         </FormControl>
       </Box>

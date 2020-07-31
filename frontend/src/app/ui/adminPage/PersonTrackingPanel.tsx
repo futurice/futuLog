@@ -1,20 +1,20 @@
-import React, { useMemo, useState } from 'react';
-import { queryCache, useMutation } from 'react-query';
-import dayjs from 'dayjs';
+import React, { useMemo, useState } from "react";
+import { queryCache, useMutation } from "react-query";
+import dayjs from "dayjs";
 
-import CollapsibleTable from './CollapsibleTable';
-import { userContactsQueryKey } from '../../utils/reactQueryUtils';
-import { useServices } from '../../services/services';
+import CollapsibleTable from "./CollapsibleTable";
+import { userContactsQueryKey } from "../../utils/reactQueryUtils";
+import { useServices } from "../../services/services";
 import {
   ICapacityDto,
   IOfficeSpaceDto,
   IUserDataRequestDto,
   IUserDto
-} from '../../services/apiClientService';
-import { ICollapsibleTableHead, ITableDataDto, IUserDtoMapped } from './types';
-import { TrackingToolbar } from './TrackingToolbar';
-import { BookingsTable } from './BookingsTable';
-import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
+} from "../../services/apiClientService";
+import { ICollapsibleTableHead, ITableDataDto, IUserDtoMapped } from "./types";
+import { TrackingToolbar } from "./TrackingToolbar";
+import { BookingsTable } from "./BookingsTable";
+import { CenteredSpinner, CenteredSpinnerContainer } from "../ux/spinner";
 
 
 interface IPersonTrackingPanel {
@@ -24,40 +24,40 @@ interface IPersonTrackingPanel {
 
 const childTableHead: ICollapsibleTableHead[] = [
   {
-    title: 'nr.'
+    title: "nr."
   },
   {
-    title: 'Name'
+    title: "Name"
   },
   {
-    title: 'Email'
+    title: "Email"
   }
 ];
 
 const parentTableHead: ICollapsibleTableHead[] = [
   {
-    title: '',
-    width: '5%'
+    title: "",
+    width: "5%"
   },
   {
-    title: 'Date',
-    width: '10%'
+    title: "Date",
+    width: "10%"
   },
   {
-    title: 'Office',
-    width: '10%'
+    title: "Office",
+    width: "10%"
   },
   {
-    title: 'Person',
-    width: '15%'
+    title: "Person",
+    width: "15%"
   },
   {
-    title: 'Capacity utilisation',
-    width: '10%'
+    title: "Capacity utilisation",
+    width: "10%"
   },
   {
-    title: '',
-    width: '50%'
+    title: "",
+    width: "50%"
   }
 ];
 
@@ -79,7 +79,7 @@ const mapBookingsForUI = ({
 
   return {
     date: date,
-    site: site || '',
+    site: site || "",
     person: user,
     visitors: mappedPeople,
     utilisation: `${mappedPeople.length} people (max ${maxPeople})`
@@ -91,21 +91,21 @@ export function PersonTrackingPanel({
   offices
 }: IPersonTrackingPanel) {
   const { apiClient } = useServices();
-  const today = dayjs().utc().startOf('day');
+  const today = dayjs().utc().startOf("day");
 
-  const [startDate, setStartDate] = useState(() => today.startOf('week').add(1, 'day'));
-  const [endDate, setEndDate] = useState(() => today.startOf('week').add(1, 'day'));
-  const [currentUser, setCurrentUser] = React.useState('');
+  const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [currentUser, setCurrentUser] = React.useState("");
   const [range, setRange] = React.useState(0);
 
-  const startDateStr = startDate.format('YYYY-MM-DD');
-  const endDateStr = endDate.format('YYYY-MM-DD');
+  const startDateStr = startDate.format("YYYY-MM-DD");
+  const endDateStr = endDate.format("YYYY-MM-DD");
 
   const handleSearch = () => {
     mutateUserContacts({
       user: currentUser,
-      startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
-      endDate: startDate.format('YYYY-MM-DD')
+      startDate: startDate.subtract(range, "day").format("YYYY-MM-DD"),
+      endDate: startDate.format("YYYY-MM-DD")
     });
   }
 
@@ -156,8 +156,8 @@ export function PersonTrackingPanel({
         onSearch={handleSearch}
       />
       {
-        mutateUserContactsRes.status === 'loading' ? (
-          <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
+        mutateUserContactsRes.status === "loading" ? (
+          <CenteredSpinnerContainer style={{ minHeight: "250px" }}>
             <CenteredSpinner/>
           </CenteredSpinnerContainer>
         ) : (
@@ -165,7 +165,7 @@ export function PersonTrackingPanel({
             childComponent={BookingsTable}
             childTableHead={childTableHead}
             parentTableHead={parentTableHead}
-            empty={'No result for the selected parameters.'}
+            empty={"No result for the selected parameters."}
             rows={rows}
           />
         )

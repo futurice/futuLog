@@ -1,22 +1,22 @@
-import React from 'react';
-import { useMediaQuery } from '@material-ui/core';
-import { SelectInputProps } from '@material-ui/core/Select/SelectInput';
-import { DatePicker } from '@material-ui/pickers';
+import React from "react";
+import { useMediaQuery } from "@material-ui/core";
+import { SelectInputProps } from "@material-ui/core/Select/SelectInput";
+import { DatePicker } from "@material-ui/pickers";
 
-import { Button } from '../ux/buttons';
-import { ICSVDataItem, IUserDtoMapped, IToolbar, ITableDataDto } from './types';
-import { CSVButton } from './CSVButton';
-import { IUserDto } from '../../services/apiClientService';
-import { Toolbar, ToolbarItem } from './styled';
-import { Theme } from '../ux/theme';
-import { FormControl } from '../ux/formcontrol';
-import { Select } from '../ux/select';
+import { Button } from "../ux/buttons";
+import { ICSVDataItem, IUserDtoMapped, IToolbar, ITableDataDto } from "./types";
+import { CSVButton } from "./CSVButton";
+import { IUserDto } from "../../services/apiClientService";
+import { Toolbar, ToolbarItem } from "./styled";
+import { Theme } from "../ux/theme";
+import { FormControl } from "../ux/formcontrol";
+import { Select } from "../ux/select";
 
 
 const DAYS_RANGE_OPTIONS = [
-  { value: 1, label: '1 day' },
-  { value: 14, label: '14 days' },
-  { value: 30, label: '30 days' }
+  { value: 1, label: "1 day" },
+  { value: 14, label: "14 days" },
+  { value: 30, label: "30 days" }
 ];
 
 interface ITrackingToolbar extends IToolbar {
@@ -25,17 +25,17 @@ interface ITrackingToolbar extends IToolbar {
   currentUser: string;
   range: number;
 
-  onUserChange?: SelectInputProps['onChange']
-  onRangeChange?: SelectInputProps['onChange']
+  onUserChange?: SelectInputProps["onChange"]
+  onRangeChange?: SelectInputProps["onChange"]
 }
 
 const trackingTableDataToCSV = (tableData: ITableDataDto[]) => {
   return tableData.reduce((acc: ICSVDataItem[], { date, site, visitors }: ITableDataDto) => {
     const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IUserDtoMapped) => ({
-      date: date || '',
-      site: site || '',
-      name: name || '',
-      email: email || ''
+      date: date || "",
+      site: site || "",
+      name: name || "",
+      email: email || ""
     }));
 
     return [...acc, ...extendedVisitors];
@@ -59,7 +59,7 @@ export function TrackingToolbar({
   );
   const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
-  const startDateStr = startDate.format('YYYY-MM-DD');
+  const startDateStr = startDate.format("YYYY-MM-DD");
 
   return (
     <Toolbar>
@@ -82,7 +82,7 @@ export function TrackingToolbar({
             onChange={onRangeChange}
             name="range"
             inputProps={{
-              id: 'range-select',
+              id: "range-select",
             }}
           >
             {
@@ -123,7 +123,7 @@ export function TrackingToolbar({
             onChange={onUserChange}
             name="person"
             inputProps={{
-              id: 'person-select'
+              id: "person-select"
             }}
           >
             {

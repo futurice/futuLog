@@ -1,20 +1,20 @@
-import React, { useMemo, useState } from 'react';
-import { queryCache, useMutation } from 'react-query';
-import dayjs from 'dayjs';
+import React, { useMemo, useState } from "react";
+import { queryCache, useMutation } from "react-query";
+import dayjs from "dayjs";
 
-import CollapsibleTable from './CollapsibleTable';
-import { officeBookingsQueryKey } from '../../utils/reactQueryUtils';
-import { useServices } from '../../services/services';
+import CollapsibleTable from "./CollapsibleTable";
+import { officeBookingsQueryKey } from "../../utils/reactQueryUtils";
+import { useServices } from "../../services/services";
 import {
   ICapacityDto,
   IOfficeBookingsRequestDto,
   IOfficeSpaceDto,
   IUserDto
-} from '../../services/apiClientService';
-import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from './types';
-import { VisitorsToolbar } from './VisitorsToolbar';
-import { BookingsTable } from './BookingsTable';
-import { CenteredSpinner, CenteredSpinnerContainer } from '../ux/spinner';
+} from "../../services/apiClientService";
+import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from "./types";
+import { VisitorsToolbar } from "./VisitorsToolbar";
+import { BookingsTable } from "./BookingsTable";
+import { CenteredSpinner, CenteredSpinnerContainer } from "../ux/spinner";
 
 interface IOfficeVisitsPanel {
   offices: IOfficeSpaceDto[];
@@ -22,36 +22,36 @@ interface IOfficeVisitsPanel {
 
 const childTableHead: ICollapsibleTableHead[] = [
   {
-    title: 'nr.'
+    title: "nr."
   },
   {
-    title: 'Name'
+    title: "Name"
   },
   {
-    title: 'Email'
+    title: "Email"
   }
 ];
 
 const parentTableHead: ICollapsibleTableHead[] = [
   {
-    title: '',
-    width: '5%'
+    title: "",
+    width: "5%"
   },
   {
-    title: 'Date',
-    width: '10%'
+    title: "Date",
+    width: "10%"
   },
   {
-    title: 'Office',
-    width: '15%'
+    title: "Office",
+    width: "15%"
   },
   {
-    title: 'Capacity utilisation',
-    width: '15%'
+    title: "Capacity utilisation",
+    width: "15%"
   },
   {
-    title: '',
-    width: '55%'
+    title: "",
+    width: "55%"
   }
 ];
 
@@ -83,20 +83,20 @@ export function OfficeVisitsPanel({
   offices
 }: IOfficeVisitsPanel) {
   const { apiClient } = useServices();
-  const today = dayjs().utc().startOf('day');
+  const today = dayjs().utc().startOf("day");
 
-  const [startDate, setStartDate] = useState(() => today.startOf('week').add(1, 'day'));
-  const [endDate, setEndDate] = useState(() => today.startOf('week').add(1, 'day'));
-  const [currentSite, setCurrentSite] = React.useState((offices && offices[2].site) || '');
+  const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [currentSite, setCurrentSite] = React.useState((offices && offices[2].site) || "");
 
-  const startDateStr = startDate.format('YYYY-MM-DD');
-  const endDateStr = endDate.format('YYYY-MM-DD');
+  const startDateStr = startDate.format("YYYY-MM-DD");
+  const endDateStr = endDate.format("YYYY-MM-DD");
 
   const handleSearch = () => {
     mutateOfficeBookings({
       site: currentSite,
-      startDate: startDate.format('YYYY-MM-DD'),
-      endDate: endDate.format('YYYY-MM-DD')
+      startDate: startDate.format("YYYY-MM-DD"),
+      endDate: endDate.format("YYYY-MM-DD")
     });
   }
 
@@ -137,8 +137,8 @@ export function OfficeVisitsPanel({
         onSearch={handleSearch}
       />
       {
-        mutateOfficeBookingsRes.status === 'loading' ? (
-          <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
+        mutateOfficeBookingsRes.status === "loading" ? (
+          <CenteredSpinnerContainer style={{ minHeight: "250px" }}>
             <CenteredSpinner />
           </CenteredSpinnerContainer>
         ) : (
@@ -146,7 +146,7 @@ export function OfficeVisitsPanel({
             childComponent={BookingsTable}
             childTableHead={childTableHead}
             parentTableHead={parentTableHead}
-            empty={'No result for the selected parameters.'}
+            empty={"No result for the selected parameters."}
             rows={rows}
           />
         )

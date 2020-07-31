@@ -1,6 +1,6 @@
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
-import { TableCellProps as MuiTableCellProps } from '@material-ui/core/TableCell/TableCell';
+import { TableCellProps as MuiTableCellProps } from "@material-ui/core/TableCell/TableCell";
 
 
 export interface ICollapsibleTableHead extends MuiTableCellProps {

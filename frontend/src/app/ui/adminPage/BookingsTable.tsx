@@ -1,11 +1,11 @@
-import React from 'react';
-import { Table, TableBody, TableHead, TableRow } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import React from "react";
+import { Table, TableBody, TableHead, TableRow } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
-import { colors } from '../ux/theme';
-import { TableCell } from './styled';
-import { ICollapsibleTableHead } from './types';
-import { mapBookingsForUI } from './OfficeVisitsPanel';
+import { colors } from "../ux/theme";
+import { TableCell } from "./styled";
+import { ICollapsibleTableHead } from "./types";
+import { mapBookingsForUI } from "./OfficeVisitsPanel";
 
 
 interface IBookingsTable {
@@ -15,21 +15,21 @@ interface IBookingsTable {
 
 const useChildTableStyles = makeStyles({
   root: {
-    boxShadow: 'none',
-    backgroundColor: 'transparent'
+    boxShadow: "none",
+    backgroundColor: "transparent"
   }
 })
 
 const useChildCellStyles = makeStyles({
   root: {
-    border: 'none',
+    border: "none",
   }
 });
 
 const useTableHeadCellStyles = makeStyles({
   root: {
-    borderTop: `1px solid ${colors['deep-blue-20']}`,
-    borderBottom: `1px solid ${colors['deep-blue-20']}`
+    borderTop: `1px solid ${colors["deep-blue-20"]}`,
+    borderBottom: `1px solid ${colors["deep-blue-20"]}`
   }
 });
 
@@ -48,7 +48,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
       <TableHead>
         <TableRow>
           {
-            head.map(({ align = 'left', title }: ICollapsibleTableHead) =>
+            head.map(({ align = "left", title }: ICollapsibleTableHead) =>
               <TableCell
                 key={title}
                 className={headCellClasses.root}
@@ -66,7 +66,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               className={cellClasses.root}
               component="td"
               scope="row"
-              style={{ paddingLeft: '20px' }}
+              style={{ paddingLeft: "20px" }}
             >{i + 1}</TableCell>
             {/* TODO: when edit button is clicked checkbox column will be displayed */}
             {/*<TableCell className={cellClasses.root}>e</TableCell>*/}

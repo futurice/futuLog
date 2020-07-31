@@ -1,13 +1,13 @@
-import React from 'react';
-import { Box } from '@material-ui/core';
+import React from "react";
+import { Box } from "@material-ui/core";
 
-import { H2Center } from '../ux/text';
-import { Stack } from '../ux/containers';
-import { colors } from '../ux/theme';
-import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from './styled';
-import { IOfficeSpaceDto, IUserDto } from '../../services/apiClientService';
-import { OfficeVisitsPanel } from './OfficeVisitsPanel';
-import { PersonTrackingPanel } from './PersonTrackingPanel';
+import { H2Center } from "../ux/text";
+import { Stack } from "../ux/containers";
+import { colors } from "../ux/theme";
+import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from "./styled";
+import { IOfficeSpaceDto, IUserDto } from "../../services/apiClientService";
+import { OfficeVisitsPanel } from "./OfficeVisitsPanel";
+import { PersonTrackingPanel } from "./PersonTrackingPanel";
 
 
 export interface ITabPanelProps {
@@ -44,7 +44,7 @@ export function TabPanel(props: ITabPanelProps) {
 function a11yProps(index: any) {
   return {
     id: `tab-${index}`,
-    'aria-controls': `tabpanel-${index}`,
+    "aria-controls": `tabpanel-${index}`,
   };
 }
 
@@ -85,7 +85,7 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices, users }) => {
           <Tab label="Office visits" {...a11yProps(0)} />
           <Tab label="Person tracking" {...a11yProps(1)} />
         </Tabs>
-        <TabsPanelWrapper bgColor={`${colors['deep-blue-10']}`}>
+        <TabsPanelWrapper bgColor={`${colors["deep-blue-10"]}`}>
           <TabPanel
             value={tab}
             index={0}

@@ -1,5 +1,5 @@
-import React from 'react';
-import { makeStyles, styled } from '@material-ui/core/styles';
+import React from "react";
+import { makeStyles, styled } from "@material-ui/core/styles";
 import {
   Table,
   TableBody,
@@ -9,40 +9,40 @@ import {
   Paper,
   Collapse,
   Box
-} from '@material-ui/core';
+} from "@material-ui/core";
 
-import { IconArrowDown, IconArrowUp } from '../ux/icons';
-import { IconButton } from '../ux/buttons';
-import { colors } from '../ux/theme';
-import { P } from '../ux/text';
-import { TableCell } from './styled';
-import { ICollapsibleTableHead } from './types';
-import { mapBookingsForUI } from './OfficeVisitsPanel';
+import { IconArrowDown, IconArrowUp } from "../ux/icons";
+import { IconButton } from "../ux/buttons";
+import { colors } from "../ux/theme";
+import { P } from "../ux/text";
+import { TableCell } from "./styled";
+import { ICollapsibleTableHead } from "./types";
+import { mapBookingsForUI } from "./OfficeVisitsPanel";
 
 
 const useRowStyles = makeStyles({
   root: {
-    '& > *': {
-      borderBottom: 'none',
+    "& > *": {
+      borderBottom: "none",
     },
-    '&:nth-child(2n+1)': {
-      borderTop: `1px solid ${colors['deep-blue-20']}`
+    "&:nth-child(2n+1)": {
+      borderTop: `1px solid ${colors["deep-blue-20"]}`
     }
   }
 });
 
 const useTableContainerStyles = makeStyles({
   root: {
-    borderRadius: 'unset',
-    boxShadow: 'none',
-    backgroundColor: 'transparent'
+    borderRadius: "unset",
+    boxShadow: "none",
+    backgroundColor: "transparent"
   }
 });
 
 const useTableHeadCellStyles = makeStyles({
   root: {
-    borderTop: `1px solid ${colors['deep-blue-30']}`,
-    borderBottom: `1px solid ${colors['deep-blue-20']}`,
+    borderTop: `1px solid ${colors["deep-blue-30"]}`,
+    borderBottom: `1px solid ${colors["deep-blue-20"]}`,
   }
 });
 
@@ -62,15 +62,15 @@ interface ICollapsibleTable extends ICollapsibleTableChild {
   empty?: string;
 }
 
-const TableEmpty = styled('div')({
-  paddingTop: '60px',
-  paddingBottom: '60px',
-  textAlign: 'center',
+const TableEmpty = styled("div")({
+  paddingTop: "60px",
+  paddingBottom: "60px",
+  textAlign: "center",
 
-  '& > p': {
-    color: colors['deep-blue-90'],
+  "& > p": {
+    color: colors["deep-blue-90"],
     opacity: 0.6,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   }
 });
 
@@ -102,7 +102,7 @@ function Row({
         </TableCell>
         {
           Object.values(row).map((value) => (
-            (typeof value === 'string' || typeof value === 'number') && <TableCell key={value}>{value}</TableCell>
+            (typeof value === "string" || typeof value === "number") && <TableCell key={value}>{value}</TableCell>
           ))
         }
         {/* TODO: Edit button will be down here */}
@@ -156,7 +156,7 @@ export default function CollapsibleTable({
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            {parentTableHead.map(({ align = 'left', title, width = '' }: ICollapsibleTableHead, i) =>
+            {parentTableHead.map(({ align = "left", title, width = "" }: ICollapsibleTableHead, i) =>
               <TableCell
                 key={title + i}
                 style={{ width }}
@@ -171,7 +171,7 @@ export default function CollapsibleTable({
             rows.length !== 0 && (
               rows.map((row, i) => (
                 <Row
-                  key={i + '1'}
+                  key={i + "1"}
                   row={row}
                   childComponent={childComponent}
                   childTableHead={childTableHead}

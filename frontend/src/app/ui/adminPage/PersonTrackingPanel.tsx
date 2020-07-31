@@ -136,14 +136,14 @@ export function PersonTrackingPanel({
   }
 
   const [mutateUserContacts, mutateUserContactsRes] = useMutation(
-    ({ user, startDate, endDate}: IUserDataRequestDto) => apiClient.getUserContacts({ user, startDate, endDate}),
+    ({ user, startDate, endDate }: IUserDataRequestDto) => apiClient.getUserContacts({ user, startDate, endDate }),
     {
       onSuccess: () => queryCache.refetchQueries(userContactsQueryKey(currentUser, startDateStr, endDateStr)),
     }
   );
 
   const [mutateUserBookings, mutateUserBookingsRes] = useMutation(
-    ({ user, startDate, endDate}: IUserDataRequestDto) => apiClient.getUserBookings({ user, startDate, endDate}),
+    ({ user, startDate, endDate }: IUserDataRequestDto) => apiClient.getUserBookings({ user, startDate, endDate }),
     {
       onSuccess: () => queryCache.refetchQueries(userBookingsQueryKey(currentUser, startDateStr, endDateStr)),
     }
@@ -156,11 +156,11 @@ export function PersonTrackingPanel({
 
     const mappedBookings: ITableDataDto[] | undefined = data && data.map(
       (item: ICapacityDto) => {
-        const { site, userEmail } = (userBookings || []).filter((booking: IUserBookingsDto) => {
+        const { site } = (userBookings || []).filter((booking: IUserBookingsDto) => {
           return booking.date === item.date;
         })[0];
 
-        return mapBookingsForUI({ bookings: item, site , user: `${user?.first_name} ${user?.last_name}`, offices: offices || [] })
+        return mapBookingsForUI({ bookings: item, site, user: `${user?.first_name} ${user?.last_name}`, offices: offices || [] });
       });
 
     return mappedBookings || [];
@@ -182,7 +182,7 @@ export function PersonTrackingPanel({
       {
         mutateUserContactsRes.status === 'loading' ? (
           <CenteredSpinnerContainer style={{ minHeight: '250px' }}>
-            <CenteredSpinner />
+            <CenteredSpinner/>
           </CenteredSpinnerContainer>
         ) : (
           <CollapsibleTable

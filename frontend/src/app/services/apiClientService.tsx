@@ -89,6 +89,7 @@ export interface IOfficeSpaceDto {
 }
 
 export interface ICapacityDto {
+  site?: string;
   date: string;
   people: IUserDto[];
 }

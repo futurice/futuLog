@@ -102,7 +102,7 @@ function Row({
         </TableCell>
         {
           Object.values(row).map((value) => (
-            <TableCell key={value}>{value}</TableCell>
+            (typeof value === 'string' || typeof value === 'number') && <TableCell key={value}>{value}</TableCell>
           ))
         }
         {/* TODO: Edit button will be down here */}

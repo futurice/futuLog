@@ -12,7 +12,7 @@ import { userBookingsQueryKey, userContactsQueryKey } from '../../utils/reactQue
 import { useServices } from '../../services/services';
 import {
   ICapacityDto,
-  IOfficeSpaceDto, IUserBookingsDto,
+  IOfficeSpaceDto,
   IUserDataRequestDto,
   IUserDto
 } from '../../services/apiClientService';
@@ -68,16 +68,14 @@ const parentTableHead: ICollapsibleTableHead[] = [
 
 const mapBookingsForUI = ({
   bookings,
-  site,
   user,
   offices
 }: {
   bookings: ICapacityDto,
-  site: string,
   user: string,
   offices: IOfficeSpaceDto[]
 }): ITableDataDto => {
-  const { people, date } = bookings;
+  const { people, date, site } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
     name: `${person.first_name} ${person.last_name}`,
     email: person.email
@@ -86,7 +84,7 @@ const mapBookingsForUI = ({
 
   return {
     date: date,
-    site,
+    site: site || '',
     person: user,
     visitors: mappedPeople,
     utilisation: `${mappedPeople.length} people (max ${maxPeople})`
@@ -109,15 +107,10 @@ export function PersonTrackingPanel({
   const endDateStr = endDate.format('YYYY-MM-DD');
 
   const handleSearch = () => {
-    mutateUserBookings({
-      user: currentUser,
-      startDate: startDate.format('YYYY-MM-DD'),
-      endDate: startDate.subtract(range, 'day').format('YYYY-MM-DD')
-    });
     mutateUserContacts({
       user: currentUser,
-      startDate: startDate.format('YYYY-MM-DD'),
-      endDate: startDate.subtract(range, 'day').format('YYYY-MM-DD')
+      startDate: startDate.subtract(range, 'day').format('YYYY-MM-DD'),
+      endDate: startDate.format('YYYY-MM-DD')
     });
   }
 
@@ -142,29 +135,17 @@ export function PersonTrackingPanel({
     }
   );
 
-  const [mutateUserBookings, mutateUserBookingsRes] = useMutation(
-    ({ user, startDate, endDate }: IUserDataRequestDto) => apiClient.getUserBookings({ user, startDate, endDate }),
-    {
-      onSuccess: () => queryCache.refetchQueries(userBookingsQueryKey(currentUser, startDateStr, endDateStr)),
-    }
-  );
-
   const rows: ITableDataDto[] = useMemo(() => {
-    const { data: userBookings } = mutateUserBookingsRes;
     const { data } = mutateUserContactsRes;
     const user = users.filter(({ email }) => currentUser === email)[0];
 
     const mappedBookings: ITableDataDto[] | undefined = data && data.map(
       (item: ICapacityDto) => {
-        const { site } = (userBookings || []).filter((booking: IUserBookingsDto) => {
-          return booking.date === item.date;
-        })[0];
-
-        return mapBookingsForUI({ bookings: item, site, user: `${user?.first_name} ${user?.last_name}`, offices: offices || [] });
+        return mapBookingsForUI({ bookings: item, user: `${user?.first_name} ${user?.last_name}`, offices: offices || [] });
       });
 
     return mappedBookings || [];
-  }, [mutateUserContactsRes, mutateUserBookingsRes]);
+  }, [mutateUserContactsRes]);
 
   return (
     <>

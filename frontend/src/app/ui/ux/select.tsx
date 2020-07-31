@@ -6,86 +6,131 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import { colors } from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
+import { Flex } from './containers';
 
 type ISelectProps = MuiSelectProps;
 
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
-  border: `1px solid ${colors["deep-blue-80"]}`,
-  borderRadius: "4px",
-  "&:hover": {
-    border: `1px solid ${colors["deep-blue-50"]}`,
-    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+  border: 'none',
+  transition: 'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
+    'box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
+    'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+
+  "& .MuiInputBase-input": {
+    padding: '8px 60px 8px 8px',
+    border: `2px solid ${colors["deep-blue-80"]}`,
+    borderRadius: "4px",
+
+    transition: 'box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
+      'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
   },
-  "&:active": {
-    border: `1px solid ${colors["deep-blue-50"]}`,
-    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
-  },
-  "&:focus": {
-    border: `1px solid ${colors["deep-blue-50"]}`,
-  },
-  "&:focus-within": {
-    border: `1px solid ${colors["deep-blue-50"]}`,
-  },
-  "&:focus .MuiSelect-icon":{
-    borderLeft: `1px solid ${colors["deep-blue-50"]}`,
-  },
-  "&:focus-within .MuiSelect-icon": {
-    borderLeft: `1px solid ${colors["deep-blue-50"]}`,
-  },
-  "&:disabled": {
-    background: "rgba(255, 255, 255, 0.5)",
-    border: "1px solid rgba(166, 157, 199, 0.5)",
-    color: "rgba(255, 255, 255, 0.5)",
-    backgroundColor: "rgba(32, 10, 116, 0.5)",
-  },
-  "& .MuiSelect-selectMenu": {
-    backgroundColor: `${colors.white}`,
-    borderRadius: "3px 0px 0px 3px",
-  },
+
   "& .MuiSelect-icon": {
-    top: "unset",
+    width: '36px',
+    height: '37px',
+    top: 'unset',
+    right: '0',
+
+    justifyContent: 'center',
+    alignItems: 'center',
+
+    border: `2px solid ${colors["deep-blue-80"]}`,
+    backgroundColor: colors["deep-blue-80"],
+    borderTopRightRadius: '5px',
+    borderBottomRightRadius: '5px',
+
+    transition: 'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
+      'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
   },
-  "&:hover .SVGpath":{
-    fill: `${colors["deep-blue-50"]}`,
+
+  "&:hover .MuiInputBase-input": {
+    border: `2px solid ${colors["deep-blue-50"]}`,
+    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
   },
-  "& .MuiSelect-root":{
-    minWidth:"150px",
-  }
+
+  "&:hover .MuiSelect-icon": {
+    backgroundColor: colors["deep-blue-50"],
+    border: `2px solid ${colors["deep-blue-50"]}`,
+  },
+
+  "&.Mui-focused": {
+    "& .MuiInputBase-input": {
+      border: `2px solid ${colors["deep-blue-50"]}`,
+      boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+    },
+
+    "& .MuiSelect-icon": {
+      border: `2px solid ${colors["deep-blue-50"]}`,
+    }
+  },
+
+  "&.Mui-disabled": {
+    opacity: 0.5,
+
+    '&:hover': {
+      "& .MuiInputBase-input": {
+        border: `2px solid ${colors["deep-blue-80"]}`,
+        boxShadow: 'none',
+      },
+      "& .MuiSelect-icon": {
+        backgroundColor: colors["deep-blue-80"],
+        border: `2px solid ${colors["deep-blue-80"]}`,
+      },
+    }
+  },
+
+  // "& .MuiSelect-selectMenu": {
+  //   backgroundColor: `${colors.white}`,
+  //   borderRadius: "3px 0px 0px 3px",
+  // },
+  // "& .MuiSelect-root":{
+  //   minWidth:"150px",
+  // }
 });
 
 const useStyles = makeStyles({
   list: {
     paddingTop: 0,
     paddingBottom: 0,
-    background: `${colors.white}`,
+
+    backgroundColor: colors.white,
     borderRadius: "4px",
     border: `1px solid ${colors["deep-blue-80"]}`,
-    "& li": {
+
+    "& option": {
       fontWeight: 200,
-      paddingTop: 12,
-      paddingBottom: 12,
-      borderRadius: "3px",
-      minWidth: 150,
+      padding: '10px 8px',
+
+      transition: 'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,' +
+        'border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     },
-    "& li:hover": {
-      color: `${colors["deep-blue-80"]}`,
-      background: `${colors["deep-blue-20"]}`,
+
+    "& option:last-child": {
+      borderRadius: "0px 0px 4px 4px",
     },
-    "& li.Mui-selected": {
-      color: `${colors["deep-blue-80"]}`,
-      background: `${colors.white}`,
+    "& option:first-child": {
+      borderRadius: "4px 4px 0px 0px",
+    },
+
+    "& option:hover": {
+      backgroundColor: colors["deep-blue-20"],
+      color: colors["deep-blue-80"],
+    },
+
+    "& option:active": {
       fontWeight: "bold",
     },
-    "& li.Mui-selected:hover": {
+
+    "& option:.Mui-selected": {
       color: `${colors["deep-blue-80"]}`,
-      background: `${colors["deep-blue-20"]}`,
+      backgroundColor: `${colors.white}`,
+      fontWeight: "bold",
     },
-    "& li:last-child": {
-      borderRadius: "0px 0px 3px 3px",
-    },
-    "& li:first-child": {
-      borderRadius: "3px 3px 0px 0px",
+
+    "& option.Mui-selected:hover": {
+      color: `${colors["deep-blue-80"]}`,
+      backgroundColor: `${colors["deep-blue-20"]}`,
     },
   },
 });
@@ -103,8 +148,8 @@ export const Select: React.FC<ISelectProps> = ({
       list: classes.list
     },
     anchorOrigin: {
-      vertical: 34,
-      horizontal: -1,
+      vertical: 40,
+      horizontal: 0,
     },
     transformOrigin: {
       vertical: 0,
@@ -128,14 +173,18 @@ export const Select: React.FC<ISelectProps> = ({
       onClose={handleClose}
       onOpen={handleOpen}
       IconComponent={() => open ?
-        <IconArrowUp
-          classNames={"MuiSvgIcon-root MuiSelect-icon"}
-          color={colors.white}
-        />
-        : <IconArrowDown
-          classNames={"MuiSvgIcon-root MuiSelect-icon"}
-          color={colors.white}
-        />
+        <Flex className={"MuiSelect-icon"}>
+          <IconArrowUp
+            classNames={"MuiSvgIcon-root"}
+            color={colors.white}
+          />
+        </Flex>
+        : <Flex className={"MuiSelect-icon"}>
+          <IconArrowDown
+            classNames={"MuiSvgIcon-root"}
+            color={colors.white}
+          />
+        </Flex>
       }
       MenuProps={menuProps}
       variant="standard"

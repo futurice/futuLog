@@ -79,7 +79,7 @@ export const Tab = styled((props: MuiTabProps) => <MuiTab {...props} disableRipp
 export const Toolbar = styled(Flex)({
   marginBottom: '35px',
   marginTop: '5px',
-  alignItems: 'center'
+  alignItems: 'flex-end'
 });
 
 export const ToolbarItem = styled(Flex)({
@@ -100,7 +100,8 @@ export const ToolbarItem = styled(Flex)({
   },
   '& .MuiFormControl-root': {
     marginLeft: '0',
-    marginRight: '0'
+    marginRight: '0',
+    marginBottom: '0'
   }
 });
 

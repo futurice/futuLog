@@ -123,7 +123,7 @@ const useStyles = makeStyles({
       fontWeight: "bold",
     },
 
-    "& option:.Mui-selected": {
+    "& option.Mui-selected": {
       color: `${colors["deep-blue-80"]}`,
       backgroundColor: `${colors.white}`,
       fontWeight: "bold",

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { queryCache, useMutation } from "react-query";
 import dayjs from "dayjs";
 
@@ -87,13 +87,14 @@ export function OfficeVisitsPanel({
 
   const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
   const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
-  const [currentSite, setCurrentSite] = React.useState((offices && offices[2].site) || "");
+  const [currentSite, setCurrentSite] = useState((offices && offices[2].site) || "");
+  const [rows, setRows] = useState<ITableDataDto[]>([]);
 
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 
-  const handleSearch = () => {
-    mutateOfficeBookings({
+  const handleSearch = async () => {
+    await mutateOfficeBookings({
       site: currentSite,
       startDate: startDateStr,
       endDate: endDateStr
@@ -110,19 +111,17 @@ export function OfficeVisitsPanel({
   }
 
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
-    ({ site, startDate, endDate}: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
+    ({ site, startDate, endDate }: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
     {
-      onSuccess: () => queryCache.refetchQueries(officeBookingsQueryKey(currentSite, startDateStr, endDateStr)),
+      onSuccess: (data) => {
+        const mappedBookings: ITableDataDto[] | undefined = data && data.map(
+          (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite, offices }));
+
+        setRows(mappedBookings || []);
+        queryCache.refetchQueries(officeBookingsQueryKey(currentSite, startDateStr, endDateStr))
+      },
     }
   );
-
-  const rows: ITableDataDto[] = useMemo(() => {
-    const { data } = mutateOfficeBookingsRes;
-    const mappedBookings: ITableDataDto[] | undefined = data && data.map(
-      (item: ICapacityDto) => mapBookingsForUI({ bookings: item, site: currentSite, offices }));
-
-    return mappedBookings || [];
-  }, [mutateOfficeBookingsRes]);
 
   return (
     <>

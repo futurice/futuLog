@@ -13,7 +13,7 @@ import { FormControl } from "../ux/formcontrol";
 import { Select } from "../ux/select";
 
 
-const DAYS_RANGE_OPTIONS = [
+export const DAYS_RANGE_OPTIONS = [
   { value: 1, label: "1 day" },
   { value: 14, label: "14 days" },
   { value: 30, label: "30 days" }

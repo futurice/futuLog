@@ -1,5 +1,5 @@
 import React from "react";
-import { useMediaQuery } from "@material-ui/core";
+import { MenuItem, useMediaQuery } from "@material-ui/core";
 import { SelectInputProps } from "@material-ui/core/Select/SelectInput";
 import { DatePicker } from "@material-ui/pickers";
 
@@ -87,10 +87,11 @@ export function TrackingToolbar({
           >
             {
               DAYS_RANGE_OPTIONS.map(({ value, label }) => (
-                <option
+                <MenuItem
+                  disableRipple
                   key={value}
                   value={value}
-                >{label}</option>
+                >{label}</MenuItem>
               ))
             }
           </Select>
@@ -128,10 +129,11 @@ export function TrackingToolbar({
           >
             {
               usersOptions.map(({ value, label }) => (
-                <option
+                <MenuItem
+                  disableRipple
                   key={value}
                   value={value}
-                >{label}</option>
+                >{label}</MenuItem>
               ))
             }
           </Select>

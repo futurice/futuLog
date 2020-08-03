@@ -1,5 +1,5 @@
 import React from "react";
-import { styled, useMediaQuery } from "@material-ui/core";
+import { MenuItem, styled, useMediaQuery } from "@material-ui/core";
 import { DatePicker } from "@material-ui/pickers";
 import { SelectInputProps } from "@material-ui/core/Select/SelectInput";
 import dayjs from "dayjs";
@@ -106,7 +106,11 @@ export function VisitorsToolbar({
           >
             {
               officesOptions.map(({ value, label }) => (
-                <option key={value} value={value}>{label}</option>
+                <MenuItem
+                  disableRipple
+                  key={value}
+                  value={value}
+                >{label}</MenuItem>
               ))
             }
           </Select>

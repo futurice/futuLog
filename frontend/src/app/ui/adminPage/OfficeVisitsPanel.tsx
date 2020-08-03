@@ -72,7 +72,7 @@ export function mapBookingsForUI({
   const { maxPeople } = offices.filter((office) => office.site === site)[0];
 
   return {
-    date: date,
+    date: dayjs(date).format("D MMM YYYY") || "",
     site,
     visitors: mappedPeople,
     utilisation: `${mappedPeople.length} people (max ${maxPeople})`
@@ -95,8 +95,8 @@ export function OfficeVisitsPanel({
   const handleSearch = () => {
     mutateOfficeBookings({
       site: currentSite,
-      startDate: startDate.format("YYYY-MM-DD"),
-      endDate: endDate.format("YYYY-MM-DD")
+      startDate: startDateStr,
+      endDate: endDateStr
     });
   }
 

@@ -117,6 +117,7 @@ export function VisitorsToolbar({
           variant="contained"
           color="primary"
           onClick={onSearch}
+          disabled={!startDate || !endDate || !currentSite}
         >
           Search
         </Button>
@@ -125,6 +126,7 @@ export function VisitorsToolbar({
         <CSVButton
           data={csvData}
           filename={`${currentSite}_${startDateStr}_${endDateStr}`}
+          disabled={!tableData || tableData.length === 0}
         />
       </ToolbarItem>
     </Toolbar>

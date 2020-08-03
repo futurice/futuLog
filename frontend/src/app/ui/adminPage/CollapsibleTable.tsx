@@ -42,7 +42,9 @@ const useTableContainerStyles = makeStyles({
 const useTableHeadCellStyles = makeStyles({
   root: {
     borderTop: `1px solid ${colors["deep-blue-30"]}`,
-    borderBottom: `1px solid ${colors["deep-blue-20"]}`,
+    borderBottom: `1px solid ${colors["deep-blue-30"]}`,
+    paddingTop: '8px',
+    paddingBottom: '8px',
   }
 });
 

@@ -142,6 +142,7 @@ export function TrackingToolbar({
           variant="contained"
           color="primary"
           onClick={onSearch}
+          disabled={!startDate || !range || !currentUser}
         >
           Search
         </Button>
@@ -149,7 +150,8 @@ export function TrackingToolbar({
       <ToolbarItem>
         <CSVButton
           data={csvData}
-          filename={`${currentUser}_${startDateStr}_${range}_day(-s)`}
+          filename={`${currentUser}_${startDateStr}_last_${range}_day(-s)`}
+          disabled={!tableData || tableData.length === 0}
         />
       </ToolbarItem>
     </Toolbar>

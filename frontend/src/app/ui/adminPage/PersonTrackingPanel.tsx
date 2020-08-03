@@ -78,7 +78,7 @@ const mapBookingsForUI = ({
   const { maxPeople } = offices.filter((office) => office.site === site)[0];
 
   return {
-    date: date,
+    date: dayjs(date).format("D MMM YYYY") || "",
     site: site || "",
     person: user,
     visitors: mappedPeople,
@@ -98,14 +98,11 @@ export function PersonTrackingPanel({
   const [currentUser, setCurrentUser] = React.useState("");
   const [range, setRange] = React.useState(0);
 
-  const startDateStr = startDate.format("YYYY-MM-DD");
-  const endDateStr = endDate.format("YYYY-MM-DD");
-
   const handleSearch = () => {
     mutateUserContacts({
       user: currentUser,
       startDate: startDate.subtract(range, "day").format("YYYY-MM-DD"),
-      endDate: startDate.format("YYYY-MM-DD")
+      endDate: endDate.format("YYYY-MM-DD")
     });
   }
 
@@ -126,7 +123,8 @@ export function PersonTrackingPanel({
   const [mutateUserContacts, mutateUserContactsRes] = useMutation(
     ({ user, startDate, endDate }: IUserDataRequestDto) => apiClient.getUserContacts({ user, startDate, endDate }),
     {
-      onSuccess: () => queryCache.refetchQueries(userContactsQueryKey(currentUser, startDateStr, endDateStr)),
+      onSuccess: () => queryCache.refetchQueries(userContactsQueryKey(
+        currentUser, startDate.subtract(range, "day").format("YYYY-MM-DD"), endDate.format("YYYY-MM-DD"))),
     }
   );
 

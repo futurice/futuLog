@@ -8,8 +8,7 @@ import {
   combineQueries,
   officesQueryKey,
   userShiftQueryKey,
-  userQueryKey,
-  usersQueryKey,
+  userQueryKey
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { AdminPage } from "app/ui/adminPage/AdminPage";
@@ -41,24 +40,22 @@ export const AppRoutes: React.FC = () => {
     setHasVisitedWelcomePage(true);
   };
 
-  // Fetch all critical data here
+  // Fetch all critical non admin data here
   const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
   const userShiftRes = useQuery(userShiftQueryKey(), () => apiClientService.getUserShift());
   const officesRes = useQuery(officesQueryKey(), () => apiClientService.getOffices());
-  const usersRes = useQuery(usersQueryKey(), () => apiClientService.getUsers());
 
   return (
     <RenderQuery
       query={combineQueries({
         user: userRes,
-        users: usersRes,
         userShift: userShiftRes,
         offices: officesRes,
       })}
       onLoading={() => <CenteredSpinner />}
       onError={(error) => <h2>{error.message}</h2>}
     >
-      {({ user, offices, users }) => (
+      {({ user, offices }) => (
         <SiteLayout user={user}>
           <Switch>
             <Route
@@ -73,7 +70,7 @@ export const AppRoutes: React.FC = () => {
               <Route
                 exact
                 path={RoutePaths.Admin}
-                render={(props) => <AdminPage users={users} offices={offices} {...props} /> } />
+                render={(props) => <AdminPage offices={offices} {...props} /> } />
             )}
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />

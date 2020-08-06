@@ -11,22 +11,21 @@ import { Toolbar, ToolbarItem } from "./styled";
 import { Theme } from "../ux/theme";
 import { FormControl } from "../ux/formcontrol";
 import { Select } from "../ux/select";
-
+import { Searchbox } from "../ux/searchbox";
+import { TextField } from "../ux/inputs";
 
 const DAYS_RANGE_OPTIONS = [
   { value: 1, label: "1 day" },
   { value: 14, label: "14 days" },
-  { value: 30, label: "30 days" }
+  { value: 30, label: "30 days" },
 ];
 
 interface ITrackingToolbar extends IToolbar {
   users?: IUserDto[];
-
   currentUser: string;
   range: number;
-
-  onUserChange?: SelectInputProps["onChange"]
-  onRangeChange?: SelectInputProps["onChange"]
+  onUserChange?: SelectInputProps["onChange"];
+  onRangeChange?: SelectInputProps["onChange"];
 }
 
 const trackingTableDataToCSV = (tableData: ITableDataDto[]) => {
@@ -35,12 +34,12 @@ const trackingTableDataToCSV = (tableData: ITableDataDto[]) => {
       date: date || "",
       site: site || "",
       name: name || "",
-      email: email || ""
+      email: email || "",
     }));
 
     return [...acc, ...extendedVisitors];
   }, []);
-}
+};
 
 export function TrackingToolbar({
   users,
@@ -52,11 +51,12 @@ export function TrackingToolbar({
   onUserChange,
   onRangeChange,
   onDateChange,
-  onSearch
+  onSearch,
 }: ITrackingToolbar) {
-  const usersOptions = (users || []).map(
-    ({ first_name, last_name, email }) => ({ value: email, label: `${first_name} ${last_name}` })
-  );
+  const usersOptions = (users || []).map(({ first_name, last_name, email }) => ({
+    value: email,
+    label: `${first_name} ${last_name}`,
+  }));
   const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
   const startDateStr = startDate.format("YYYY-MM-DD");
@@ -69,9 +69,7 @@ export function TrackingToolbar({
           value={startDate}
           format="D MMM YYYY"
           variant={isMobile ? "dialog" : "inline"}
-          onChange={(date: any) =>
-            onDateChange(date, date)
-          }
+          onChange={(date: any) => onDateChange(date, date)}
         />
       </ToolbarItem>
       <ToolbarItem>
@@ -85,73 +83,77 @@ export function TrackingToolbar({
               id: "range-select",
             }}
           >
-            {
-              DAYS_RANGE_OPTIONS.map(({ value, label }) => (
-                <option
-                  key={value}
-                  value={value}
-                >{label}</option>
-              ))
-            }
+            {DAYS_RANGE_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </Select>
         </FormControl>
       </ToolbarItem>
       <ToolbarItem>
         <b>Person</b>
-        <FormControl>
-          {/* TODO: use Autocomplete component instead of Select (https://material-ui.com/components/autocomplete/)*/}
-          {/*<Autocomplete*/}
-          {/*  {...defaultProps}*/}
-          {/*  id="person-select"*/}
-          {/*  disableCloseOnSelect*/}
-          {/*  value={value}*/}
-          {/*  onChange={(event: any, newValue: FilmOptionType | null) => {*/}
-          {/*    setValue(newValue);*/}
-          {/*  }}*/}
-          {/*  getOptionLabel={({ label }) => label}*/}
-          {/*  renderOption={({ label }) => (*/}
-          {/*    <React.Fragment>*/}
-          {/*      {label}*/}
-          {/*    </React.Fragment>*/}
-          {/*  )}*/}
-          {/*  renderInput={(params) => (*/}
-          {/*    <TextField {...params} margin="normal" />*/}
-          {/*  )}*/}
-          {/*/>*/}
-          <Select
+        {/* <FormControl> */}
+        {/* TODO: use Autocomplete component instead of Select (https://material-ui.com/components/autocomplete/)*/}
+        {/*<Autocomplete*/}
+        {/*  {...defaultProps}*/}
+        {/*  id="person-select"*/}
+        {/*  disableCloseOnSelect*/}
+        {/*  value={value}*/}
+        {/*  onChange={(event: any, newValue: FilmOptionType | null) => {*/}
+        {/*    setValue(newValue);*/}
+        {/*  }}*/}
+        {/*  getOptionLabel={({ label }) => label}*/}
+        {/*  renderOption={({ label }) => (*/}
+        {/*    <React.Fragment>*/}
+        {/*      {label}*/}
+        {/*    </React.Fragment>*/}
+        {/*  )}*/}
+        {/*  renderInput={(params) => (*/}
+        {/*    <TextField {...params} margin="normal" />*/}
+        {/*  )}*/}
+        {/*/>*/}
+        {/* <Select
             value={currentUser}
             onChange={onUserChange}
             name="person"
             inputProps={{
-              id: "person-select"
+              id: "person-select",
             }}
           >
-            {
-              usersOptions.map(({ value, label }) => (
-                <option
-                  key={value}
-                  value={value}
-                >{label}</option>
-              ))
-            }
+            {usersOptions.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </Select>
-        </FormControl>
+        </FormControl> */}
+
+        <Searchbox
+          id="combo-box-demo"
+          options={tempUsersOptions}
+          getOptionLabel={(option) => option.label}
+          style={{ width: 200 }}
+          renderInput={(params) => <TextField {...params} />}
+        />
       </ToolbarItem>
       <ToolbarItem>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onSearch}
-        >
+        <Button variant="contained" color="primary" onClick={onSearch}>
           Search
         </Button>
       </ToolbarItem>
       <ToolbarItem>
-        <CSVButton
-          data={csvData}
-          filename={`${currentUser}_${startDateStr}_${range}_day(-s)`}
-        />
+        <CSVButton data={csvData} filename={`${currentUser}_${startDateStr}_${range}_day(-s)`} />
       </ToolbarItem>
     </Toolbar>
   );
 }
+
+const tempUsersOptions = [
+  { label: "Jan Van Brugge" },
+  { label: "Patrick Burden" },
+  { label: "Egor Sorokin" },
+  { label: "Beatrice Rachello" },
+  { label: "Simon Messmer" },
+  { label: "Theresa Glanzberg" },
+];

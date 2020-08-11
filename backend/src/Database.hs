@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Capacity (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), Contact(..))
+import Data.ClientRequest (Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -80,7 +80,7 @@ getOfficeBooked office start end =
     mapM
       ( \day ->
           (day,) . fmap fromOnly
-            <$> query' "SELECT DISTINCT user_email FROM workmodes WHERE site = ? AND date = ?" (office, day)
+            <$> query' "SELECT DISTINCT user_email FROM workmodes WHERE site = ? AND date = ? AND workmode = 'Office'" (office, day)
       )
       days
     >>= mapM

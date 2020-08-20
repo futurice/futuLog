@@ -1,5 +1,5 @@
 import React from "react";
-import { useMediaQuery } from "@material-ui/core";
+import { MenuItem, useMediaQuery } from "@material-ui/core";
 import { SelectInputProps } from "@material-ui/core/Select/SelectInput";
 import { DatePicker } from "@material-ui/pickers";
 
@@ -14,7 +14,7 @@ import { Select } from "../ux/select";
 import { Searchbox } from "../ux/searchbox";
 import { TextField } from "../ux/inputs";
 
-const DAYS_RANGE_OPTIONS = [
+export const DAYS_RANGE_OPTIONS = [
   { value: 1, label: "1 day" },
   { value: 14, label: "14 days" },
   { value: 30, label: "30 days" },
@@ -83,11 +83,15 @@ export function TrackingToolbar({
               id: "range-select",
             }}
           >
-            {DAYS_RANGE_OPTIONS.map(({ value, label }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
+            {
+              DAYS_RANGE_OPTIONS.map(({ value, label }) => (
+                <MenuItem
+                  disableRipple
+                  key={value}
+                  value={value}
+                >{label}</MenuItem>
+              ))
+            }
           </Select>
         </FormControl>
       </ToolbarItem>
@@ -108,7 +112,11 @@ export function TrackingToolbar({
         </Button>
       </ToolbarItem>
       <ToolbarItem>
-        <CSVButton data={csvData} filename={`${currentUser}_${startDateStr}_${range}_day(-s)`} />
+        <CSVButton
+          data={csvData}
+          filename={`${currentUser}_${startDateStr}_last_${range}_day(-s)`}
+          disabled={!tableData || tableData.length === 0}
+        />
       </ToolbarItem>
     </Toolbar>
   );

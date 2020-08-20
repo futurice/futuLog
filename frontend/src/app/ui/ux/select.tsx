@@ -8,7 +8,7 @@ import { colors } from "./theme";
 import { IconArrowUp, IconArrowDown } from "./icons";
 import { Flex } from "./containers";
 
-type ISelectProps = MuiSelectProps;
+type SelectProps = MuiSelectProps;
 
 export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...props} />)({
   color: `${colors["deep-blue-80"]}`,
@@ -99,7 +99,7 @@ const useStyles = makeStyles({
     borderRadius: "4px",
     border: `1px solid ${colors["deep-blue-80"]}`,
 
-    "& option": {
+    "& li": {
       fontWeight: 200,
       padding: "10px 8px",
       minWidth: "198px",
@@ -108,29 +108,29 @@ const useStyles = makeStyles({
         "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
     },
 
-    "& option:last-child": {
+    "& li:last-child": {
       borderRadius: "0px 0px 4px 4px",
     },
-    "& option:first-child": {
+    "& li:first-child": {
       borderRadius: "4px 4px 0px 0px",
     },
 
-    "& option:hover": {
+    "& li:hover": {
       backgroundColor: colors["deep-blue-20"],
       color: colors["deep-blue-80"],
     },
 
-    "& option:active": {
+    "& li:active": {
       fontWeight: "bold",
     },
 
-    "& option.Mui-selected": {
+    "& li.Mui-selected": {
       color: `${colors["deep-blue-80"]}`,
       backgroundColor: `${colors.white}`,
       fontWeight: "bold",
     },
 
-    "& option.Mui-selected:hover": {
+    "& li.Mui-selected:hover": {
       color: `${colors["deep-blue-80"]}`,
       backgroundColor: `${colors["deep-blue-20"]}`,
     },
@@ -138,7 +138,7 @@ const useStyles = makeStyles({
 });
 
 
-export const Select: React.FC<ISelectProps> = ({
+export const Select: React.FC<SelectProps> = ({
   children,
   ...props
 }) => {

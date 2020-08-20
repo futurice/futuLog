@@ -1,5 +1,5 @@
 import React from "react";
-import { styled, useMediaQuery } from "@material-ui/core";
+import { MenuItem, styled, useMediaQuery } from "@material-ui/core";
 import { DatePicker } from "@material-ui/pickers";
 import { SelectInputProps } from "@material-ui/core/Select/SelectInput";
 import dayjs from "dayjs";
@@ -106,7 +106,11 @@ export function VisitorsToolbar({
           >
             {
               officesOptions.map(({ value, label }) => (
-                <option key={value} value={value}>{label}</option>
+                <MenuItem
+                  disableRipple
+                  key={value}
+                  value={value}
+                >{label}</MenuItem>
               ))
             }
           </Select>
@@ -117,6 +121,7 @@ export function VisitorsToolbar({
           variant="contained"
           color="primary"
           onClick={onSearch}
+          disabled={!startDate || !endDate || !currentSite}
         >
           Search
         </Button>
@@ -125,6 +130,7 @@ export function VisitorsToolbar({
         <CSVButton
           data={csvData}
           filename={`${currentSite}_${startDateStr}_${endDateStr}`}
+          disabled={!tableData || tableData.length === 0}
         />
       </ToolbarItem>
     </Toolbar>

@@ -109,9 +109,8 @@ export function PersonTrackingPanel({
     });
   }
 
-  const handleUserChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    const userEmail = event.target.value as string;
-    setCurrentUser(userEmail);
+  const handleUserChange = (event: React.ChangeEvent<{}>, value: any | null) => {
+    setCurrentUser(value.value);
   }
 
   const handleRangeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {

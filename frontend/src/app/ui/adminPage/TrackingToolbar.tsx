@@ -24,7 +24,7 @@ interface ITrackingToolbar extends IToolbar {
   users?: IUserDto[];
   currentUser: string;
   range: number;
-  onUserChange?: SelectInputProps["onChange"];
+  onUserChange?: (event: React.ChangeEvent<{}>, value: any | null) => void;
   onRangeChange?: SelectInputProps["onChange"];
 }
 
@@ -93,47 +93,12 @@ export function TrackingToolbar({
       </ToolbarItem>
       <ToolbarItem>
         <b>Person</b>
-        {/* <FormControl> */}
-        {/* TODO: use Autocomplete component instead of Select (https://material-ui.com/components/autocomplete/)*/}
-        {/*<Autocomplete*/}
-        {/*  {...defaultProps}*/}
-        {/*  id="person-select"*/}
-        {/*  disableCloseOnSelect*/}
-        {/*  value={value}*/}
-        {/*  onChange={(event: any, newValue: FilmOptionType | null) => {*/}
-        {/*    setValue(newValue);*/}
-        {/*  }}*/}
-        {/*  getOptionLabel={({ label }) => label}*/}
-        {/*  renderOption={({ label }) => (*/}
-        {/*    <React.Fragment>*/}
-        {/*      {label}*/}
-        {/*    </React.Fragment>*/}
-        {/*  )}*/}
-        {/*  renderInput={(params) => (*/}
-        {/*    <TextField {...params} margin="normal" />*/}
-        {/*  )}*/}
-        {/*/>*/}
-        {/* <Select
-            value={currentUser}
-            onChange={onUserChange}
-            name="person"
-            inputProps={{
-              id: "person-select",
-            }}
-          >
-            {usersOptions.map(({ value, label }) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </Select>
-        </FormControl> */}
-
         <Searchbox
           id="combo-box-demo"
-          options={tempUsersOptions}
+          options={usersOptions}
           getOptionLabel={(option) => option.label}
           style={{ width: 200 }}
+          onChange={onUserChange}
           renderInput={(params) => <TextField {...params} />}
         />
       </ToolbarItem>
@@ -148,12 +113,3 @@ export function TrackingToolbar({
     </Toolbar>
   );
 }
-
-const tempUsersOptions = [
-  { label: "Jan Van Brugge" },
-  { label: "Patrick Burden" },
-  { label: "Egor Sorokin" },
-  { label: "Beatrice Rachello" },
-  { label: "Simon Messmer" },
-  { label: "Theresa Glanzberg" },
-];

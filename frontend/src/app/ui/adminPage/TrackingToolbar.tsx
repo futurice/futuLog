@@ -93,17 +93,24 @@ export function TrackingToolbar({
       </ToolbarItem>
       <ToolbarItem>
         <b>Person</b>
-        <Searchbox
-          id="combo-box-demo"
-          options={usersOptions}
-          getOptionLabel={(option) => option.label}
-          style={{ width: 200 }}
-          onChange={onUserChange}
-          renderInput={(params) => <TextField {...params} />}
-        />
+        <FormControl>
+          <Searchbox
+            id="Person-Searchbox"
+            options={usersOptions}
+            getOptionLabel={(option) => option.label}
+            style={{ width: 200 }}
+            onChange={onUserChange}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </FormControl>
       </ToolbarItem>
       <ToolbarItem>
-        <Button variant="contained" color="primary" onClick={onSearch}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onSearch}
+          disabled={!startDate || !range || !currentUser}
+          >
           Search
         </Button>
       </ToolbarItem>

@@ -1,8 +1,7 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
-import { InputBase as MuiInputBase } from "@material-ui/core";
+import { InputBase as MuiInputBase, TextField as MuiTextField  } from "@material-ui/core";
 import { InputBaseProps as MuiInputBaseProps } from "@material-ui/core/InputBase";
-import { TextField as MuiTextField } from "@material-ui/core";
 import { TextFieldProps as MuiTextFieldProps } from "@material-ui/core/TextField";
 import { colors } from "./theme";
 

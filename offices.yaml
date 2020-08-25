@@ -6,3 +6,6 @@
 
 - site: Stuttgart
   maxPeople: 10
+
+- site: Stockholm
+  maxPeople: 10

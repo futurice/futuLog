@@ -11,7 +11,7 @@ Name,Email,Office,Shift name
 Test User,test-user@futurice.com,Berlin,default
 ```
 
-Possible values for `Office` are: `Berlin`, `Munich` and `Stuttgart`. The shift name is always `default`.
+Possible values for `Office` are: `Berlin`, `Munich`, `Stockholm` and `Stuttgart`. The shift name is always `default`.
 
 You can add more than one user in one go by adding more lines to the CSV.
 

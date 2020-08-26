@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
-import {IconButton as MuiIconButton, Link as MuiLink } from "@material-ui/core";
+import { IconButton as MuiIconButton, Link as MuiLink } from "@material-ui/core";
 import MuiButton, { ButtonProps as MuiButtonProps } from "@material-ui/core/Button";
 import { LinkProps, Link as ReactRouterLink } from "react-router-dom";
 import { colors } from "./theme";
@@ -78,26 +78,26 @@ export const ButtonWithIcon = styled(Button)({
 
 export const ButtonDiscrete = styled(Button)({
   lineHeight: 1.5,
-  borderRadius: "4px",
-  padding: "0",
+  borderRadius: "8px",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "transparent",
+  padding: "4px 8px",
+  margin: "8px 0",
 
   "&:hover": {
     boxShadow: "none",
-    backgroundColor: colors["deep-blue-20"]
-  },
-  "&:focus": {
-    boxShadow: `0 0 0px 4px ${colors["deep-blue-50"]}`,
+    backgroundColor: colors["deep-blue-20"],
+    borderColor: colors["deep-blue-80"]
   },
   "&:active": {
     boxShadow: `0 0 0px 2px ${colors["deep-blue-80"]}`,
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    borderColor: colors["deep-blue-80"]
   }
 });
 
 export const ButtonDiscreteWithEndIcon = styled(ButtonDiscrete)({
-  borderRadius: "4px",
-  padding: "0 0.5rem",
-
   "& > .MuiButton-label": {
     justifyContent: "flex-start"
   },

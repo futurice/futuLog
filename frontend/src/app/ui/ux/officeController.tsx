@@ -9,6 +9,7 @@ import {
   ICapacityDto
 } from "app/services/apiClientService";
 import { ButtonDiscrete, ButtonDiscreteWithEndIcon } from "app/ui/ux/buttons"
+import { IconArrowDown, IconArrowUp } from "app/ui/ux/icons";
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -23,6 +24,7 @@ const divider = makeStyles({
     border: '1px solid #D2CEE3',
     boxSizing: 'content-box',
     display: 'inline',
+    margin: '0 8px',
   }
 });
 
@@ -32,7 +34,6 @@ const center = makeStyles({
     marginLeft: 'auto',
     marginRight: 'auto',
     textAlign: 'center',
-    display: 'inline',
     flexDirection: 'column',
     alignItems: 'center',
     alignSelf: 'center',
@@ -46,6 +47,8 @@ const list_holder = makeStyles({
     borderRadius: '4px',
   }
 })
+
+const active = makeStyles({ border: { border: '1px solid #200A74' } });
 
 interface OfficeControllerProps {
   userOffice: IOfficeSpaceDto | undefined,
@@ -77,7 +80,7 @@ function officeStateSelector(officeState: boolean, officeBookings: ICapacityDto[
                   <img src={user.portrait_badge_url} />
                 </Avatar>
               </ListItemAvatar>
-              <ListItemText primary={user.first_name + user.last_name} />
+              <ListItemText primary={`${user.first_name} ${user.last_name}`} />
             </ListItem>)
           }))
         })
@@ -91,6 +94,8 @@ function officeStateSelector(officeState: boolean, officeBookings: ICapacityDto[
 export const OfficeController = ({ userOffice, officeBookings }: OfficeControllerProps) => {
   const centerClass = center();
   const dividerClass = divider();
+  const activeClass = active();
+
   const [officeState, setOfficeState] = React.useState(true);
 
   const toggleOfficeStatesTrue = () => {
@@ -101,10 +106,14 @@ export const OfficeController = ({ userOffice, officeBookings }: OfficeControlle
     setOfficeState(false);
   };
 
+  const officeClass = !officeState ? activeClass.border : '';
+  const bookedClass = officeState ? activeClass.border : '';
+  const bookedArrow = officeState ? <IconArrowUp /> : <IconArrowUp />
+
   return (<div><div className={centerClass.root}>
-    <ButtonDiscrete onClick={toggleOfficeStatesFalse}>Change Office</ButtonDiscrete>
+    <ButtonDiscrete className={officeClass} onClick={toggleOfficeStatesFalse}>Change Office</ButtonDiscrete>
     <div className={dividerClass.root} />
-    <ButtonDiscreteWithEndIcon onClick={toggleOfficeStatesTrue}> Who Booked</ButtonDiscreteWithEndIcon>
+    <ButtonDiscreteWithEndIcon endIcon={bookedArrow} className={bookedClass} onClick={toggleOfficeStatesTrue}>who booked</ButtonDiscreteWithEndIcon>
     {
       officeStateSelector(officeState, officeBookings, userOffice)
     }

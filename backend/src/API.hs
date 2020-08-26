@@ -1,6 +1,6 @@
 module API where
 
-import Data.ClientRequest (Capacity, RegisterWorkmode, SetShift, UserWorkmode, Contact)
+import Data.ClientRequest (Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode)
 import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
@@ -42,10 +42,8 @@ type WorkmodeAPI =
 
 type ShiftAPI =
   "get" :> Get '[JSON] (Maybe ShiftAssignment)
-    :<|> Capture "site" Text
-      :> ( "set" :> ReqBody '[JSON] SetShift :> Post '[JSON] NoContent
-             :<|> "all" :> Get '[JSON] [Shift]
-         )
+    :<|> "set" :> ReqBody '[JSON] SetShift :> Post '[JSON] NoContent
+    :<|> Capture "site" Text :> "all" :> Get '[JSON] [Shift]
 
 type OfficeAPI =
   "all" :> Get '[JSON] [OfficeSpace]

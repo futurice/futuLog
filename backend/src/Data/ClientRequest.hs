@@ -16,7 +16,8 @@ import GHC.Generics (Generic)
 
 data SetShift
   = MkSetShift
-      {shiftName :: Text}
+      {shiftName :: Text,
+      site :: Text}
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema)
 

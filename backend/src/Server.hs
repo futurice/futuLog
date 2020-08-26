@@ -9,7 +9,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.ByteString.Lazy.Char8 (pack)
-import Data.ClientRequest (shiftName)
+import Data.ClientRequest (shiftName, SetShift(..))
 import Data.Config (Shift (name), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
@@ -54,14 +54,14 @@ workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHan
     queryBatch = withDefaultDays $ DB.queryWorkmodes email
 
 shiftHandler :: User -> Server ShiftAPI
-shiftHandler MkUser {email} = getShift :<|> (\office -> setShift office :<|> getShifts office)
+shiftHandler MkUser {email} = getShift :<|> setShift :<|> getShifts
   where
     getShift = listToMaybe <$> DB.getLastShiftsFor email
     getShifts office = filter ((==) office . shiftSite) . shifts <$> ask
-    setShift office x = do
+    setShift x@(MkSetShift {site = office}) = do
       shiftNames <- fmap name <$> getShifts office
       if shiftName x `elem` shiftNames
-        then DB.saveShift email office x $> NoContent
+        then DB.saveShift email x $> NoContent
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: Server OfficeAPI

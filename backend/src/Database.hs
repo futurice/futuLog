@@ -9,7 +9,7 @@ import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
-import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName)
+import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
@@ -91,8 +91,8 @@ getOfficeBooked office start end =
               (Only $ In emails)
       )
 
-saveShift :: (MonadIO m, MonadReader Env m) => Text -> Text -> SetShift -> m ()
-saveShift email office MkSetShift {shiftName = name} = do
+saveShift :: (MonadIO m, MonadReader Env m) => Text -> SetShift -> m ()
+saveShift email MkSetShift {shiftName = name, site = office} = do
   lastShift <-
     query'
       shiftQuery
@@ -100,7 +100,7 @@ saveShift email office MkSetShift {shiftName = name} = do
   today <- liftIO $ utctDay <$> getCurrentTime
   case lastShift of
     [s]
-      | shiftAssignmentName s == name -> pure ()
+      | shiftAssignmentName s == name && shiftAssignmentSite s == office -> pure ()
       | assignmentDate s == today ->
         exec
           "UPDATE shift_assignments SET user_email = ?, site = ?, shift_name = ? WHERE assignment_date = current_date"

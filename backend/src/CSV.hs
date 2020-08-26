@@ -15,4 +15,4 @@ saveShifts :: (MonadIO m, MonadReader Env m) => ByteString -> m (Either ByteStri
 saveShifts p = case decodeByName p of
   Left err -> pure $ Left $ pack err
   Right (_, shifts) -> fmap Right $ forM_ shifts $ \MkShiftAssignment {userEmail, site, shiftName} ->
-    saveShift userEmail site MkSetShift {shiftName = shiftName}
+    saveShift userEmail MkSetShift {shiftName = shiftName, site}

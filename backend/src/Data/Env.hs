@@ -30,3 +30,6 @@ data ShiftAssignment
 
 shiftAssignmentName :: ShiftAssignment -> Text
 shiftAssignmentName = shiftName
+
+shiftAssignmentSite :: ShiftAssignment -> Text
+shiftAssignmentSite = site

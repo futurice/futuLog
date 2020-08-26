@@ -8,7 +8,7 @@ import {
   IShiftAssignmentDto,
   IOfficeSpaceDto,
   IRegisterWorkmodeDto,
-  IBookedDto,
+  ICapacityDto
 } from "app/services/apiClientService";
 import {
   RenderQuery,
@@ -50,10 +50,10 @@ const InlineIconButton = styled(IconButton)({
 const getOfficeCapacity = (
   office: IOfficeSpaceDto,
   date: string,
-  officeBookings: IBookedDto[]
+  officeBookings: ICapacityDto[]
 ) => {
   const booking = officeBookings.find((booking) => booking.date === date);
-  return booking ? office.maxPeople - booking.users.length : office.maxPeople;
+  return booking ? office.maxPeople - booking.people.length : office.maxPeople;
 };
 
 export const HomePage: React.FC = () => {
@@ -74,7 +74,7 @@ export const HomePage: React.FC = () => {
   const officeBookingsRes = useQuery(
     userShift && officeBookingsQueryKey(userShift.site, date, date),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings(userShift!.site, date, date)
+    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
   );
 
   const [registerWorkmode] = useMutation(
@@ -183,26 +183,26 @@ export const HomePage: React.FC = () => {
                     </Button>
                   </Stack>
                 ) : (
-                  //
-                  // Checked in
-                  <>
-                    <Box
-                      component={P}
-                      maxWidth="26rem"
-                      mx="auto"
-                      fontSize="1.5rem"
-                      fontWeight="bold"
-                      fontFamily="Futurice"
-                      lineHeight="1.75"
-                      marginBottom="0"
-                    >
-                      ✓<br />
+                    //
+                    // Checked in
+                    <>
+                      <Box
+                        component={P}
+                        maxWidth="26rem"
+                        mx="auto"
+                        fontSize="1.5rem"
+                        fontWeight="bold"
+                        fontFamily="Futurice"
+                        lineHeight="1.75"
+                        marginBottom="0"
+                      >
+                        ✓<br />
                       You are checked in!
                       <br />
                       Thank you.
                     </Box>
-                  </>
-                )}
+                    </>
+                  )}
               </>
             )}
           </Card>
@@ -211,7 +211,7 @@ export const HomePage: React.FC = () => {
 
       <Card spacing="2rem" textAlign="center">
         <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-          <H2>Where will you work work in the next two weeks?</H2>
+          <H2>Where will you work in the next two weeks?</H2>
 
           <P>
             Plan in advance where you want to work in the next weeks.

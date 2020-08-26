@@ -19,7 +19,7 @@ import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (..))
-import Database (confirmWorkmode, getAllWorkmodes, getLastShiftsFor, getOfficeBooked, queryWorkmode, queryWorkmodes, saveShift)
+import qualified Database as DB
 import Logic (registerWorkmode)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
@@ -44,50 +44,49 @@ apiHandler :: Server ProtectedAPI
 apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
-workmodeHandler MkUser {email} = regWorkmode :<|> flip confWorkmode :<|> queryWorkmode email :<|> queryBatch
+workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHandler :<|> DB.queryWorkmode email :<|> queryBatch
   where
     regWorkmode [] = pure NoContent
-    regWorkmode (m : xs) = registerWorkmode email m >>= \case
+    regWorkmode (m : xs) = registerWorkmode user m >>= \case
       Right _ -> regWorkmode xs
       Left err -> throwError $ err400 {errBody = pack err}
-    confWorkmode status = const (pure NoContent) <=< confirmWorkmode email status <=< defaultDay
-    queryBatch startDate endDate = do
-      start <- defaultDay startDate
-      end <- defaultDay endDate
-      queryWorkmodes email start end
+    confirmWorkmodeHandler status = const (pure NoContent) <=< DB.confirmWorkmode email status <=< defaultDay
+    queryBatch = withDefaultDays $ DB.queryWorkmodes email
 
 shiftHandler :: User -> Server ShiftAPI
 shiftHandler MkUser {email} = getShift :<|> (\office -> setShift office :<|> getShifts office)
   where
-    getShift = listToMaybe <$> getLastShiftsFor email
+    getShift = listToMaybe <$> DB.getLastShiftsFor email
     getShifts office = filter ((==) office . shiftSite) . shifts <$> ask
     setShift office x = do
       shiftNames <- fmap name <$> getShifts office
       if shiftName x `elem` shiftNames
-        then saveShift email office x $> NoContent
+        then DB.saveShift email office x $> NoContent
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: Server OfficeAPI
 officeHandler = getOffices :<|> getBooked
   where
     getOffices = offices <$> ask
-    getBooked office startDate endDate = do
-      start <- defaultDay startDate
-      end <- defaultDay endDate
-      getOfficeBooked office start end
+    getBooked office = withDefaultDays $ DB.getOfficeBooked office
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler
+adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler
   where
     shiftCSVAddHandler = \case
       MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
         Left err -> throwError $ err400 {errBody = err}
         Right _ -> pure NoContent
       _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}
-    workmodeRangeHandler office startDate endDate = do
-      start <- defaultDay startDate
-      end <- defaultDay endDate
-      getAllWorkmodes office start end
+    workmodeRangeHandler office = withDefaultDays $ DB.getAllWorkmodes office
+    bookingsHandler email = withDefaultDays $ DB.queryWorkmodes email
+    contactsHandler email = withDefaultDays $ DB.queryContacts email
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure
+
+withDefaultDays :: MonadIO m => (Day -> Day -> m a) -> Maybe Day -> Maybe Day -> m a
+withDefaultDays f startDate endDate = do
+  start <- defaultDay startDate
+  end <- defaultDay endDate
+  f start end

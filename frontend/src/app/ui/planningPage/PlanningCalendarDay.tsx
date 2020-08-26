@@ -14,7 +14,7 @@ import {
   IOfficeSpaceDto,
   IUserWorkmodeDto,
   IUserDto,
-  IBookedDto
+  ICapacityDto,
 } from "app/services/apiClientService";
 import { useServices } from "app/services/services";
 import {
@@ -27,7 +27,7 @@ import {
 import { useQuery } from "react-query";
 import { Button, IconButton } from "app/ui/ux/buttons";
 import { dateRange, isWeekend } from "app/utils/dateUtils";
-import {OfficeController} from "app/ui/ux/officeController";
+import { OfficeController } from "app/ui/ux/officeController";
 
 interface IPlanningCalendarDay {
   date: dayjs.Dayjs;
@@ -86,11 +86,11 @@ const ConfirmButtonContainer = styled("div")<Theme>(({ theme }) => ({
   },
 }));
 
-function getOfficeCapacity(office: IOfficeSpaceDto, bookings: IBookedDto[]) {
+function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
   if (!bookings.length) {
     return office.maxPeople;
   }
-  const capacities = bookings.map((booking) => office.maxPeople - booking.users.length);
+  const capacities = bookings.map((booking) => office.maxPeople - booking.people.length);
   return Math.min(...capacities);
 }
 
@@ -123,7 +123,12 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings(userOffice!.site, startDateStr, endDateStr)
+    () =>
+      apiClient.getOfficeBookings({
+        site: userOffice!.site,
+        startDate: startDateStr,
+        endDate: endDateStr,
+      })
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -222,12 +227,12 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                     ) : officeCapacity <= 0 ? (
                       "No spots available"
                     ) : (
-                      "Multiple slots available"
-                    )
+                          "Multiple slots available"
+                        )
                   ) : (
-                    ""
-                  )}
-                  <OfficeController userOffice={userOffice} officeBookings={officeBookings}/>
+                      ""
+                    )}
+                  <OfficeController userOffice={userOffice} officeBookings={officeBookings} />
                 </OfficeInfoContainer>
                 {/*
                   NOTE: We use explicit `isExpanded` flag here due to collapsible

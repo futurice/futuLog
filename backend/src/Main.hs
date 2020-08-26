@@ -65,7 +65,7 @@ main = do
   manager <- newTlsManager
   let devUser = do
         email <- devEmail
-        pure $ MkUser "Dev" "User" (pack email) "" "" ""
+        pure $ MkUser "Dev" "User" (pack email) "" "" "" True
   case devEmail of
     Nothing -> putStrLn $ "Running server on port " <> show port
     Just email -> putStrLn $ "Running development server on port " <> show port <> " with logged in email " <> email

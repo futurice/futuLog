@@ -9,7 +9,6 @@ import { IOfficeSpaceDto, ISetShiftDto, IShiftAssignmentDto } from "app/services
 import { officesQueryKey, userShiftQueryKey } from "app/utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import { useMutation } from "react-query";
-import { styled } from "@material-ui/core";
 
 interface IWelcomePage {
   onMount: () => void;

@@ -17,7 +17,6 @@ export const userWorkmodesQueryKey = (startDate: string, endDate: string): AnyQu
 ];
 // IShiftDto
 export const siteShiftQueryKey = (): AnyQueryKey => ["siteShifts"];
-// export const siteShiftQueryKey = (site: string): AnyQueryKey => ["siteShifts", site];
 // IOfficeSpaceDto[]
 export const officesQueryKey = () => "offices";
 // IUserDto[]

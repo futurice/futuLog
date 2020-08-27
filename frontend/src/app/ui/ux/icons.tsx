@@ -3,6 +3,8 @@ import React from "react";
 interface IIcon {
   color?: string;
   backgroundColor?: string;
+  width?: string;
+  height?: string;
 }
 
 export const IconHome: React.FC<IIcon> = ({ color = "#ff465a" }) => (
@@ -151,12 +153,12 @@ export const IconInfo: React.FC<IIcon> = ({ color = "#fff" }) => (
   </svg>
 );
 
-export const IconLogoDark: React.FC<IIcon> = ({ color = "#200a74" }) => (
+export const IconLogoDark: React.FC<IIcon> = ({ color = "#200a74", width = "360", height = "409" }) => (
   <svg
     fill="none"
-    height="409"
+    height={height}
     viewBox="0 0 360 409"
-    width="360"
+    width={width}
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
@@ -168,12 +170,11 @@ export const IconLogoDark: React.FC<IIcon> = ({ color = "#200a74" }) => (
   </svg>
 );
 
-export const IconLogoLight: React.FC<IIcon> = ({ color = "#fff" }) => (
+export const IconLogoLight: React.FC<IIcon> = ({ color = "#fff", width = "360", height = "409" }) => (
   <svg
-    fill="none"
-    height="409"
+    height={height}
     viewBox="0 0 360 409"
-    width="360"
+    width={width}
     xmlns="http://www.w3.org/2000/svg"
   >
     <path

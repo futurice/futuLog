@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
     office-tracker:
         build: .
@@ -8,7 +8,7 @@ services:
         environment:
             DB_URL: postgresql://postgres:example_password@db:5432/office
         ports:
-            - '8000:8000'
+            - "8000:8000"
         depends_on:
             - db
 

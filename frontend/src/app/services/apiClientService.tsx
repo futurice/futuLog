@@ -55,6 +55,7 @@ export interface IShiftDto {
 
 export interface ISetShiftDto {
   shiftName: string;
+  site: string;
 }
 
 export enum Workmode {
@@ -125,8 +126,8 @@ export function createAPIClientService(baseUrl: string) {
 
     getSiteShifts: (site: string) => fetchJSON<IShiftDto[]>(`${baseUrl}/api/shift/${e(site)}/all`),
 
-    registerSiteShift: (site: string, request: ISetShiftDto) =>
-      fetchJSON<void>(`${baseUrl}/api/shift/${e(site)}/set`, {
+    registerSiteShift: (request: ISetShiftDto) =>
+      fetchJSON<void>(`${baseUrl}/api/shift/set`, {
         method: "POST",
         body: request,
       }),

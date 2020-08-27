@@ -215,23 +215,24 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                     onSelectWorkmode={onSelectLocalWorkmode}
                   />
                 </Box>
-
                 <OfficeInfoContainer>
-                  Current office: {userOffice?.site || "N/A"}
-                  <br />
-                  {userOffice ? (
-                    startDate.isSame(endDate) ? (
-                      <>
-                        {officeCapacity}/{userOffice.maxPeople} spots available
-                      </>
-                    ) : officeCapacity <= 0 ? (
-                      "No spots available"
+                  <Box padding={"0 2rem"}>
+                    Current office: {userOffice?.site || "N/A"}
+                    <br />
+                    {userOffice ? (
+                      startDate.isSame(endDate) ? (
+                        <>
+                          {officeCapacity}/{userOffice.maxPeople} spots available
+                        </>
+                      ) : officeCapacity <= 0 ? (
+                        "No spots available"
+                      ) : (
+                        "Multiple slots available"
+                      )
                     ) : (
-                          "Multiple slots available"
-                        )
-                  ) : (
                       ""
                     )}
+                  </Box>
                   <OfficeController userOffice={userOffice} officeBookings={officeBookings} />
                 </OfficeInfoContainer>
                 {/*

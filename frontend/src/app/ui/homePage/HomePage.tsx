@@ -77,6 +77,8 @@ export const HomePage: React.FC = () => {
     () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
   );
 
+
+
   const [registerWorkmode] = useMutation(
     (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode([request]),
     {

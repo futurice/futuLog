@@ -16,11 +16,11 @@ export const userWorkmodesQueryKey = (startDate: string, endDate: string): AnyQu
   endDate,
 ];
 // IShiftDto
-export const siteShiftQueryKey = (site: string): AnyQueryKey => ["siteShifts", site];
+export const siteShiftQueryKey = (): AnyQueryKey => ["siteShifts"];
 // IOfficeSpaceDto[]
 export const officesQueryKey = () => "offices";
 // IUserDto[]
-export const usersQueryKey  = () => "users";
+export const usersQueryKey = () => "users";
 // number
 export const officeCapacityQueryKey = (site: string, date: string): AnyQueryKey => [
   "officeCapacity",

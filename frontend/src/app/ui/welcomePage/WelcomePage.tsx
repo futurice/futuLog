@@ -31,7 +31,10 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
   const [registerSiteShift] = useMutation(
     (request: ISetShiftDto) => apiClient.registerSiteShift(request),
     {
-      onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
+      onSuccess: () => {
+        queryCache.refetchQueries(userShiftQueryKey());
+        window.location.href = '/';
+      },
     }
   );
 
@@ -42,8 +45,6 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
 
   const registerUserSite = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     registerSiteShift({ shiftName: "default", site: currentSite })
-    window.location.href = '/'
-
   }
 
 

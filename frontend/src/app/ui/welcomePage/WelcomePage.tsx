@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { PageMargins, Stack, HR } from "app/ui/ux/containers";
 import { H2, H4, P } from "app/ui/ux/text";
-import { LinkButton } from "app/ui/ux/buttons";
+import { Button } from "app/ui/ux/buttons";
 
 import { Select } from "../ux/select";
 import { MenuItem } from "@material-ui/core";
@@ -28,7 +28,6 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
   const [currentSite, setCurrentSite] = useState((userShift && userShift.site) || "");
   const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
 
-
   const [registerSiteShift] = useMutation(
     (request: ISetShiftDto) => apiClient.registerSiteShift(request),
     {
@@ -39,9 +38,12 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
 
   const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setCurrentSite(event.target.value as string);
-    if (currentSite !== "") {
-      registerSiteShift({ shiftName: "default", site: event.target.value as string })
-    }
+  }
+
+  const registerUserSite = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    registerSiteShift({ shiftName: "default", site: currentSite })
+    window.location.href = '/'
+
   }
 
 
@@ -85,9 +87,9 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
         </Stack>
       </Stack>
       <Stack paddingTop="2.5rem" spacing="2.5rem" maxWidth="26rem" mx="auto" textAlign="center">
-        <LinkButton to="/" variant="contained" color="primary">
+        <Button variant="contained" color="primary" disabled={currentSite === "" ? true : false} onClick={registerUserSite}>
           Start
-        </LinkButton>
+        </Button>
       </Stack>
     </PageMargins>
   );

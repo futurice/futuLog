@@ -6,6 +6,7 @@ import { H4, H2Center } from "app/ui/ux/text";
 import { Flex, Stack } from "app/ui/ux/containers";
 import { Theme } from "app/ui/ux/theme";
 import { IconClose } from "app/ui/ux/icons";
+import { OfficeController } from "app/ui/ux/officeController";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import {
   Workmode,
@@ -122,7 +123,12 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings({ site: userOffice!.site, startDate: startDateStr, endDate: endDateStr })
+    () =>
+      apiClient.getOfficeBookings({
+        site: userOffice!.site,
+        startDate: startDateStr,
+        endDate: endDateStr,
+      })
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -209,23 +215,25 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                     onSelectWorkmode={onSelectLocalWorkmode}
                   />
                 </Box>
-
                 <OfficeInfoContainer>
-                  Current office: {userOffice?.site || "N/A"}
-                  <br />
-                  {userOffice ? (
-                    startDate.isSame(endDate) ? (
-                      <>
-                        {officeCapacity}/{userOffice.maxPeople} spots available
-                      </>
-                    ) : officeCapacity <= 0 ? (
-                      "No spots available"
+                  <Box padding={"0 2rem"}>
+                    Current office: {userOffice?.site || "N/A"}
+                    <br />
+                    {userOffice ? (
+                      startDate.isSame(endDate) ? (
+                        <>
+                          {officeCapacity}/{userOffice.maxPeople} spots available
+                        </>
+                      ) : officeCapacity <= 0 ? (
+                        "No spots available"
+                      ) : (
+                        "Multiple slots available"
+                      )
                     ) : (
-                      "Multiple slots available"
-                    )
-                  ) : (
-                    ""
-                  )}
+                      ""
+                    )}
+                  </Box>
+                  <OfficeController userOffice={userOffice} officeBookings={officeBookings} />
                 </OfficeInfoContainer>
 
                 {/*

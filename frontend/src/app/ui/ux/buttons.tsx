@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
-import {IconButton as MuiIconButton, Link as MuiLink } from "@material-ui/core";
+import { IconButton as MuiIconButton, Link as MuiLink } from "@material-ui/core";
 import MuiButton, { ButtonProps as MuiButtonProps } from "@material-ui/core/Button";
 import { LinkProps, Link as ReactRouterLink } from "react-router-dom";
 import { colors } from "./theme";
@@ -20,78 +20,82 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
 
   "&:hover": {
     boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
-    backgroundColor: colors["deep-blue-50"]
+    backgroundColor: colors["deep-blue-50"],
   },
   "&:focus": {
-    boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`
+    boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`,
   },
   "&:active": {
     boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
-    backgroundColor: colors["deep-blue-50"]
+    backgroundColor: colors["deep-blue-50"],
   },
 
   "&.MuiButton-outlinedPrimary": {
     "&:hover": {
       boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
-      backgroundColor: colors["deep-blue-20"]
+      backgroundColor: colors["deep-blue-20"],
     },
     "&:focus": {
       boxShadow: `inset 0 0 0px 3px ${colors["deep-blue-50"]}`,
-      backgroundColor: colors["deep-blue-20"]
+      backgroundColor: colors["deep-blue-20"],
     },
     "&:active": {
       boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
-    }
-  }
+    },
+  },
 });
 
 export const ButtonWithIcon = styled(Button)({
   borderRadius: "4px",
 
   "&:hover, &:focus": {
-    borderWidth: "1px !important"
+    borderWidth: "1px !important",
   },
   "&:hover": {
-    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)"
+    boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
   },
   "&:focus": {
-    boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-50"]}`
+    boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-50"]}`,
   },
   "&:active": {
     boxShadow: "none",
     backgroundColor: "initial",
 
     "& > .MuiButton-label": {
-      fontWeight: "bold"
-    }
+      fontWeight: "bold",
+    },
   },
   "& > .MuiButton-label": {
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   },
   "& .MuiButton-startIcon": {
-    marginLeft: 0
+    marginLeft: 0,
   },
   "&:disabled .MuiButton-startIcon": {
-    opacity: 0.5
-  }
+    opacity: 0.5,
+  },
 });
 
 export const ButtonDiscrete = styled(Button)({
   lineHeight: 1.5,
-  borderRadius: "4px",
-  padding: "0",
+  borderRadius: "8px",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderColor: "transparent",
+  padding: "4px 8px",
+  margin: "8px 0",
+  color: colors["deep-blue-80"],
 
   "&:hover": {
     boxShadow: "none",
-    backgroundColor: colors["deep-blue-20"]
-  },
-  "&:focus": {
-    boxShadow: `0 0 0px 4px ${colors["deep-blue-50"]}`,
+    backgroundColor: colors["deep-blue-20"],
+    borderColor: colors["deep-blue-80"],
   },
   "&:active": {
     boxShadow: `0 0 0px 2px ${colors["deep-blue-80"]}`,
-    backgroundColor: "transparent"
-  }
+    backgroundColor: "transparent",
+    borderColor: colors["deep-blue-80"],
+  },
 });
 
 export const ButtonDiscreteWithEndIcon = styled(ButtonDiscrete)({
@@ -99,27 +103,27 @@ export const ButtonDiscreteWithEndIcon = styled(ButtonDiscrete)({
   padding: "0 0.5rem",
 
   "& > .MuiButton-label": {
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   },
   "& .MuiButton-endIcon": {
-    marginRight: 0
+    marginRight: 0,
   },
   "&:disabled .MuiButton-endIcon": {
-    opacity: 0.5
-  }
+    opacity: 0.5,
+  },
 });
 
 export const IconButton = styled(MuiIconButton)({
   "&:hover": {
     boxShadow: "none",
-    backgroundColor: colors["deep-blue-20"]
+    backgroundColor: colors["deep-blue-20"],
   },
   "&:focus": {
     boxShadow: `0 0 0px 4px ${colors["deep-blue-50"]}`,
   },
   "& > .MuiTouchRipple-root": {
-    display: "none"
-  }
+    display: "none",
+  },
 });
 
 export const Link = styled(MuiLink)({
@@ -132,8 +136,8 @@ export const Link = styled(MuiLink)({
   },
   "&:hover": {
     boxShadow: "none",
-    color: colors["deep-blue-50"]
-  }
+    color: colors["deep-blue-50"],
+  },
 });
 
 export const FauxLink = styled(Button)({
@@ -158,7 +162,7 @@ export const FauxLink = styled(Button)({
 
 const A = styled(ReactRouterLink)({
   display: "inline-block",
-  textDecoration: "none"
+  textDecoration: "none",
 });
 
 // Link + Button type helper

@@ -66,11 +66,11 @@ export const AppRoutes: React.FC = () => {
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
-            { user.isAdmin && (
+            {user.isAdmin && (
               <Route
                 exact
                 path={RoutePaths.Admin}
-                render={(props) => <AdminPage offices={offices} {...props} /> } />
+                render={(props) => <AdminPage offices={offices} {...props} />} />
             )}
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />

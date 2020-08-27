@@ -3,7 +3,7 @@ import { AppBar, styled, Toolbar, IconButton } from "@material-ui/core";
 import { IUserDto } from "app/services/apiClientService";
 import { colors } from "app/ui/ux/theme";
 import { ButtonWithIcon, LinkButton } from "app/ui/ux/buttons";
-import { IconInfoBalloon, IconProfile, IconTracking } from "app/ui/ux/icons";
+import { IconInfoBalloon, IconProfile, IconTracking, IconPlanning } from "app/ui/ux/icons";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { MediaQuery } from "app/ui/mediaQuery/MediaQuery";
@@ -34,7 +34,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 const ToolbarButtonContainer = styled("div")({
   marginLeft: "auto",
 
-  "& button, & .MuiButtonBase-root" : {
+  "& button, & .MuiButtonBase-root": {
     "&:hover": {
       backgroundColor: colors["deep-blue-40"]
     },
@@ -88,11 +88,15 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       {/* Mobile controls */}
       <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
         <ToolbarButtonContainer>
-          { user.isAdmin && (
+          {user.isAdmin && (
             <LinkButton to={RoutePaths.Admin} component={IconButton} aria-label="Tracking">
               <IconTracking />
             </LinkButton>
           )}
+
+          <LinkButton to={RoutePaths.Planning} component={IconButton} aria-label="Planning">
+            <IconPlanning />
+          </LinkButton>
 
           <LinkButton to={RoutePaths.Info} component={IconButton} aria-label="Info">
             <IconInfoBalloon />
@@ -107,11 +111,15 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       {/* Desktop controls */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <ToolbarButtonContainer>
-          { user.isAdmin && (
+          {user.isAdmin && (
             <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
               Tracking
             </LinkButton>
           )}
+          <LinkButton to={RoutePaths.Planning} component={BarButton} startIcon={<IconPlanning />}>
+            Planning
+          </LinkButton>
+
           <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
             Info
           </LinkButton>

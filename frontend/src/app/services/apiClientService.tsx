@@ -55,7 +55,6 @@ export interface IShiftDto {
 
 export interface ISetShiftDto {
   shiftName: string;
-  site: string
 }
 
 export enum Workmode {
@@ -126,8 +125,8 @@ export function createAPIClientService(baseUrl: string) {
 
     getSiteShifts: (site: string) => fetchJSON<IShiftDto[]>(`${baseUrl}/api/shift/${e(site)}/all`),
 
-    registerSiteShift: (request: ISetShiftDto) =>
-      fetchJSON<void>(`${baseUrl}/api/shift/set`, {
+    registerSiteShift: (site: string, request: ISetShiftDto) =>
+      fetchJSON<void>(`${baseUrl}/api/shift/${e(site)}/set`, {
         method: "POST",
         body: request,
       }),
@@ -156,7 +155,7 @@ export function createAPIClientService(baseUrl: string) {
 
     getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
 
-    getOfficeBookings: ({ site, startDate, endDate }: IOfficeBookingsRequestDto) =>
+    getOfficeBookings: ({ site, startDate, endDate}: IOfficeBookingsRequestDto) =>
       fetchJSON<ICapacityDto[]>(
         `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
       ),

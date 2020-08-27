@@ -21,8 +21,6 @@ export const StyledSelect = styled((props: MuiSelectProps) => <MuiSelect {...pro
     "border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
 
   "& .MuiInputBase-input": {
-    textAlign: "left",
-
     padding: "8px 40px 8px 8px",
     border: `2px solid ${colors["deep-blue-80"]}`,
     borderRadius: "4px",
@@ -173,18 +171,17 @@ export const Select: React.FC<SelectProps> = ({
 
   return (
     <StyledSelect
-      disableUnderline
       open={open}
       onClose={handleClose}
       onOpen={handleOpen}
       IconComponent={() => open ?
         (
           <Flex className={"MuiSelect-icon"}>
-            <IconArrowUp color={colors.white} />
+            <IconArrowUp color={colors.white}/>
           </Flex>
         ) : (
           <Flex className={"MuiSelect-icon"}>
-            <IconArrowDown color={colors.white} />
+            <IconArrowDown color={colors.white}/>
           </Flex>
         )
       }

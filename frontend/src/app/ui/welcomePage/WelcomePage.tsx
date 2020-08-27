@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { PageMargins, Stack, HR } from "app/ui/ux/containers";
 import { H2, H4, P } from "app/ui/ux/text";
 import { Button } from "app/ui/ux/buttons";
 
-import { Select } from "../ux/select";
-import { MenuItem } from "@material-ui/core";
-import { IOfficeSpaceDto, ISetShiftDto, IShiftAssignmentDto } from "app/services/apiClientService";
-import { officesQueryKey, userShiftQueryKey } from "app/utils/reactQueryUtils";
-import { useServices } from "../../services/services";
-import { useMutation } from "react-query";
 
 interface IWelcomePage {
   onMount: () => void;
 }
 
 export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
-  const { apiClient, queryCache } = useServices();
   useEffect(onMount, []); // eslint-disable-line
 
   //
@@ -45,12 +38,10 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
     window.location.href = '/'
 
   }
-
-
+  
   return (
     <PageMargins className="WelcomePage">
       <Stack paddingTop="2.5rem" spacing="2.5rem" maxWidth="26rem" mx="auto" textAlign="center">
-
         <H2>Welcome to the Futurice Entrance App!</H2>
 
         <HR />
@@ -60,7 +51,7 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
           amount of people for your safety and the one of your colleagues. Please note that the
           general recommendation is still to work from home.
         </P>
-
+        
         <Stack spacing="1rem">
           <H4>
             Select your usual office

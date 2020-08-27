@@ -74,10 +74,8 @@ export const HomePage: React.FC = () => {
   const officeBookingsRes = useQuery(
     userShift && officeBookingsQueryKey(userShift.site, date, date),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
+    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date})
   );
-
-
 
   const [registerWorkmode] = useMutation(
     (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode([request]),
@@ -185,26 +183,26 @@ export const HomePage: React.FC = () => {
                     </Button>
                   </Stack>
                 ) : (
-                    //
-                    // Checked in
-                    <>
-                      <Box
-                        component={P}
-                        maxWidth="26rem"
-                        mx="auto"
-                        fontSize="1.5rem"
-                        fontWeight="bold"
-                        fontFamily="Futurice"
-                        lineHeight="1.75"
-                        marginBottom="0"
-                      >
-                        ✓<br />
+                  //
+                  // Checked in
+                  <>
+                    <Box
+                      component={P}
+                      maxWidth="26rem"
+                      mx="auto"
+                      fontSize="1.5rem"
+                      fontWeight="bold"
+                      fontFamily="Futurice"
+                      lineHeight="1.75"
+                      marginBottom="0"
+                    >
+                      ✓<br />
                       You are checked in!
                       <br />
                       Thank you.
                     </Box>
-                    </>
-                  )}
+                  </>
+                )}
               </>
             )}
           </Card>

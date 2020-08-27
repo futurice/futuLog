@@ -29,8 +29,7 @@ registerWorkmode user@(MkUser {email}) mode@(MkRegisterWorkmode {workmode, site 
               shifts <- getLastShiftsFor email
               case shifts of
                 [] -> pure $ Left "You are not signed into any shift, please set a shift first"
-                [shift] -> checkShift user mode shift
-                _ -> pure $ Left "You cannot visit the office, you have to stay home two weeks after changing shifts" --TODO: Check if person was in the office in the last two weeks
+                shift:_ -> checkShift user mode shift
   where
     isOffice (Office _) = True
     isOffice _ = False

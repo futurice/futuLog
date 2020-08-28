@@ -3,11 +3,12 @@ import { AppBar, styled, Toolbar, IconButton } from "@material-ui/core";
 import { IUserDto } from "app/services/apiClientService";
 import { colors } from "app/ui/ux/theme";
 import { ButtonWithIcon, LinkButton } from "app/ui/ux/buttons";
-import { IconInfoBalloon, IconProfile, IconTracking } from "app/ui/ux/icons";
+import { IconInfoBalloon, IconProfile, IconTracking, IconPlanning, IconLogoLight } from "app/ui/ux/icons";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { MediaQuery } from "app/ui/mediaQuery/MediaQuery";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
+
 
 interface INavigationBar {
   user: IUserDto;
@@ -34,7 +35,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 const ToolbarButtonContainer = styled("div")({
   marginLeft: "auto",
 
-  "& button, & .MuiButtonBase-root" : {
+  "& button, & .MuiButtonBase-root": {
     "&:hover": {
       backgroundColor: colors["deep-blue-40"]
     },
@@ -61,7 +62,9 @@ const StyledToolbar = styled(Toolbar)({
 });
 
 const AppTitleLink = styled(Link)({
-  textDecoration: "none"
+  textDecoration: "none",
+  display: "flex",
+  "& > *": { marginRight: "0.6rem" },
 });
 
 const AppTitle = styled("h1")({
@@ -82,13 +85,17 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
   <StyledAppBar position="static" className="NavigationBar">
     <StyledToolbar>
       <AppTitleLink to={RoutePaths.Home} aria-label="Home">
-        <AppTitle>futuLog</AppTitle>
+        <IconLogoLight height="32" width="28" /> <AppTitle>futuLog</AppTitle>
       </AppTitleLink>
 
       {/* Mobile controls */}
       <MediaQuery query={(theme) => theme.breakpoints.down("sm")}>
         <ToolbarButtonContainer>
-          { user.isAdmin && (
+          <LinkButton to={RoutePaths.Planning} component={IconButton} aria-label="Planning">
+            <IconPlanning />
+          </LinkButton>
+
+          {user.isAdmin && (
             <LinkButton to={RoutePaths.Admin} component={IconButton} aria-label="Tracking">
               <IconTracking />
             </LinkButton>
@@ -107,11 +114,17 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       {/* Desktop controls */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <ToolbarButtonContainer>
-          { user.isAdmin && (
+
+          <LinkButton to={RoutePaths.Planning} component={BarButton} startIcon={<IconPlanning />}>
+            Planning
+          </LinkButton>
+
+          {user.isAdmin && (
             <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
               Tracking
             </LinkButton>
           )}
+
           <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
             Info
           </LinkButton>

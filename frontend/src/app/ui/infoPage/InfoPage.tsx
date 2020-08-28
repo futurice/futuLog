@@ -2,6 +2,17 @@ import React from "react";
 import { PageMargins, Stack } from "app/ui/ux/containers";
 import { H2, H3, P, H4 } from "app/ui/ux/text";
 import { Box } from "@material-ui/core";
+import { styled } from "@material-ui/core/styles";
+import { colors } from "../ux/theme";
+
+export const A = styled("a")({
+  fontFamily: "Roboto",
+  textDecoration: "none",
+  color: `${colors["deep-blue-80"]}`,
+  marginTop: "1,5rem",
+  display: "block"
+});
+
 
 export const InfoPage: React.FC = () => (
   <PageMargins className="InfoPage">
@@ -106,6 +117,49 @@ export const InfoPage: React.FC = () => (
           This can happen. In this case, we would advise to talk to your local HC team which will
           track your presence in the office manually for that day.{" "}
         </P>
+      </Stack>
+
+      <Stack spacing="1.5rem">
+        <H3>What happens if somebody went to the office who was infected?</H3>
+
+        <P>
+          As soon as one employee at Futurice will be tested positive for the coronavirus
+          (or somebody else who has been to one of our offices), the pandemic plan will be initiated.
+          This means, we will inform everybody who has been to the office the same days the infected person has been on site.
+          We will also inform the local health department. All the employees detected would have to go into self quarantine for 14 days.
+          The office itself will be locked and nobody would be able to enter for at least three days. {" "}
+        </P>
+      </Stack>
+
+      <Stack spacing="1.5rem">
+        <H3>What should I do in case I got infected?</H3>
+
+        <P>
+          If you have tested positive or have been in contact with a person who has tested positive,
+          you have to inform the public health department in any case. For more information on this
+          take a look at the bottom of the confluence page {" "}
+        </P>
+
+        <A href="https://confluence.futurice.com/display/HC/Coronavirus+COVID-19" target="_blank" rel="noreferrer noopener">
+          https://confluence.futurice.com/display/HC/Coronavirus+COVID-19.
+        </A>
+
+        <P>
+          Futurice also asks you to inform HC, so they can track via futuLog who was in contact
+          with you and inform them accordingly.{" "}
+        </P>
+
+        <P>
+          Please contact your family doctor or paediatrician practice immediately by telephone or
+          call the on-call service of accredited doctors on (116 117) and inform the local health department:{" "}
+        </P>
+
+        <Stack component="ul" spacing="1.5rem">
+          <li>Berlin: Hotline of senat administration +49 (30) 90 28 28 28 </li>
+          <li>Munich: Coronavirus-Hotline Munich +49 (89) 233-44740</li>
+          <li>Stuttgart: Coronavirus-Hotline Baden-Wuerttemberg +49 (0) 711 904-39555</li>
+        </Stack>
+
       </Stack>
     </Stack>
   </PageMargins>

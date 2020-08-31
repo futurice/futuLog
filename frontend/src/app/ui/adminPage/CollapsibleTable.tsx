@@ -45,7 +45,17 @@ const useTableHeadCellStyles = makeStyles({
     borderBottom: `1px solid ${colors["deep-blue-30"]}`,
     paddingTop: '8px',
     paddingBottom: '8px',
-  }
+  },
+  button: {
+    borderTop: `1px solid ${colors["deep-blue-30"]}`,
+    borderBottom: `1px solid ${colors["deep-blue-30"]}`,
+    paddingTop: '8px',
+    paddingBottom: '8px',
+    "&:hover": {
+      textDecoration: 'underline',
+      cursor: 'pointer',
+    }
+  },
 });
 
 interface ICollapsibleTableChild {
@@ -56,12 +66,14 @@ interface ICollapsibleTableChild {
 interface ICollapsibleTableCell extends ICollapsibleTableChild {
   row: ReturnType<typeof mapBookingsForUI>;
   colSpan?: number;
+  isEditing?: boolean;
 }
 
 interface ICollapsibleTable extends ICollapsibleTableChild {
   parentTableHead: ICollapsibleTableHead[];
   rows: ReturnType<typeof mapBookingsForUI>[];
   empty?: string;
+  onRowClick?: () => void,
 }
 
 const TableEmpty = styled("div")({
@@ -86,7 +98,7 @@ function Row({
   row,
   childComponent: ChildComponent,
   childTableHead,
-  colSpan
+  colSpan,
 }: ICollapsibleTableCell) {
   const [open, setOpen] = React.useState(false);
   const classes = useRowStyles();
@@ -99,7 +111,7 @@ function Row({
             aria-label="expand row"
             onClick={() => setOpen(!open)}
           >
-            {open ? <IconArrowUp/> : <IconArrowDown/>}
+            {open ? <IconArrowUp /> : <IconArrowDown />}
           </IconButton>
         </TableCell>
         {
@@ -108,12 +120,12 @@ function Row({
           ))
         }
         {/* TODO: Edit button will be down here */}
-        <TableCell/>
+        <TableCell />
       </TableRow>
       {
         ChildComponent &&
         <TableRow className={classes.root}>
-          <TableCell style={{ padding: 0 }}/>
+          <TableCell style={{ padding: 0 }} />
           <TableCell
             style={{ padding: 0 }}
             colSpan={colSpan}
@@ -145,7 +157,7 @@ export default function CollapsibleTable({
   childTableHead,
   parentTableHead,
   rows,
-  empty
+  empty,
 }: ICollapsibleTable) {
   const tableContainerClasses = useTableContainerStyles();
   const tableHeadClasses = useTableHeadCellStyles();
@@ -158,12 +170,13 @@ export default function CollapsibleTable({
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            {parentTableHead.map(({ align = "left", title, width = "" }: ICollapsibleTableHead, i) =>
+            {parentTableHead.map(({ align = "left", title, width = "", onClick, }: ICollapsibleTableHead, i) =>
               <TableCell
                 key={title + i}
                 style={{ width }}
-                className={tableHeadClasses.root}
+                className={onClick ? tableHeadClasses.button : tableHeadClasses.root}
                 align={align}
+                onClick={onClick}
               >{title}</TableCell>
             )}
           </TableRow>

@@ -73,7 +73,8 @@ const mapBookingsForUI = ({
   const { people, date, site } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
     name: `${person.first_name} ${person.last_name}`,
-    email: person.email
+    email: person.email,
+    checked: false,
   }));
   const { maxPeople } = offices.filter((office) => office.site === site)[0];
 
@@ -155,17 +156,17 @@ export function PersonTrackingPanel({
       {
         mutateUserContactsRes.status === "loading" ? (
           <CenteredSpinnerContainer style={{ minHeight: "250px" }}>
-            <CenteredSpinner/>
+            <CenteredSpinner />
           </CenteredSpinnerContainer>
         ) : (
-          <CollapsibleTable
-            childComponent={BookingsTable}
-            childTableHead={childTableHead}
-            parentTableHead={parentTableHead}
-            empty={"No result for the selected parameters."}
-            rows={rows}
-          />
-        )
+            <CollapsibleTable
+              childComponent={BookingsTable}
+              childTableHead={childTableHead}
+              parentTableHead={parentTableHead}
+              empty={"No result for the selected parameters."}
+              rows={rows}
+            />
+          )
       }
     </>
   );

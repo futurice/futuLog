@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, createContext } from "react";
 import { queryCache, useMutation } from "react-query";
 import dayjs from "dayjs";
 
@@ -20,19 +20,40 @@ interface IOfficeVisitsPanel {
   offices: IOfficeSpaceDto[];
 }
 
-const childTableHead: ICollapsibleTableHead[] = [
-  {
-    title: "nr."
-  },
-  {
-    title: "Name"
-  },
-  {
-    title: "Email"
-  }
-];
+interface IEditOfficeVisitsContext {
+  isEditing: boolean,
+  onToggleAllRows: (date: string) => void,
+  onToggleRow: (email: string, date: string) => void,
+}
 
-const parentTableHead: ICollapsibleTableHead[] = [
+export const EditOfficeVisitsContext = createContext<IEditOfficeVisitsContext>({
+  isEditing: false,
+  onToggleAllRows: (date: string) => { },
+  onToggleRow: (email: string, date: string) => { },
+});
+
+const childTableHead = (isEditing: boolean): ICollapsibleTableHead[] => {
+  const tableHead: ICollapsibleTableHead[] = [
+    {
+      title: "nr."
+    },
+    {
+      title: "Name"
+    },
+    {
+      title: "Email"
+    }
+  ];
+  if (isEditing) {
+    tableHead.splice(1, 0, {
+      title: 'checkbox',
+      checked: isEditing,
+    })
+  }
+  return tableHead;
+};
+
+const parentTableHead = (isEditing: boolean, toggleIsEditing: () => void): ICollapsibleTableHead[] => ([
   {
     title: "",
     width: "5%"
@@ -51,9 +72,14 @@ const parentTableHead: ICollapsibleTableHead[] = [
   },
   {
     title: "",
-    width: "55%"
+    width: "45%"
+  },
+  {
+    title: isEditing ? "Exit edit mode" : "Edit list",
+    width: "10%",
+    onClick: toggleIsEditing,
   }
-];
+]);
 
 export function mapBookingsForUI({
   bookings,
@@ -67,7 +93,8 @@ export function mapBookingsForUI({
   const { people, date } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
     name: `${person.first_name} ${person.last_name}`,
-    email: person.email
+    email: person.email,
+    checked: false,
   }));
   const { maxPeople } = offices.filter((office) => office.site === site)[0];
 
@@ -89,6 +116,14 @@ export function OfficeVisitsPanel({
   const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
   const [currentSite, setCurrentSite] = useState((offices && offices[2].site) || "");
   const [rows, setRows] = useState<ITableDataDto[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
+  const toggleIsEditing = useCallback(() => {
+    setIsEditing(!isEditing);
+  },
+    [isEditing, setIsEditing],
+  );
+
 
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
@@ -111,7 +146,7 @@ export function OfficeVisitsPanel({
   }
 
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
-    ({ site, startDate, endDate }: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate}),
+    ({ site, startDate, endDate }: IOfficeBookingsRequestDto) => apiClient.getOfficeBookings({ site, startDate, endDate }),
     {
       onSuccess: (data) => {
         const mappedBookings: ITableDataDto[] | undefined = data && data.map(
@@ -121,6 +156,44 @@ export function OfficeVisitsPanel({
         queryCache.refetchQueries(officeBookingsQueryKey(currentSite, startDateStr, endDateStr))
       },
     }
+  );
+
+  const onToggleAllRows = useCallback((date: string) => {
+    const toggledSelectAll = !selectAll;
+    setSelectAll(toggledSelectAll);
+    const dayIndex = rows.findIndex(r => r.date === date);
+    if (dayIndex !== -1) {
+      const day = Object.assign({}, rows[dayIndex]);
+      const newVisitors = day.visitors.map(v => {
+        return { ...v, checked: toggledSelectAll }
+      });
+      day.visitors = newVisitors;
+      const newRows = [...rows];
+      newRows[dayIndex] = day;
+      setRows(newRows);
+    }
+  },
+    [rows, setRows, selectAll, setSelectAll],
+  );
+
+  const onToggleRow = useCallback(
+    (email: string, date: string) => {
+      const dayIndex = rows.findIndex(r => r.date === date);
+      if (dayIndex !== -1) {
+        const day = Object.assign({}, rows[dayIndex]);
+        const newVisitors = day.visitors.map(v => {
+          if (v.email === email) {
+            return { ...v, checked: !v.checked }
+          }
+          return v;
+        });
+        day.visitors = newVisitors;
+        const newRows = [...rows];
+        newRows[dayIndex] = day;
+        setRows(newRows);
+      }
+    },
+    [rows, setRows],
   );
 
   return (
@@ -141,14 +214,22 @@ export function OfficeVisitsPanel({
             <CenteredSpinner />
           </CenteredSpinnerContainer>
         ) : (
-          <CollapsibleTable
-            childComponent={BookingsTable}
-            childTableHead={childTableHead}
-            parentTableHead={parentTableHead}
-            empty={"No result for the selected parameters."}
-            rows={rows}
-          />
-        )
+            <EditOfficeVisitsContext.Provider
+              value={{
+                isEditing,
+                onToggleAllRows,
+                onToggleRow,
+              }}
+            >
+              <CollapsibleTable
+                childComponent={BookingsTable}
+                childTableHead={childTableHead(isEditing)}
+                parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
+                empty={"No result for the selected parameters."}
+                rows={rows}
+              />
+            </EditOfficeVisitsContext.Provider>
+          )
       }
     </>
   );

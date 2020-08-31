@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Table, TableBody, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 import { colors } from "../ux/theme";
+import { Checkbox } from "../ux/checkbox";
 import { TableCell } from "./styled";
 import { ICollapsibleTableHead } from "./types";
 import { mapBookingsForUI } from "./OfficeVisitsPanel";
+import { EditOfficeVisitsContext } from './OfficeVisitsPanel';
 
 
 interface IBookingsTable {
@@ -38,6 +40,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
+  const { isEditing, onToggleAllRows, onToggleRow } = useContext(EditOfficeVisitsContext);
 
   return (
     <Table
@@ -48,19 +51,19 @@ export function BookingsTable({ row, head }: IBookingsTable) {
       <TableHead>
         <TableRow>
           {
-            head.map(({ align = "left", title }: ICollapsibleTableHead) =>
+            head.map(({ align = "left", title, checked }: ICollapsibleTableHead) =>
               <TableCell
                 key={title}
                 className={headCellClasses.root}
                 align={align}
               >
-                {title}
+                {checked ? <Checkbox value={checked} onClick={() => onToggleAllRows(row.date)} /> : title}
               </TableCell>
             )}
         </TableRow>
       </TableHead>
       <TableBody>
-        {row.visitors.map(({ name, email }, i) => (
+        {row.visitors.map(({ name, email, checked }, i) => (
           <TableRow key={email}>
             <TableCell
               className={cellClasses.root}
@@ -69,7 +72,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               style={{ paddingLeft: "20px" }}
             >{i + 1}</TableCell>
             {/* TODO: when edit button is clicked checkbox column will be displayed */}
-            {/*<TableCell className={cellClasses.root}>e</TableCell>*/}
+            {isEditing && <TableCell className={cellClasses.root}><Checkbox checked={checked} onClick={() => onToggleRow(email, row.date)} /></TableCell>}
             <TableCell className={cellClasses.root}>{name}</TableCell>
             <TableCell className={cellClasses.root}>{email}</TableCell>
           </TableRow>

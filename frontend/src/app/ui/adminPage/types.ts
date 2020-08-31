@@ -6,6 +6,7 @@ import { TableCellProps as MuiTableCellProps } from "@material-ui/core/TableCell
 export interface ICollapsibleTableHead extends MuiTableCellProps {
   title: string
   width?: string
+  checked?: boolean
 }
 
 export interface ITableDataDto {
@@ -19,6 +20,7 @@ export interface ITableDataDto {
 export interface IUserDtoMapped {
   name: string;
   email: string;
+  checked: boolean;
 }
 
 export interface IToolbar {

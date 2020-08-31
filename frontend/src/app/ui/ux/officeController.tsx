@@ -76,7 +76,7 @@ export const OfficeController = ({ userOffice, officeBookings }: OfficeControlle
 
   const [officeState, setOfficeState] = React.useState(false);
   const [whoBookedState, setWhoBookedState] = React.useState(false);
-  const [currentOfficeState, setSurrentOfficeState] = React.useState(
+  const [currentOfficeState, setCurrentOfficeState] = React.useState(
     userOffice ? userOffice.site : ""
   );
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
@@ -93,7 +93,7 @@ export const OfficeController = ({ userOffice, officeBookings }: OfficeControlle
 
   const handleOfficeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const currentOffice = event.target.value as string;
-    setSurrentOfficeState(currentOffice);
+    setCurrentOfficeState(currentOffice);
     registerSiteShift(currentOffice);
   };
 

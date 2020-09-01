@@ -30,6 +30,14 @@ data RegisterWorkmode
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
+data WorkmodeId
+    = MkWorkmodeId
+        { date :: Day,
+          email :: Text
+        }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
+
 data UserWorkmode
   = MkUserWorkmode
       { userEmail :: Text,

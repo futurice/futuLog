@@ -9,7 +9,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.ByteString.Lazy.Char8 (pack)
-import Data.ClientRequest (shiftName, SetShift(..))
+import Data.ClientRequest (SetShift (..), shiftName)
 import Data.Config (Shift (name), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
@@ -71,16 +71,21 @@ officeHandler = getOffices :<|> getBooked
     getBooked office = withDefaultDays $ DB.getOfficeBooked office
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = shiftCSVAddHandler :<|> workmodeRangeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler
+adminHandler _ = shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler
   where
     shiftCSVAddHandler = \case
       MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
         Left err -> throwError $ err400 {errBody = err}
         Right _ -> pure NoContent
       _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}
-    workmodeRangeHandler office = withDefaultDays $ DB.getAllWorkmodes office
     bookingsHandler email = withDefaultDays $ DB.queryWorkmodes email
     contactsHandler email = withDefaultDays $ DB.queryContacts email
+
+adminWorkmodeHandler :: Server AdminWorkmodeAPI
+adminWorkmodeHandler = workmodeRangeHandler :<|> deleteWorkmodeHandler
+  where
+    workmodeRangeHandler office = withDefaultDays $ DB.getAllWorkmodes office
+    deleteWorkmodeHandler = fmap (const NoContent) . DB.deleteWorkmodes
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

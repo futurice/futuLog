@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..))
+import Data.ClientRequest (Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -46,6 +46,9 @@ queryContacts email start end =
               )
               t
       )
+
+deleteWorkmodes :: (MonadIO m, MonadReader Env m) => [WorkmodeId] -> m ()
+deleteWorkmodes = mapM_ $ \(MkWorkmodeId date email) -> exec "DELETE FROM workmodes WHERE date = ? AND user_email = ?" (date, email)
 
 confirmWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Bool -> Day -> m ()
 confirmWorkmode email status day = exec "UPDATE workmodes SET confirmed = ? WHERE user_email = ? AND date = ?" (status, email, day)
@@ -93,10 +96,7 @@ getOfficeBooked office start end =
 
 saveShift :: (MonadIO m, MonadReader Env m) => Text -> SetShift -> m ()
 saveShift email MkSetShift {shiftName = name, site = office} = do
-  lastShift <-
-    query'
-      shiftQuery
-      (Only email)
+  lastShift <- query' shiftQuery (Only email)
   today <- liftIO $ utctDay <$> getCurrentTime
   case lastShift of
     [s]

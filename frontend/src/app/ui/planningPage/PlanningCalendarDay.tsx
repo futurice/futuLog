@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { styled, useMediaQuery, Box } from "@material-ui/core";
 import { DatePicker } from "@material-ui/pickers";
@@ -6,7 +6,9 @@ import { H4, H2Center } from "app/ui/ux/text";
 import { Flex, Stack } from "app/ui/ux/containers";
 import { Theme } from "app/ui/ux/theme";
 import { IconClose } from "app/ui/ux/icons";
+import { OfficeController } from "app/ui/ux/officeController";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
+import { useMutation } from "react-query";
 import {
   Workmode,
   IWorkmodeDto,
@@ -122,7 +124,24 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings({ site: userOffice!.site, startDate: startDateStr, endDate: endDateStr })
+    () =>
+      apiClient.getOfficeBookings({
+        site: userOffice!.site,
+        startDate: startDateStr,
+        endDate: endDateStr,
+      })
+  );
+
+  const [registerSiteShift] = useMutation(
+    (currentOffice: string) =>
+      apiClient.registerSiteShift({ shiftName: "default", site: currentOffice }),
+    {
+      onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
+    }
+  );
+
+  const [currentOfficeState, setCurrentOfficeState] = useState(
+    userOffice ? userOffice.site : undefined
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -130,10 +149,20 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
     setEndDate(endDate);
     setIsChanged(true);
   };
+
   const onSelectLocalWorkmode = (workmode: IWorkmodeDto) => {
     setLocalWorkmode(workmode);
     setIsChanged(true);
   };
+
+  useEffect(() => {
+    setLocalWorkmode({ type: workmode });
+  }, [workmode, setLocalWorkmode]);
+
+  const onSelectOffice = (office: string) => {
+    setCurrentOfficeState(office);
+    setIsChanged(true);
+  }
   const onConfirmChanges = async () => {
     const workmodes = dateRange(startDate, endDate)
       .filter((date) => !isWeekend(date))
@@ -147,6 +176,9 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
           } as IUserWorkmodeDto)
       );
     await onSelectWorkmodes(workmodes);
+    if (currentOfficeState) {
+      registerSiteShift(currentOfficeState);
+    }
     setIsChanged(false);
   };
 
@@ -209,23 +241,25 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                     onSelectWorkmode={onSelectLocalWorkmode}
                   />
                 </Box>
-
                 <OfficeInfoContainer>
-                  Current office: {userOffice?.site || "N/A"}
-                  <br />
-                  {userOffice ? (
-                    startDate.isSame(endDate) ? (
-                      <>
-                        {officeCapacity}/{userOffice.maxPeople} spots available
-                      </>
-                    ) : officeCapacity <= 0 ? (
-                      "No spots available"
+                  <Box padding={"0 2rem"}>
+                    Current office: {userOffice?.site || "N/A"}
+                    <br />
+                    {userOffice ? (
+                      startDate.isSame(endDate) ? (
+                        <>
+                          {officeCapacity}/{userOffice.maxPeople} spots available
+                        </>
+                      ) : officeCapacity <= 0 ? (
+                        "No spots available"
+                      ) : (
+                            "Multiple slots available"
+                          )
                     ) : (
-                      "Multiple slots available"
-                    )
-                  ) : (
-                    ""
-                  )}
+                        ""
+                      )}
+                  </Box>
+                  <OfficeController userOffice={currentOfficeState} officeBookings={officeBookings} onSelectOffice={onSelectOffice} />
                 </OfficeInfoContainer>
 
                 {/*

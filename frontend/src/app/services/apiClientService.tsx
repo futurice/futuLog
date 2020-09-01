@@ -55,7 +55,7 @@ export interface IShiftDto {
 
 export interface ISetShiftDto {
   shiftName: string;
-  site: string
+  site: string;
 }
 
 export enum Workmode {
@@ -96,14 +96,14 @@ export interface ICapacityDto {
 }
 
 export interface IUserBookingsDto {
-  userEmail: string,
-  site: string,
-  date: string,
+  userEmail: string;
+  site: string;
+  date: string;
   workmode: {
-    type: string,
-    confirmed: boolean,
-    name: string
-  }
+    type: string;
+    confirmed: boolean;
+    name: string;
+  };
 }
 
 export interface IOfficeBookingsRequestDto {

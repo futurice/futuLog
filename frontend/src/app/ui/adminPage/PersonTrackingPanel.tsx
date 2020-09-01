@@ -165,6 +165,7 @@ export function PersonTrackingPanel({
               parentTableHead={parentTableHead}
               empty={"No result for the selected parameters."}
               rows={rows}
+              editUserButtons={false}
             />
           )
       }

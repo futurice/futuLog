@@ -17,9 +17,7 @@ import { ModalContext } from '../../providers/ModalProvider';
 interface IBookingsTable {
   row: ReturnType<typeof mapBookingsForUI>,
   head: ICollapsibleTableHead[],
-  openModal: boolean,
-  onModalClose: () => void,
-  onModalOpen: () => void,
+  editUserButtons?: boolean;
 }
 
 const useChildTableStyles = makeStyles({
@@ -43,14 +41,13 @@ const useTableHeadCellStyles = makeStyles({
 });
 
 
-export function BookingsTable({ row, head }: IBookingsTable) {
+export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
   const { isEditing, onToggleAllRows, onToggleRow } = useContext(EditOfficeVisitsContext);
 
-  const { handleModalOpen, setModalState } = useContext(ModalContext);
-
+  const { handleModalOpen } = useContext(ModalContext);
 
   return (
     <Table
@@ -88,9 +85,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
           </TableRow>
         ))}
 
-        {/* SHOULD ONLY SHOW IF OFFICE VISITS */}
-
-        <TableRow>
+        {editUserButtons ? (<TableRow>
           <TableCell colSpan={3}>
             <Flex paddingTop="2.5rem">
               <Button
@@ -111,7 +106,8 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               </Button>
             </Flex>
           </TableCell>
-        </TableRow>
+        </TableRow>) : null}
+
       </TableBody>
     </Table>
   )

@@ -152,6 +152,12 @@ export function createAPIClientService(baseUrl: string) {
         body: confirm,
       }),
 
+    updateUserWorkmode: (request: IUserWorkmodeDto[]) =>
+      fetchJSON<void>(`${baseUrl}/api/admin/workmode/update`, {
+        method: "POST",
+        body: request,
+      }),
+
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
 
     getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),

@@ -1,6 +1,6 @@
 module API where
 
-import Data.ClientRequest (Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode, WorkmodeId)
+import Data.ClientRequest (Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode, WorkmodeId, AdminWorkmode)
 import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
@@ -59,3 +59,4 @@ type AdminAPI =
 type AdminWorkmodeAPI =
   "csv" :> Capture "office" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[CSV] [UserWorkmode]
     :<|> "remove" :> ReqBody '[JSON] [WorkmodeId] :> Delete '[JSON] NoContent
+    :<|> "update" :> ReqBody '[JSON] [AdminWorkmode] :> Put '[JSON] NoContent

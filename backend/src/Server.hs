@@ -82,10 +82,11 @@ adminHandler _ = shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople 
     contactsHandler email = withDefaultDays $ DB.queryContacts email
 
 adminWorkmodeHandler :: Server AdminWorkmodeAPI
-adminWorkmodeHandler = workmodeRangeHandler :<|> deleteWorkmodeHandler
+adminWorkmodeHandler = workmodeRangeHandler :<|> deleteWorkmodeHandler :<|> updateWorkmodeHandler
   where
     workmodeRangeHandler office = withDefaultDays $ DB.getAllWorkmodes office
     deleteWorkmodeHandler = fmap (const NoContent) . DB.deleteWorkmodes
+    updateWorkmodeHandler = fmap (const NoContent) . DB.updateWorkmodes
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

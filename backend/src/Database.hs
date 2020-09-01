@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
+import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -46,6 +46,13 @@ queryContacts email start end =
               )
               t
       )
+
+updateWorkmodes :: (MonadIO m, MonadReader Env m) => [AdminWorkmode] -> m ()
+updateWorkmodes = mapM_ $ \(MkAdminWorkmode {email, site, date, workmode}) -> do
+  users <- query' "SELECT * FROM users WHERE user_email = ?" (Only email)
+  case users of
+    [user] -> saveWorkmode user $ MkRegisterWorkmode site date workmode
+    _ -> pure ()
 
 deleteWorkmodes :: (MonadIO m, MonadReader Env m) => [WorkmodeId] -> m ()
 deleteWorkmodes = mapM_ $ \(MkWorkmodeId date email) -> exec "DELETE FROM workmodes WHERE date = ? AND user_email = ?" (date, email)

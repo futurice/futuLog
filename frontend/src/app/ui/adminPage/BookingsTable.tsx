@@ -8,11 +8,18 @@ import { TableCell } from "./styled";
 import { ICollapsibleTableHead } from "./types";
 import { mapBookingsForUI } from "./OfficeVisitsPanel";
 import { EditOfficeVisitsContext } from './OfficeVisitsPanel';
+import { Button } from "../ux/buttons";
+import { Flex } from "../ux/containers";
+
+import { ModalContext } from '../../providers/ModalProvider';
 
 
 interface IBookingsTable {
   row: ReturnType<typeof mapBookingsForUI>,
-  head: ICollapsibleTableHead[]
+  head: ICollapsibleTableHead[],
+  openModal: boolean,
+  onModalClose: () => void,
+  onModalOpen: () => void,
 }
 
 const useChildTableStyles = makeStyles({
@@ -41,6 +48,9 @@ export function BookingsTable({ row, head }: IBookingsTable) {
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
   const { isEditing, onToggleAllRows, onToggleRow } = useContext(EditOfficeVisitsContext);
+
+  const { handleModalOpen, setModalState } = useContext(ModalContext);
+
 
   return (
     <Table
@@ -77,6 +87,31 @@ export function BookingsTable({ row, head }: IBookingsTable) {
             <TableCell className={cellClasses.root}>{email}</TableCell>
           </TableRow>
         ))}
+
+        {/* SHOULD ONLY SHOW IF OFFICE VISITS */}
+
+        <TableRow>
+          <TableCell colSpan={3}>
+            <Flex paddingTop="2.5rem">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleModalOpen}
+              // disabled={if no users selected}
+              >
+                Remove People
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleModalOpen}
+              >
+                Add people
+              </Button>
+            </Flex>
+          </TableCell>
+        </TableRow>
       </TableBody>
     </Table>
   )

@@ -15,9 +15,13 @@ import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from "./types";
 import { VisitorsToolbar } from "./VisitorsToolbar";
 import { BookingsTable } from "./BookingsTable";
 import { CenteredSpinner, CenteredSpinnerContainer } from "../ux/spinner";
+import { StyledModal } from "../ux/modal"
+import AddEmployeeModalContent from './AddEmployeeModalContent';
+
 
 interface IOfficeVisitsPanel {
   offices: IOfficeSpaceDto[];
+  users: IUserDto[]
 }
 
 interface IEditOfficeVisitsContext {
@@ -107,7 +111,8 @@ export function mapBookingsForUI({
 }
 
 export function OfficeVisitsPanel({
-  offices
+  offices,
+  users
 }: IOfficeVisitsPanel) {
   const { apiClient } = useServices();
   const today = dayjs().utc().startOf("day");
@@ -124,6 +129,8 @@ export function OfficeVisitsPanel({
     [isEditing, setIsEditing],
   );
 
+
+  const [currentUser, setCurrentUser] = useState("");
 
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
@@ -143,6 +150,10 @@ export function OfficeVisitsPanel({
   const handleDateChange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
     setStartDate(startDate);
     setEndDate(endDate);
+  }
+
+  const handleUserChange = (event: React.ChangeEvent<{}>, value: any | null) => {
+    setCurrentUser(value.value);
   }
 
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
@@ -231,6 +242,9 @@ export function OfficeVisitsPanel({
             </EditOfficeVisitsContext.Provider>
           )
       }
+      <StyledModal>
+        <AddEmployeeModalContent users={users} onUserChange={handleUserChange} />
+      </StyledModal>
     </>
   );
 }

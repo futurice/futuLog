@@ -12,6 +12,7 @@ import { PersonTrackingPanel } from "./PersonTrackingPanel";
 import { usersQueryKey } from "../../utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import { CenteredSpinner } from "../ux/spinner";
+import { ModalProvider } from "../../providers/ModalProvider";
 
 
 export interface ITabPanelProps {
@@ -63,60 +64,62 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
   };
 
   return (
-    <Stack
-      className="AdminPage"
-      display="flex"
-      flexDirection="column"
-      height="100%"
-      p={[]}
-      spacing={[]}
-    >
-      {
-        isFetching ? (
-          <CenteredSpinner/>
-        ) : (
-          <>
-            <Stack
-              className="AdminPageTitle"
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              mx="auto"
-              p={["0.5rem", "1rem", "2.5rem"]}
-              spacing={["0.5rem", "1rem", "2.5rem"]}
-            >
-              <H2Center>Who was in the office?</H2Center>
-            </Stack>
-            <TabsWrapper>
-              <Tabs
-                value={tab}
-                onChange={handleTabChange}
-                aria-label="Admin page tabs"
-              >
-                <Tab label="Office visits" {...a11yProps(0)} />
-                <Tab label="Person tracking" {...a11yProps(1)} />
-              </Tabs>
-              <TabsPanelWrapper bgColor={`${colors["deep-blue-10"]}`}>
-                <TabPanel
-                  value={tab}
-                  index={0}
+    <ModalProvider>
+      <Stack
+        className="AdminPage"
+        display="flex"
+        flexDirection="column"
+        height="100%"
+        p={[]}
+        spacing={[]}
+      >
+        {
+          isFetching ? (
+            <CenteredSpinner />
+          ) : (
+              <>
+                <Stack
+                  className="AdminPageTitle"
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  mx="auto"
+                  p={["0.5rem", "1rem", "2.5rem"]}
+                  spacing={["0.5rem", "1rem", "2.5rem"]}
                 >
-                  <OfficeVisitsPanel offices={offices}/>
-                </TabPanel>
-                <TabPanel
-                  value={tab}
-                  index={1}
-                >
-                  <PersonTrackingPanel
-                    users={users || []}
-                    offices={offices || []}
-                  />
-                </TabPanel>
-              </TabsPanelWrapper>
-            </TabsWrapper>
-          </>
-        )
-      }
-    </Stack>
+                  <H2Center>Who was in the office?</H2Center>
+                </Stack>
+                <TabsWrapper>
+                  <Tabs
+                    value={tab}
+                    onChange={handleTabChange}
+                    aria-label="Admin page tabs"
+                  >
+                    <Tab label="Office visits" {...a11yProps(0)} />
+                    <Tab label="Person tracking" {...a11yProps(1)} />
+                  </Tabs>
+                  <TabsPanelWrapper bgColor={`${colors["deep-blue-10"]}`}>
+                    <TabPanel
+                      value={tab}
+                      index={0}
+                    >
+                      <OfficeVisitsPanel offices={offices} users={users || []} />
+                    </TabPanel>
+                    <TabPanel
+                      value={tab}
+                      index={1}
+                    >
+                      <PersonTrackingPanel
+                        users={users || []}
+                        offices={offices || []}
+                      />
+                    </TabPanel>
+                  </TabsPanelWrapper>
+                </TabsWrapper>
+              </>
+            )
+        }
+      </Stack>
+    </ModalProvider>
   );
 }

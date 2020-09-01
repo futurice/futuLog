@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { styled, useMediaQuery, Box } from "@material-ui/core";
 import { DatePicker } from "@material-ui/pickers";
@@ -8,6 +8,7 @@ import { Theme } from "app/ui/ux/theme";
 import { IconClose } from "app/ui/ux/icons";
 import { OfficeController } from "app/ui/ux/officeController";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
+import { useMutation } from "react-query";
 import {
   Workmode,
   IWorkmodeDto,
@@ -131,15 +132,37 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
       })
   );
 
+  const [registerSiteShift] = useMutation(
+    (currentOffice: string) =>
+      apiClient.registerSiteShift({ shiftName: "default", site: currentOffice }),
+    {
+      onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
+    }
+  );
+
+  const [currentOfficeState, setCurrentOfficeState] = useState(
+    userOffice ? userOffice.site : undefined
+  );
+
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
     setStartDate(startDate);
     setEndDate(endDate);
     setIsChanged(true);
   };
+
   const onSelectLocalWorkmode = (workmode: IWorkmodeDto) => {
     setLocalWorkmode(workmode);
     setIsChanged(true);
   };
+
+  useEffect(() => {
+    setLocalWorkmode({ type: workmode });
+  }, [workmode, setLocalWorkmode]);
+
+  const onSelectOffice = (office: string) => {
+    setCurrentOfficeState(office);
+    setIsChanged(true);
+  }
   const onConfirmChanges = async () => {
     const workmodes = dateRange(startDate, endDate)
       .filter((date) => !isWeekend(date))
@@ -153,6 +176,9 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
           } as IUserWorkmodeDto)
       );
     await onSelectWorkmodes(workmodes);
+    if (currentOfficeState) {
+      registerSiteShift(currentOfficeState);
+    }
     setIsChanged(false);
   };
 
@@ -227,13 +253,13 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                       ) : officeCapacity <= 0 ? (
                         "No spots available"
                       ) : (
-                        "Multiple slots available"
-                      )
+                            "Multiple slots available"
+                          )
                     ) : (
-                      ""
-                    )}
+                        ""
+                      )}
                   </Box>
-                  <OfficeController userOffice={userOffice} officeBookings={officeBookings} />
+                  <OfficeController userOffice={currentOfficeState} officeBookings={officeBookings} onSelectOffice={onSelectOffice} />
                 </OfficeInfoContainer>
 
                 {/*

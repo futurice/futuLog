@@ -13,7 +13,6 @@ import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import { makeStyles } from "@material-ui/core/styles";
 import { Select } from "app/ui/ux/select";
 import { officesQueryKey, userShiftQueryKey } from "app/utils/reactQueryUtils";
-import { useMutation } from "react-query";
 import { useServices } from "../../services/services";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
 
@@ -65,20 +64,18 @@ const active = makeStyles({
 });
 
 interface OfficeControllerProps {
-  userOffice: IOfficeSpaceDto | undefined;
+  userOffice: string | undefined;
   officeBookings: ICapacityDto[];
+  onSelectOffice: (office: string) => void,
 }
 
-export const OfficeController = ({ userOffice, officeBookings }: OfficeControllerProps) => {
+export const OfficeController = ({ userOffice, officeBookings, onSelectOffice }: OfficeControllerProps) => {
   const centerClass = center();
   const dividerClass = divider();
   const activeClass = active();
 
   const [officeState, setOfficeState] = React.useState(false);
   const [whoBookedState, setWhoBookedState] = React.useState(false);
-  const [currentOfficeState, setCurrentOfficeState] = React.useState(
-    userOffice ? userOffice.site : ""
-  );
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
   const toggleOfficeStates = () => {
@@ -93,8 +90,7 @@ export const OfficeController = ({ userOffice, officeBookings }: OfficeControlle
 
   const handleOfficeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const currentOffice = event.target.value as string;
-    setCurrentOfficeState(currentOffice);
-    registerSiteShift(currentOffice);
+    onSelectOffice(currentOffice);
   };
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -107,14 +103,7 @@ export const OfficeController = ({ userOffice, officeBookings }: OfficeControlle
     toggleWhoBooked();
   };
 
-  const { apiClient, queryCache } = useServices();
-  const [registerSiteShift] = useMutation(
-    (currentOffice: string) =>
-      apiClient.registerSiteShift({ shiftName: "default", site: currentOffice }),
-    {
-      onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
-    }
-  );
+  const { queryCache } = useServices();
 
   const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
   const open = Boolean(anchorEl);
@@ -183,7 +172,7 @@ export const OfficeController = ({ userOffice, officeBookings }: OfficeControlle
           <Box>
             <Box fontWeight="fontWeightBold">Office</Box>
             <Select
-              value={currentOfficeState}
+              value={userOffice}
               onChange={handleOfficeChange}
               name="range"
               inputProps={{

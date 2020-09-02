@@ -42,6 +42,7 @@ const useTableHeadCellStyles = makeStyles({
 
 
 export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
+  console.log(editUserButtons);
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
@@ -86,31 +87,32 @@ export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
           </TableRow>
         ))}
 
-        {editUserButtons ? (<TableRow>
-          <TableCell colSpan={3}>
-            <Flex paddingTop="2.5rem">
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleModalOpen}
-              // disabled={if no users selected}
-              >
-                Remove People
+        {editUserButtons && isEditing ?
+          (<TableRow>
+            <TableCell colSpan={3}>
+              <Flex paddingTop="2.5rem">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleModalOpen}
+                // disabled={if no users selected}
+                >
+                  Remove People
               </Button>
 
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={() => {
-                  setSelected(row)
-                  setModalState(true)
-                }}
-              >
-                Add people
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => {
+                    setSelected(row)
+                    setModalState(true)
+                  }}
+                >
+                  Add people
               </Button>
-            </Flex>
-          </TableCell>
-        </TableRow>) : null}
+              </Flex>
+            </TableCell>
+          </TableRow>) : null}
 
       </TableBody>
     </Table>

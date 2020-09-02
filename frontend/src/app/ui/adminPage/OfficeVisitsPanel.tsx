@@ -242,6 +242,7 @@ export function OfficeVisitsPanel({
                 parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
                 empty={"No result for the selected parameters."}
                 rows={rows}
+                editUserButtons={true}
               />
             </EditOfficeVisitsContext.Provider>
           )

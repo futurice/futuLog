@@ -41,12 +41,11 @@ const useTableHeadCellStyles = makeStyles({
 });
 
 
-export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
-  console.log(editUserButtons);
+export function BookingsTable({ row, head }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
-  const { isEditing, onToggleAllRows, onToggleRow } = useContext(EditOfficeVisitsContext);
+  const { isEditing, onToggleAllRows, onToggleRow, setModalInfo } = useContext(EditOfficeVisitsContext);
 
   const { handleModalOpen, setSelected, setModalState } = useContext(ModalContext);
   console.log(row);
@@ -87,14 +86,17 @@ export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
           </TableRow>
         ))}
 
-        {editUserButtons && isEditing ?
+        {isEditing ?
           (<TableRow>
             <TableCell colSpan={3}>
               <Flex paddingTop="2.5rem">
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleModalOpen}
+                  onClick={() => {
+                    setModalInfo(row.site, row.date)
+                    handleModalOpen()
+                  }}
                 // disabled={if no users selected}
                 >
                   Remove People
@@ -105,6 +107,7 @@ export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
                   color="primary"
                   onClick={() => {
                     setSelected(row)
+                    setModalInfo(row.site, row.date)
                     setModalState(true)
                   }}
                 >

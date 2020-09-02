@@ -76,7 +76,6 @@ interface ICollapsibleTable extends ICollapsibleTableChild {
   rows: ReturnType<typeof mapBookingsForUI>[];
   empty?: string;
   onRowClick?: () => void,
-  editUserButtons?: boolean;
 }
 
 const TableEmpty = styled("div")({
@@ -102,7 +101,6 @@ function Row({
   childComponent: ChildComponent,
   childTableHead,
   colSpan,
-  editUserButtons,
 }: ICollapsibleTableCell) {
   const [open, setOpen] = React.useState(false);
   const classes = useRowStyles();
@@ -146,7 +144,6 @@ function Row({
                 <ChildComponent
                   head={childTableHead}
                   row={row}
-                  editUserButtons={editUserButtons}
                 />
               </Box>
             </Collapse>
@@ -163,7 +160,6 @@ export default function CollapsibleTable({
   parentTableHead,
   rows,
   empty,
-  editUserButtons
 }: ICollapsibleTable) {
   const tableContainerClasses = useTableContainerStyles();
   const tableHeadClasses = useTableHeadCellStyles();
@@ -197,7 +193,6 @@ export default function CollapsibleTable({
                   childComponent={childComponent}
                   childTableHead={childTableHead}
                   colSpan={parentTableHead.length - 2}
-                  editUserButtons={editUserButtons}
                 />
               ))
             )

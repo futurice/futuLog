@@ -24,16 +24,23 @@ interface IOfficeVisitsPanel {
   users: IUserDto[]
 }
 
+interface IModalState {
+  site: string
+  date: string
+}
+
 interface IEditOfficeVisitsContext {
   isEditing: boolean,
   onToggleAllRows: (date: string) => void,
   onToggleRow: (email: string, date: string) => void,
+  setModalInfo: (site: string, date: string) => void,
 }
 
 export const EditOfficeVisitsContext = createContext<IEditOfficeVisitsContext>({
   isEditing: false,
   onToggleAllRows: (date: string) => { },
   onToggleRow: (email: string, date: string) => { },
+  setModalInfo: (site: string, date: string) => { },
 });
 
 const childTableHead = (isEditing: boolean): ICollapsibleTableHead[] => {
@@ -123,6 +130,17 @@ export function OfficeVisitsPanel({
   const [rows, setRows] = useState<ITableDataDto[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
+  const [modalState, setModalState] = useState<IModalState>({
+    date: '',
+    site: ''
+  });
+  const setModalInfo = useCallback((site: string, date: string) => {
+    setModalState({ date, site })
+    console.log('MODAL STATE: ', date, site);
+  },
+    [setModalState],
+  );
+
   const toggleIsEditing = useCallback(() => {
     setIsEditing(!isEditing);
   },
@@ -154,6 +172,7 @@ export function OfficeVisitsPanel({
 
   const handleUserChange = (event: React.ChangeEvent<{}>, value: any | null) => {
     if (value) {
+      // TODO: Make use of modalInfo here!
       setCurrentUser({ ...currentUser, name: value.label, email: value.value })
       console.log("EMAIL:", value.value, "NAME:", value.label);
     }
@@ -234,6 +253,7 @@ export function OfficeVisitsPanel({
                 isEditing,
                 onToggleAllRows,
                 onToggleRow,
+                setModalInfo
               }}
             >
               <CollapsibleTable
@@ -242,7 +262,6 @@ export function OfficeVisitsPanel({
                 parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
                 empty={"No result for the selected parameters."}
                 rows={rows}
-                editUserButtons={true}
               />
             </EditOfficeVisitsContext.Provider>
           )

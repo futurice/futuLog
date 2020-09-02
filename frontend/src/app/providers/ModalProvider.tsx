@@ -1,4 +1,4 @@
-import React, { createContext, SetStateAction } from "react";
+import React, { createContext } from "react";
 import { useModal } from "../hooks/useModal";
 
 const ModalContext = createContext({
@@ -7,7 +7,7 @@ const ModalContext = createContext({
     handleModalOpen: () => { },
     setModalState: (state: boolean) => { },
     selected: null,
-    setSelected: (state: null) => { },
+    setSelected: (state: any) => { },
 })
 
 

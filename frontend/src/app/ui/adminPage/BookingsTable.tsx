@@ -47,7 +47,8 @@ export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
   const headCellClasses = useTableHeadCellStyles();
   const { isEditing, onToggleAllRows, onToggleRow } = useContext(EditOfficeVisitsContext);
 
-  const { handleModalOpen } = useContext(ModalContext);
+  const { handleModalOpen, setSelected, setModalState } = useContext(ModalContext);
+  console.log(row);
 
   return (
     <Table
@@ -100,7 +101,10 @@ export function BookingsTable({ row, head, editUserButtons }: IBookingsTable) {
               <Button
                 variant="outlined"
                 color="primary"
-                onClick={handleModalOpen}
+                onClick={() => {
+                  setSelected(row)
+                  setModalState(true)
+                }}
               >
                 Add people
               </Button>

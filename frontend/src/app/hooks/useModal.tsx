@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export const useModal = (initialMode = false, initialSelected = null) => {
     const [modalOpen, setModalOpen] = useState(initialMode);
-    const [selected, setSelected] = useState(initialSelected)
+    const [selected, setSelected] = useState<any>(initialSelected)
 
 
     const handleModalClose = () => {

@@ -130,7 +130,7 @@ export function OfficeVisitsPanel({
   );
 
 
-  const [currentUser, setCurrentUser] = useState("");
+  const [currentUser, setCurrentUser] = useState({ name: "", email: "" });
 
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
@@ -153,7 +153,11 @@ export function OfficeVisitsPanel({
   }
 
   const handleUserChange = (event: React.ChangeEvent<{}>, value: any | null) => {
-    setCurrentUser(value.value);
+    if (value) {
+      setCurrentUser({ ...currentUser, name: value.label, email: value.value })
+      console.log("EMAIL:", value.value, "NAME:", value.label);
+    }
+    return null
   }
 
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(

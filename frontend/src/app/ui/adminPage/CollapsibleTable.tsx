@@ -61,14 +61,12 @@ const useTableHeadCellStyles = makeStyles({
 interface ICollapsibleTableChild {
   childComponent?: React.ElementType;
   childTableHead?: ICollapsibleTableHead[];
-  editUserButtons?: boolean;
 }
 
 interface ICollapsibleTableCell extends ICollapsibleTableChild {
   row: ReturnType<typeof mapBookingsForUI>;
   colSpan?: number;
   isEditing?: boolean;
-  editUserButtons?: boolean;
 }
 
 interface ICollapsibleTable extends ICollapsibleTableChild {

@@ -17,7 +17,6 @@ import { ModalContext } from '../../providers/ModalProvider';
 interface IBookingsTable {
   row: ReturnType<typeof mapBookingsForUI>,
   head: ICollapsibleTableHead[],
-  editUserButtons?: boolean;
 }
 
 const useChildTableStyles = makeStyles({

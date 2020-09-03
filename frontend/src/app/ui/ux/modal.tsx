@@ -30,7 +30,7 @@ const useStyles = makeStyles({
 export const StyledModal: React.FC = ({ children }) => {
     const classes = useStyles();
 
-    const { modalOpen, handleModalClose } = useContext(ModalContext);
+    const { modalOpen, handleModalClose, selected } = useContext(ModalContext);
 
     return (
         <Modal
@@ -49,7 +49,7 @@ export const StyledModal: React.FC = ({ children }) => {
                 <div
                     className={classes.paper}
                 >
-                    {children}
+                    {selected}
                 </div>
             </Fade>
         </Modal>

@@ -12,6 +12,9 @@ import { Button } from "../ux/buttons";
 import { Flex } from "../ux/containers";
 
 import { ModalContext } from '../../providers/ModalProvider';
+import { StyledModal } from "../ux/modal";
+import AddEmployeeModalContent from "./AddEmployeeModalContent";
+import DeleteEmployeeModalContent from "./DeleteEmployeeModalContent";
 
 
 interface IBookingsTable {
@@ -44,10 +47,9 @@ export function BookingsTable({ row, head }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
-  const { isEditing, onToggleAllRows, onToggleRow, setModalInfo } = useContext(EditOfficeVisitsContext);
+  const { isEditing, onToggleAllRows, onToggleRow, setModalInfo, onAddEmployee, onDeleteEmployee, users } = useContext(EditOfficeVisitsContext);
 
-  const { handleModalOpen, setSelected, setModalState } = useContext(ModalContext);
-  console.log(row);
+  const { handleModalOpen, setModalState, setSelected } = useContext(ModalContext);
 
   return (
     <Table
@@ -93,8 +95,9 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                   variant="contained"
                   color="primary"
                   onClick={() => {
-                    setModalInfo(row.site, row.date)
                     handleModalOpen()
+                    setModalInfo(row.site, row.date)
+                    setSelected(<DeleteEmployeeModalContent date={row.date} email={"dummy data"} onDeleteEmployee={onDeleteEmployee} />)
                   }}
                 // disabled={if no users selected}
                 >
@@ -105,9 +108,10 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                   variant="outlined"
                   color="primary"
                   onClick={() => {
-                    setSelected(row)
+                    handleModalOpen()
                     setModalInfo(row.site, row.date)
                     setModalState(true)
+                    setSelected(<AddEmployeeModalContent users={users} onAddEmployee={onAddEmployee} />)
                   }}
                 >
                   Add people
@@ -115,7 +119,6 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               </Flex>
             </TableCell>
           </TableRow>) : null}
-
       </TableBody>
     </Table>
   )

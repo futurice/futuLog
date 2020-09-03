@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { H4, P } from "../ux/text";
-import { Stack, HR, Flex } from "../ux/containers";
+import { Stack, HR, Flex, HorizontalStack } from "../ux/containers";
 import { Searchbox } from "../ux/searchbox"
 import { IUserDto } from "app/services/apiClientService";
 import { TextField, Box, makeStyles, Button } from "@material-ui/core";
@@ -98,9 +98,16 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
 								renderInput={(params) => <TextField {...params} />}
 							/>
 						</Flex>
-
-						<Flex justifyContent="flex-end">
-							<Button variant="outlined" color="primary" onClick={handleModalClose}>
+						<HorizontalStack
+							spacing="0.8rem"
+							marginTop="1.25rem"
+							justifyContent="flex-end"
+						>
+							<Button
+								variant="contained"
+								color="secondary"
+								onClick={handleModalClose}
+							>
 								Cancel
               </Button>
 
@@ -111,7 +118,7 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
 							>
 								Add
               </Button>
-						</Flex>
+						</HorizontalStack>
 					</>
 				)}
 

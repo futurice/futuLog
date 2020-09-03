@@ -6,6 +6,9 @@ import { colors } from "./theme";
 export interface IStack extends BoxProps {
   spacing: BreakpointProp<number | string>;
 }
+export interface IHorizontalStack extends BoxProps {
+  spacing: BreakpointProp<number | string>;
+}
 
 export const Stack = styled(Box)<Theme, IStack>(({ theme }) => ({
   "& > *": { marginBottom: 0 },
@@ -29,3 +32,12 @@ export const HR = styled("hr")({
 export const Flex = styled(Box)({
   display: "flex",
 });
+
+export const HorizontalStack = styled(Box)<Theme, IHorizontalStack>(({ theme }) => ({
+  display: "flex",
+  '& > *': {
+    ...breakpoints<IHorizontalStack>(theme, (propFn) => ({
+      marginRight: propFn("spacing"),
+    })),
+  },
+}));

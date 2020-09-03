@@ -2,19 +2,19 @@ import React, { useContext } from "react";
 import { Table, TableBody, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { colors } from "../ux/theme";
 import { Checkbox } from "../ux/checkbox";
 import { TableCell } from "./styled";
 import { ICollapsibleTableHead } from "./types";
 import { mapBookingsForUI } from "./OfficeVisitsPanel";
 import { EditOfficeVisitsContext } from './OfficeVisitsPanel';
 import { Button } from "../ux/buttons";
-import { Flex } from "../ux/containers";
+import { HorizontalStack } from "../ux/containers";
 
 import { ModalContext } from '../../providers/ModalProvider';
-import { StyledModal } from "../ux/modal";
 import AddEmployeeModalContent from "./AddEmployeeModalContent";
 import DeleteEmployeeModalContent from "./DeleteEmployeeModalContent";
+
+import { colors } from "../ux/theme";
 
 
 interface IBookingsTable {
@@ -90,7 +90,10 @@ export function BookingsTable({ row, head }: IBookingsTable) {
         {isEditing ?
           (<TableRow>
             <TableCell colSpan={3}>
-              <Flex paddingTop="2.5rem">
+              <HorizontalStack
+                spacing="0.8rem"
+                marginTop="1.25rem"
+              >
                 <Button
                   variant="contained"
                   color="primary"
@@ -104,8 +107,8 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               </Button>
 
                 <Button
-                  variant="outlined"
-                  color="primary"
+                  variant="contained"
+                  color="secondary"
                   onClick={() => {
                     handleModalOpen()
                     setModalInfo(row.site, row.date)
@@ -115,7 +118,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                 >
                   Add people
               </Button>
-              </Flex>
+              </HorizontalStack>
             </TableCell>
           </TableRow>) : null}
       </TableBody>

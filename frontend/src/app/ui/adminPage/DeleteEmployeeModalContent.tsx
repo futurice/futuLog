@@ -1,6 +1,6 @@
 import React from "react";
 import { H4, P } from "../ux/text";
-import { Stack, Flex } from "../ux/containers";
+import { Stack, HorizontalStack } from "../ux/containers";
 import { Button } from "@material-ui/core";
 import { useContext } from 'react';
 import { ModalContext } from '../../providers/ModalProvider';
@@ -24,8 +24,16 @@ const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmp
 				<P>
 					Are you sure you want to remove the selected persons from the list?
         </P>
-				<Flex justifyContent="flex-end">
-					<Button variant="outlined" color="primary" onClick={handleModalClose}>
+				<HorizontalStack
+					spacing="0.8rem"
+					marginTop="1.25rem"
+					justifyContent="flex-end"
+				>
+					<Button
+						variant="contained"
+						color="secondary"
+						onClick={handleModalClose}
+					>
 						Cancel
           </Button>
 
@@ -36,7 +44,7 @@ const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmp
 					>
 						Remove
           </Button>
-				</Flex>
+				</HorizontalStack>
 			</Stack>
 		</>
 	);

@@ -24,12 +24,12 @@ import { ModalContext } from "app/providers/ModalProvider";
 
 interface IOfficeVisitsPanel {
   offices: IOfficeSpaceDto[];
-  users: IUserDto[]
+  users: IUserDto[];
 }
 
 interface IModalState {
-  site: string
-  date: string
+  site: string;
+  date: string;
 }
 
 interface IEditOfficeVisitsContext {
@@ -38,7 +38,7 @@ interface IEditOfficeVisitsContext {
   onToggleRow: (email: string, date: string) => void,
   setModalInfo: (site: string, date: string) => void,
   onAddEmployee: (email: string) => void,
-  onDeleteEmployee: (email: string, date: string) => void,
+  onDeleteEmployee: (site: string, date: string) => void,
   users: IUserDto[],
 }
 
@@ -48,7 +48,7 @@ export const EditOfficeVisitsContext = createContext<IEditOfficeVisitsContext>({
   onToggleRow: (email: string, date: string) => { },
   setModalInfo: (site: string, date: string) => { },
   onAddEmployee: (email: string) => { },
-  onDeleteEmployee: (email: string, date: string) => { },
+  onDeleteEmployee: (site: string, date: string) => { },
   users: []
 });
 
@@ -205,7 +205,7 @@ export function OfficeVisitsPanel({
     }
   );
   const [deleteUserWorkmode] = useMutation(
-    (request: IDeleteUserWorkmodeDto) => apiClient.deleteUserWorkmode(request),
+    (request: IDeleteUserWorkmodeDto[]) => apiClient.deleteUserWorkmode(request),
     {
       onSuccess: async () => {
         await mutateOfficeBookings({
@@ -213,11 +213,11 @@ export function OfficeVisitsPanel({
           startDate: startDateStr,
           endDate: endDateStr
         });
-        console.log("PARTY")
         handleModalClose()
       }
     }
   );
+
 
   const onAddEmployee = (email: string) => {
     let { site, date: unformatedDate } = modalState;
@@ -231,8 +231,18 @@ export function OfficeVisitsPanel({
     updateUserWorkmode([{ date, site, workmode, email }]);
   };
 
-  const onDeleteEmployee = (date: string, email: string) => {
-    deleteUserWorkmode({ date, email })
+  const onDeleteEmployee = (site: string, date: string) => {
+
+    const formattedDate = dayjs(date).format("YYYY-MM-DD");
+    const dayIndex = rows.findIndex((row) => row.date === date);
+    const visitors = rows.find((row) => row.date === date)?.visitors.filter(v => v.checked);
+
+    const selectedUsers: IDeleteUserWorkmodeDto[] = visitors ? visitors.map(v => {
+      return { email: v.email, date: formattedDate }
+    }) : [];
+
+    console.log(selectedUsers);
+    deleteUserWorkmode(selectedUsers)
   }
 
 

@@ -166,7 +166,7 @@ export function createAPIClientService(baseUrl: string) {
         body: request,
       }),
 
-    deleteUserWorkmode: (request: IDeleteUserWorkmodeDto) =>
+    deleteUserWorkmode: (request: IDeleteUserWorkmodeDto[]) =>
       fetchJSON<void>(`${baseUrl}/api/admin/workmode/remove`, {
         method: "DELETE",
         body: request,

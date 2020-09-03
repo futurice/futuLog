@@ -96,7 +96,6 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                   color="primary"
                   onClick={() => {
                     handleModalOpen()
-                    setModalInfo(row.site, row.date)
                     setSelected(<DeleteEmployeeModalContent date={row.date} email={"dummy data"} onDeleteEmployee={onDeleteEmployee} />)
                   }}
                 // disabled={if no users selected}

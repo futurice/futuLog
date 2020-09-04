@@ -57,7 +57,7 @@ data UserWorkmode
         site :: Text,
         date :: Day,
         workmode :: Workmode,
-        note :: Maybe Text
+        note :: Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)

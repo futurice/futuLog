@@ -3,7 +3,6 @@
 module Database where
 
 import Control.Monad (when)
-import Data.Maybe (fromMaybe)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
@@ -11,6 +10,7 @@ import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
+import Data.Maybe (fromMaybe)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
@@ -126,11 +126,11 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode, not
     Leave -> mkSimpleQuery "Leave"
     (Client name) ->
       exec
-        "INSERT INTO workmodes (user_email, site, date, workmode, client_name, note) VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO workmodes (user_email, site, date, workmode, client_name, note) VALUES (?, ?, ?, ?, ?, ?)"
         (email, site, date, "Client" :: String, name, note')
     (Office confirmed) ->
       exec
-        "INSERT INTO workmodes (user_email, site, date, workmode, confirmed, note') VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO workmodes (user_email, site, date, workmode, confirmed, note) VALUES (?, ?, ?, ?, ?, ?)"
         (email, site, date, "Office" :: String, confirmed, note')
   exec
     ( "INSERT INTO users (first_name, last_name, user_email, portrait_full_url, portrait_thumb_url, portrait_badge_url, isAdmin) "
@@ -143,7 +143,7 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode, not
     note' = fromMaybe "" note
     mkSimpleQuery s =
       exec
-        "INSERT INTO workmodes (user_email, site, date, workmode, note) VALUES (?, ?, ?, ?)"
+        "INSERT INTO workmodes (user_email, site, date, workmode, note) VALUES (?, ?, ?, ?, ?)"
         (email, site, date, s :: String, note')
 
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
@@ -159,7 +159,7 @@ initDatabase connectionString = do
           <> "workmode text not null, "
           <> "confirmed bool, "
           <> "client_name text, "
-          <> "note text"
+          <> "note text not null"
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn ->

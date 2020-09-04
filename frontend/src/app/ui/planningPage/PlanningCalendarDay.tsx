@@ -35,6 +35,7 @@ interface IPlanningCalendarDay {
   workmode: Workmode;
   isLoading?: boolean;
   isExpanded?: boolean;
+  office?: string;
   onSelectWorkmodes: (workmodes: IUserWorkmodeDto[]) => void;
   onClose: () => void;
 }
@@ -100,6 +101,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   workmode,
   isLoading,
   isExpanded,
+  office,
   onSelectWorkmodes,
   onClose,
 }) => {
@@ -119,7 +121,13 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey())!;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey())!;
-  const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
+  const [currentOfficeState, setCurrentOfficeState] = useState(
+    userShift ? userShift.site : undefined
+  );
+
+  const userOffice = (offices || []).find((office) => currentOfficeState && office.site === currentOfficeState);
+
+  const temporaryOffice = office && office !== userShift?.site;
 
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
@@ -138,10 +146,6 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
     {
       onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
     }
-  );
-
-  const [currentOfficeState, setCurrentOfficeState] = useState(
-    userOffice ? userOffice.site : undefined
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -170,15 +174,12 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         (date) =>
           ({
             userEmail: user.email,
-            site: userOffice?.site,
+            site: currentOfficeState,
             date: date.format("YYYY-MM-DD"),
             workmode: localWorkmode,
           } as IUserWorkmodeDto)
       );
     await onSelectWorkmodes(workmodes);
-    if (currentOfficeState) {
-      registerSiteShift(currentOfficeState);
-    }
     setIsChanged(false);
   };
 

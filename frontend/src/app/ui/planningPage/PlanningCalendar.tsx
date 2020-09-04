@@ -43,6 +43,11 @@ const getUserWorkmode = (dateStr: string, userWorkmodes: IUserWorkmodeDto[]) => 
   return userWorkmode && userWorkmode.workmode.type;
 };
 
+const getUserSite = (dateStr: string, userWorkmodes: IUserWorkmodeDto[]) => {
+  const userWorkmode = userWorkmodes.find((workmode) => workmode.date === dateStr);
+  return userWorkmode && userWorkmode.site;
+};
+
 // NOTE: This function assumes the hex color string looks like #rrggbb
 const hexToRgba = (hex: string, a: number) => {
   const [r, g, b] = [hex.slice(1, 3), hex.slice(3, 5), hex.slice(5, 7)].map((x) => parseInt(x, 16));
@@ -277,6 +282,10 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                       userWorkmodesRes.status === "success" ? userWorkmodesRes.data : []
                     ) || Workmode.Home;
                   const WorkmodeIcon = workmodeIcons[workmode];
+                  const office = getUserSite(
+                    dateStr,
+                    userWorkmodesRes.status === "success" ? userWorkmodesRes.data : []
+                  );
 
                   return (
                     <AccordionItem
@@ -312,6 +321,7 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                           isExpanded={!!expandedDate && expandedDate === dateStr}
                           onSelectWorkmodes={onSelectWorkmodes}
                           onClose={() => setExpandedDate(undefined)}
+                          office={office}
                         />
                       </AccordionContent>
                     </AccordionItem>

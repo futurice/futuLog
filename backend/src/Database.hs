@@ -159,7 +159,7 @@ initDatabase connectionString = do
           <> "workmode text not null, "
           <> "confirmed bool, "
           <> "client_name text, "
-          <> "note text, "
+          <> "note text"
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn ->

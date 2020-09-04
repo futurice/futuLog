@@ -1,5 +1,7 @@
 import { styled, Box, Theme, BoxProps } from "@material-ui/core";
 import { BreakpointProp, breakpoints } from "app/ui/ux/breakpoints";
+import { colors } from "./theme";
+
 
 export interface IStack extends BoxProps {
   spacing: BreakpointProp<number | string>;
@@ -21,9 +23,7 @@ export const PageMargins = styled(Box)(({ theme }) => ({
 }));
 
 export const HR = styled("hr")({
-  // TODO: Rearrange colors into xxx-10, xxx-20, etc..
-  // This should then be `deep-blue-20`
-  borderColor: "#D2CEE3",
+  border: `1px solid ${colors["deep-blue-20"]}`,
 });
 
 export const Flex = styled(Box)({

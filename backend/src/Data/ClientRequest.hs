@@ -56,7 +56,8 @@ data UserWorkmode
       { userEmail :: Text,
         site :: Text,
         date :: Day,
-        workmode :: Workmode
+        workmode :: Workmode,
+        note :: Maybe Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
@@ -88,14 +89,14 @@ instance FromRow UserWorkmode where
   fromRow = do
     common <- MkUserWorkmode <$> field <*> field <*> field
     mode <- field
-    common <$> case mode of
-      "Office" -> Office <$> field <* nullField
-      "Client" -> Client <$> (nullField *> field)
-      "Leave" -> Leave <$ nullField <* nullField
-      "Home" -> Home <$ nullField <* nullField
-      _ -> error $ "Could not deserialize working mode type: " <> mode
+    common <$> specific mode <*> field
     where
       nullField = field :: RowParser Null
+      specific "Office" = Office <$> field <* nullField
+      specific "Client" = Client <$> (nullField *> field)
+      specific "Leave" = Leave <$ nullField <* nullField
+      specific "Home" = Home <$ nullField <* nullField
+      specific mode = error $ "Could not deserialize working mode type: " <> mode
 
 instance DefaultOrdered UserWorkmode where
   headerOrder _ = ["Email", "Date", "Office"]

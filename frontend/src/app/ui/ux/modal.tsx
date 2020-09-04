@@ -15,15 +15,18 @@ const useStyles = makeStyles({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: 'none',
     },
     paper: {
         backgroundColor: colors.white,
-        borderRadius: "4px",
+        boxShadow: "20px 20px 40px rgba(20, 7, 75, 0.12)",
+        borderRadius: "8px",
         border: 'none',
-        padding: '32px',
+        padding: '2rem',
         color: colors["deep-blue-80"],
         textAlign: 'center',
+        "&:focus": {
+            outline: "none"
+        }
     },
 });
 

@@ -1,11 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { H4, P } from "../ux/text";
 import { Stack, HorizontalStack } from "../ux/containers";
-import { Button } from "@material-ui/core";
-import { useContext } from 'react';
+import { Button } from "../ux/buttons";
 import { ModalContext } from '../../providers/ModalProvider';
 
-//Should be able to delete several employees, should it take in an ARRAY of emails?
 interface IDeleteUserModalContent {
 	onDeleteEmployee: (email: string, date: string) => void;
 	email: string;
@@ -14,8 +12,6 @@ interface IDeleteUserModalContent {
 
 const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmployee, email, date }) => {
 	const { handleModalClose } = useContext(ModalContext);
-
-	//Actions
 
 	return (
 		<>
@@ -30,8 +26,8 @@ const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmp
 					justifyContent="flex-end"
 				>
 					<Button
-						variant="contained"
-						color="secondary"
+						variant="outlined"
+						color="primary"
 						onClick={handleModalClose}
 					>
 						Cancel

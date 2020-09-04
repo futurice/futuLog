@@ -80,7 +80,6 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               scope="row"
               style={{ paddingLeft: "20px" }}
             >{i + 1}</TableCell>
-            {/* TODO: when edit button is clicked checkbox column will be displayed */}
             {isEditing && <TableCell className={cellClasses.root}><Checkbox checked={checked} onClick={() => onToggleRow(email, row.date)} /></TableCell>}
             <TableCell className={cellClasses.root}>{name}</TableCell>
             <TableCell className={cellClasses.root}>{email}</TableCell>
@@ -101,11 +100,9 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                     handleModalOpen()
                     setSelected(<DeleteEmployeeModalContent date={row.date} email={"dummy data"} onDeleteEmployee={onDeleteEmployee} />)
                   }}
-                // disabled={if no users selected}
                 >
                   Remove People
               </Button>
-
                 <Button
                   variant="contained"
                   color="secondary"

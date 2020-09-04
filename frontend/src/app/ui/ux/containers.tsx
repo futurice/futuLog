@@ -2,7 +2,6 @@ import { styled, Box, Theme, BoxProps } from "@material-ui/core";
 import { BreakpointProp, breakpoints } from "app/ui/ux/breakpoints";
 import { colors } from "./theme";
 
-
 export interface IStack extends BoxProps {
   spacing: BreakpointProp<number | string>;
 }
@@ -35,9 +34,10 @@ export const Flex = styled(Box)({
 
 export const HorizontalStack = styled(Box)<Theme, IHorizontalStack>(({ theme }) => ({
   display: "flex",
-  '& > *': {
+  "& > button:nth-of-type(1)": {
     ...breakpoints<IHorizontalStack>(theme, (propFn) => ({
       marginRight: propFn("spacing"),
     })),
   },
+
 }));

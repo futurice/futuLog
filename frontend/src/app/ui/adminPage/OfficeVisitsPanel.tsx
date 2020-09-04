@@ -226,7 +226,7 @@ export function OfficeVisitsPanel({
     const workmode: IWorkmodeDto = {
       type: Workmode.Office,
       confirmed: true,
-      name: "Office",
+      name: Workmode.Office,
     }
     updateUserWorkmode([{ date, site, workmode, email }]);
   };

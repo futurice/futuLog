@@ -3,6 +3,7 @@
 module Database where
 
 import Control.Monad (when)
+import Data.Maybe (fromMaybe)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
@@ -48,10 +49,10 @@ queryContacts email start end =
       )
 
 updateWorkmodes :: (MonadIO m, MonadReader Env m) => [AdminWorkmode] -> m ()
-updateWorkmodes = mapM_ $ \(MkAdminWorkmode {email, site, date, workmode}) -> do
+updateWorkmodes = mapM_ $ \(MkAdminWorkmode {email, site, date, workmode, note}) -> do
   users <- query' "SELECT * FROM users WHERE user_email = ?" (Only email)
   case users of
-    [user] -> saveWorkmode user $ MkRegisterWorkmode site date workmode
+    [user] -> saveWorkmode user $ MkRegisterWorkmode site date workmode note
     _ -> pure ()
 
 deleteWorkmodes :: (MonadIO m, MonadReader Env m) => [WorkmodeId] -> m ()
@@ -118,19 +119,19 @@ saveShift email MkSetShift {shiftName = name, site = office} = do
         (email, office, name)
 
 saveWorkmode :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m ()
-saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = do
+saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode, note} = do
   exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
     Leave -> mkSimpleQuery "Leave"
     (Client name) ->
       exec
-        "INSERT INTO workmodes (user_email, site, date, workmode, client_name) VALUES (?, ?, ?, ?, ?)"
-        (email, site, date, "Client" :: String, name)
+        "INSERT INTO workmodes (user_email, site, date, workmode, client_name, note) VALUES (?, ?, ?, ?, ?)"
+        (email, site, date, "Client" :: String, name, note')
     (Office confirmed) ->
       exec
-        "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
-        (email, site, date, "Office" :: String, confirmed)
+        "INSERT INTO workmodes (user_email, site, date, workmode, confirmed, note') VALUES (?, ?, ?, ?, ?)"
+        (email, site, date, "Office" :: String, confirmed, note')
   exec
     ( "INSERT INTO users (first_name, last_name, user_email, portrait_full_url, portrait_thumb_url, portrait_badge_url, isAdmin) "
         <> "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (user_email) DO "
@@ -139,10 +140,11 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
     )
     user
   where
+    note' = fromMaybe "" note
     mkSimpleQuery s =
       exec
-        "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
-        (email, site, date, s :: String)
+        "INSERT INTO workmodes (user_email, site, date, workmode, note) VALUES (?, ?, ?, ?)"
+        (email, site, date, s :: String, note')
 
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
 initDatabase connectionString = do
@@ -156,7 +158,8 @@ initDatabase connectionString = do
           <> "date date not null, "
           <> "workmode text not null, "
           <> "confirmed bool, "
-          <> "client_name text"
+          <> "client_name text, "
+          <> "note text, "
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn ->

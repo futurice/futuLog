@@ -16,8 +16,9 @@ import GHC.Generics (Generic)
 
 data SetShift
   = MkSetShift
-      {shiftName :: Text,
-      site :: Text}
+      { shiftName :: Text,
+        site :: Text
+      }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema)
 
@@ -25,7 +26,8 @@ data RegisterWorkmode
   = MkRegisterWorkmode
       { site :: Text,
         date :: Day,
-        workmode :: Workmode
+        workmode :: Workmode,
+        note :: Maybe Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
@@ -35,16 +37,17 @@ data AdminWorkmode
       { site :: Text,
         date :: Day,
         email :: Text,
-        workmode :: Workmode
+        workmode :: Workmode,
+        note :: Maybe Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 data WorkmodeId
-    = MkWorkmodeId
-        { date :: Day,
-          email :: Text
-        }
+  = MkWorkmodeId
+      { date :: Day,
+        email :: Text
+      }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
@@ -67,13 +70,13 @@ data Capacity
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 data Contact
-    = MkContact
-        { date :: Day
-        , site :: Text
-        , people :: [User]
-        }
-    deriving stock (Generic, Show, Eq)
-    deriving anyclass (FromJSON, ToJSON, ToSchema)
+  = MkContact
+      { date :: Day,
+        site :: Text,
+        people :: [User]
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site

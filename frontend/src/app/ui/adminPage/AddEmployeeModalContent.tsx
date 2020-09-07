@@ -67,16 +67,16 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
 				<P>
 					You can add a futurice colleague or an external guest. If it’s a new colleague that
 					doesn’t have FUM access yet, please add as a guest.
-        </P>
+				</P>
 				<HR />
 				<Flex>
 					<ButtonDiscrete className={employeeClass} onClick={toggleEmployeeAndGuestState}>
 						Futurice employee
-          </ButtonDiscrete>
+					</ButtonDiscrete>
 					<Box className={dividerClass.root} />
 					<ButtonDiscrete className={guestClass} onClick={toggleEmployeeAndGuestState}>
 						Guest
-          </ButtonDiscrete>
+					</ButtonDiscrete>
 				</Flex>
 				{showEmployee && (
 					<>
@@ -113,20 +113,20 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
 								onClick={handleModalClose}
 							>
 								Cancel
-              </Button>
+							</Button>
 							<Button
 								variant="contained"
 								color="primary"
 								onClick={() => onAddEmployee(currentUser.email)}
 							>
 								Add
-              </Button>
+							</Button>
 						</HorizontalStack>
 					</>
 				)}
 				{showGuest && (
 					<>
-						{/* TODO: Viktorija */}
+						{/* TODO: Show guest input */}
 					</>
 				)}
 			</Stack>

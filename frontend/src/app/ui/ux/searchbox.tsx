@@ -13,11 +13,8 @@ const useStyles = makeStyles(() => ({
     width: "36px",
   },
   popupIndicatorOpen: {
-    "& .MuiSvgIcon-root": {
-      transform: "rotate(180deg)",
-    },
+    transform: "rotate(0)",
   },
-
   searchGlassIndicator: {
     backgroundColor: `${colors["deep-blue-80"]}`,
     borderRadius: "0 4px 4px 0",
@@ -43,7 +40,6 @@ export const Searchbox = (props: MuiAutocompleteProps<option, boolean, boolean, 
       popupIcon={<IconArrowDown color={colors.white} />}
       classes={{
         popupIndicator: classes.popupIndicator,
-        popupIndicatorOpen: classes.popupIndicatorOpen,
       }}
     />
   );
@@ -58,6 +54,7 @@ export const Searchbar = (props: MuiAutocompleteProps<option, boolean, boolean, 
       popupIcon={<IconSearch color={colors.white} />}
       classes={{
         popupIndicator: classes.searchGlassIndicator,
+        popupIndicatorOpen: classes.popupIndicatorOpen,
       }}
     />
   );

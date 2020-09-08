@@ -69,7 +69,6 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
       boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
     },
   },
-
 });
 
 export const ButtonWithIcon = styled(Button)({

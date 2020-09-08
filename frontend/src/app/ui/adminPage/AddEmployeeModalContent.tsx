@@ -13,7 +13,7 @@ interface AddEmployeeModalContent {
   onAddEmployee: (userEmail: string) => void
 }
 
-//Uncomment following lines when addGuest functionality is added
+//Styling for Add guest / add employee button
 // const divider = makeStyles({
 //   root: {
 //     background: colors["deep-blue-20"],
@@ -39,7 +39,7 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
     label: `${first_name} ${last_name}`,
   }));
 
-  //Uncomment following lines when addGuest functionality is added
+  {/* TODO: Uncomment following lines when addGuest functionality is added */ }
   // const dividerClass = divider();
   // const activeClass = active();
 
@@ -47,7 +47,7 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
   const showEmployee = toggleEmployeeAndGuest;
   const showGuest = !toggleEmployeeAndGuest;
 
-  //Uncomment following lines when addGuest functionality is added
+  {/* TODO: Uncomment following lines when addGuest functionality is added */ }
   // const employeeClass = showEmployee ? activeClass.border : "";
   // const guestClass = showGuest ? activeClass.border : "";
 
@@ -59,7 +59,7 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
     return null
   }
 
-  //Uncomment following lines when addGuest functionality is added
+  {/* TODO: Uncomment following lines when addGuest functionality is added */ }
   // const toggleEmployeeAndGuestState = () => {
   //   setToggleEmployeeAndGuest(!toggleEmployeeAndGuest);
   // };
@@ -70,22 +70,22 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
       <Stack spacing="1.5rem" maxWidth="26rem" mx="auto">
         <P>
           You can add a futurice colleague
-          {/* Uncomment following lines  when addGuest functionality is added */}
+          {/* TODO: Uncomment following lines when addGuest functionality is added */}
           {/* You can add a futurice colleague or an external guest. If it’s a new colleague that
           doesn’t have FUM access yet, please add as a guest. */}
         </P>
         <HR />
-        <Flex>
-          {/* Uncomment following lines when addGuest functionality is added */}
-          {/* <ButtonDiscrete className={employeeClass} 
+        {/* TODO: Uncomment following lines when addGuest functionality is added */}
+        {/* <Flex>
+          <ButtonDiscrete className={employeeClass} 
           onClick={toggleEmployeeAndGuestState}>
             Futurice employee
-					</ButtonDiscrete> */}
-          {/* <Box className={dividerClass.root} />
+					</ButtonDiscrete>
+          <Box className={dividerClass.root} />
           <ButtonDiscrete className={guestClass} onClick={toggleEmployeeAndGuestState}>
             Guest
-					</ButtonDiscrete> */}
-        </Flex>
+					</ButtonDiscrete>
+        </Flex> */}
         {showEmployee && (
           <>
             <Flex flexDirection="column" alignItems="flex-start" textAlign="left">
@@ -99,6 +99,7 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
                   border: `1px solid ${colors["deep-blue-80"]}`,
                   height: "40px",
                   borderRadius: "4px",
+                  marginTop: "6px",
                 }}
                 renderInput={(params) =>
                   <TextField {...params}

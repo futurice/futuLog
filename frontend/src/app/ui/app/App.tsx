@@ -10,7 +10,6 @@ import DayjsUtils from "@date-io/dayjs";
 import { ModalProvider } from "../../providers/ModalProvider";
 import { StyledModal } from "../ux/modal";
 
-
 interface IApp {
   services: IServices;
 }

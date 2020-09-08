@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { Table, TableBody, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-
 import { Checkbox } from "../ux/checkbox";
 import { TableCell } from "./styled";
 import { ICollapsibleTableHead } from "./types";
@@ -9,13 +8,10 @@ import { mapBookingsForUI } from "./OfficeVisitsPanel";
 import { EditOfficeVisitsContext } from './OfficeVisitsPanel';
 import { Button } from "../ux/buttons";
 import { HorizontalStack } from "../ux/containers";
-
 import { ModalContext } from '../../providers/ModalProvider';
 import AddEmployeeModalContent from "./AddEmployeeModalContent";
 import DeleteEmployeeModalContent from "./DeleteEmployeeModalContent";
-
 import { colors } from "../ux/theme";
-
 
 interface IBookingsTable {
   row: ReturnType<typeof mapBookingsForUI>,
@@ -42,13 +38,11 @@ const useTableHeadCellStyles = makeStyles({
   }
 });
 
-
 export function BookingsTable({ row, head }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
   const { isEditing, onToggleAllRows, onToggleRow, setModalInfo, onAddEmployee, onDeleteEmployee, users } = useContext(EditOfficeVisitsContext);
-
   const { handleModalOpen, setModalState, setSelected } = useContext(ModalContext);
 
   return (
@@ -102,7 +96,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                   }}
                 >
                   Remove People
-              </Button>
+                </Button>
                 <Button
                   variant="contained"
                   color="secondary"

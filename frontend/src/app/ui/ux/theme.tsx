@@ -25,7 +25,6 @@ export const theme = createMuiTheme(
   {
     palette: {
       primary: { main: colors["deep-blue-80"], contrastText: colors.white },
-      secondary: { main: colors.white, contrastText: colors["deep-blue-80"] },
     },
   },
   { colors }

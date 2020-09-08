@@ -96,6 +96,15 @@ function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
   return Math.min(...capacities);
 }
 
+function hasUserBookedOffice(user: IUserDto, bookings: ICapacityDto[], office?: IOfficeSpaceDto) {
+  const officeBookings = office && bookings.find(b => b.site === office.site);
+  if (officeBookings) {
+    return officeBookings.people.findIndex(p => p.email === user.email) !== -1;
+  } else {
+    return false;
+  }
+}
+
 export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   date,
   workmode,
@@ -121,13 +130,10 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey())!;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey())!;
-  const [currentOfficeState, setCurrentOfficeState] = useState(
-    userShift ? userShift.site : undefined
-  );
+  const initialOffice = office ? office : (userShift ? userShift.site : undefined);
+  const [currentOfficeState, setCurrentOfficeState] = useState(initialOffice);
 
   const userOffice = (offices || []).find((office) => currentOfficeState && office.site === currentOfficeState);
-
-  const temporaryOffice = office && office !== userShift?.site;
 
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
@@ -138,14 +144,6 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         startDate: startDateStr,
         endDate: endDateStr,
       })
-  );
-
-  const [registerSiteShift] = useMutation(
-    (currentOffice: string) =>
-      apiClient.registerSiteShift({ shiftName: "default", site: currentOffice }),
-    {
-      onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
-    }
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -183,6 +181,8 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
     setIsChanged(false);
   };
 
+
+
   return (
     <Root className="PlanningCalendarDay">
       <CloseButtonContainer>
@@ -199,6 +199,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         >
           {(officeBookings) => {
             const officeCapacity = userOffice ? getOfficeCapacity(userOffice, officeBookings) : 0;
+            const userIsBooked = hasUserBookedOffice(user, officeBookings, userOffice);
 
             return (
               <>
@@ -239,6 +240,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                     disabled={officeBookingsRes.status === "loading"}
                     workmode={localWorkmode}
                     officeCapacity={officeCapacity}
+                    userIsBooked={userIsBooked}
                     onSelectWorkmode={onSelectLocalWorkmode}
                   />
                 </Box>

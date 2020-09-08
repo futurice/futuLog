@@ -16,9 +16,8 @@ import GHC.Generics (Generic)
 
 data SetShift
   = MkSetShift
-      { shiftName :: Text,
-        site :: Text
-      }
+      {shiftName :: Text,
+      site :: Text}
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema)
 
@@ -26,8 +25,7 @@ data RegisterWorkmode
   = MkRegisterWorkmode
       { site :: Text,
         date :: Day,
-        workmode :: Workmode,
-        note :: Maybe Text
+        workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
@@ -37,17 +35,16 @@ data AdminWorkmode
       { site :: Text,
         date :: Day,
         email :: Text,
-        workmode :: Workmode,
-        note :: Maybe Text
+        workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 data WorkmodeId
-  = MkWorkmodeId
-      { date :: Day,
-        email :: Text
-      }
+    = MkWorkmodeId
+        { date :: Day,
+          email :: Text
+        }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
@@ -56,8 +53,7 @@ data UserWorkmode
       { userEmail :: Text,
         site :: Text,
         date :: Day,
-        workmode :: Workmode,
-        note :: Text
+        workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
@@ -71,13 +67,13 @@ data Capacity
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 data Contact
-  = MkContact
-      { date :: Day,
-        site :: Text,
-        people :: [User]
-      }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (FromJSON, ToJSON, ToSchema)
+    = MkContact
+        { date :: Day
+        , site :: Text
+        , people :: [User]
+        }
+    deriving stock (Generic, Show, Eq)
+    deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site
@@ -89,14 +85,14 @@ instance FromRow UserWorkmode where
   fromRow = do
     common <- MkUserWorkmode <$> field <*> field <*> field
     mode <- field
-    common <$> specific mode <*> field
+    common <$> case mode of
+      "Office" -> Office <$> field <* nullField
+      "Client" -> Client <$> (nullField *> field)
+      "Leave" -> Leave <$ nullField <* nullField
+      "Home" -> Home <$ nullField <* nullField
+      _ -> error $ "Could not deserialize working mode type: " <> mode
     where
       nullField = field :: RowParser Null
-      specific "Office" = Office <$> field <* nullField
-      specific "Client" = Client <$> (nullField *> field)
-      specific "Leave" = Leave <$ nullField <* nullField
-      specific "Home" = Home <$ nullField <* nullField
-      specific mode = error $ "Could not deserialize working mode type: " <> mode
 
 instance DefaultOrdered UserWorkmode where
   headerOrder _ = ["Email", "Date", "Office"]

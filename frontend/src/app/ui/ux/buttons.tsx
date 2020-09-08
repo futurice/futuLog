@@ -29,6 +29,31 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
     boxShadow: `inset 0 0 0px 1px ${colors["deep-blue-80"]}`,
     backgroundColor: colors["deep-blue-50"],
   },
+  "&:disabled": {
+    opacity: 0.4,
+  },
+
+  "&.MuiButton-containedSecondary": {
+    backgroundColor: colors.white,
+    color: colors["deep-blue-80"],
+    border: `1px solid ${colors.white}`,
+
+    "&:hover": {
+      boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
+      border: `1px solid ${colors["deep-blue-80"]}`,
+      backgroundColor: colors["deep-blue-20"],
+    },
+    "&:focus": {
+      border: `4px solid ${colors["deep-blue-50"]}`,
+      backgroundColor: colors.white,
+    },
+    "&:active": {
+      border: `2px solid ${colors["deep-blue-80"]}`
+    },
+    "&:disabled": {
+      opacity: 0.4,
+    },
+  },
 
   "&.MuiButton-outlinedPrimary": {
     "&:hover": {

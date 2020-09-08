@@ -34,6 +34,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 
 const ToolbarButtonContainer = styled("div")({
   marginLeft: "auto",
+  display: "flex",
 
   "& button, & .MuiButtonBase-root": {
     "&:hover": {
@@ -81,6 +82,22 @@ const BarButton = styled(ButtonWithIcon)({
   background: "transparent",
 });
 
+const UserCredentials = styled("span")({
+  margin: 0,
+  fontFamily: "Futurice",
+  fontSize: "1rem",
+  fontWeight: "bold",
+  lineHeight: 1.5,
+  color: colors.white,
+})
+const AvatarContainer = styled("div")({
+  display: "flex",
+  alignItems: "center",
+  '& span:first-of-type': {
+    marginLeft: "0.75rem",
+  }
+});
+
 export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
   <StyledAppBar position="static" className="NavigationBar">
     <StyledToolbar>
@@ -113,34 +130,31 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
 
       {/* Desktop controls */}
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
-        <ToolbarButtonContainer>
-
-          <LinkButton to={RoutePaths.Planning} component={BarButton} startIcon={<IconPlanning />}>
-            Planning
+        <>
+          <ToolbarButtonContainer>
+            <LinkButton to={RoutePaths.Planning} component={BarButton} startIcon={<IconPlanning />}>
+              Planning
           </LinkButton>
 
-          {user.isAdmin && (
-            <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
-              Tracking
+            {user.isAdmin && (
+              <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
+                Tracking
+              </LinkButton>
+            )}
+
+            <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
+              Info
+          </LinkButton>
+
+            <LinkButton to={RoutePaths.User} component={BarButton} startIcon={<IconProfile />}>
+              Profile
             </LinkButton>
-          )}
-
-          <LinkButton to={RoutePaths.Info} component={BarButton} startIcon={<IconInfoBalloon />}>
-            Info
-          </LinkButton>
-
-          <BarButton startIcon={<IconProfile />} href="https://login.futurice.com/?logout=true">
-            Logout
-          </BarButton>
-
-          <LinkButton
-            to={RoutePaths.User}
-            component={BarButton}
-            startIcon={<AvatarIcon src={user.portrait_thumb_url} />}
-          >
-            {user.first_name} {user.last_name}
-          </LinkButton>
-        </ToolbarButtonContainer>
+          </ToolbarButtonContainer>
+          <AvatarContainer>
+            <AvatarIcon src={user.portrait_thumb_url} />
+            <UserCredentials>{user.first_name} {user.last_name}</UserCredentials>
+          </AvatarContainer>
+        </>
       </MediaQuery>
     </StyledToolbar>
   </StyledAppBar>

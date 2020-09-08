@@ -8,7 +8,7 @@ import { colors } from "./theme";
 export type ButtonProps = MuiButtonProps;
 
 export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} disableRipple />)({
-  padding: "10px 32px",
+  padding: "0.75rem 2rem",
   textTransform: "none",
   fontFamily: "Futurice",
   fontSize: "1rem",

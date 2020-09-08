@@ -27,7 +27,6 @@ export const UserPage: React.FC = () => {
     }
   );
 
-
   const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setCurrentSite(event.target.value as string);
   }
@@ -56,11 +55,8 @@ export const UserPage: React.FC = () => {
           <Button href="https://login.futurice.com/?logout=true" variant="outlined" color="primary">
             Logout
          </Button>
-
         </Flex>
-
         <HR />
-
         <SiteSelector
           handleSiteChange={handleSiteChange}
           registerUserSite={registerUserSite}

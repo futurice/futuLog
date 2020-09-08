@@ -132,7 +132,6 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
       <MediaQuery query={(theme) => theme.breakpoints.up("md")}>
         <>
           <ToolbarButtonContainer>
-
             <LinkButton to={RoutePaths.Planning} component={BarButton} startIcon={<IconPlanning />}>
               Planning
           </LinkButton>
@@ -150,9 +149,7 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
             <LinkButton to={RoutePaths.User} component={BarButton} startIcon={<IconProfile />}>
               Profile
             </LinkButton>
-
           </ToolbarButtonContainer>
-
           <AvatarContainer>
             <AvatarIcon src={user.portrait_thumb_url} />
             <UserCredentials>{user.first_name} {user.last_name}</UserCredentials>

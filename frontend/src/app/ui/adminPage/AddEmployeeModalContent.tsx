@@ -13,21 +13,22 @@ interface AddEmployeeModalContent {
   onAddEmployee: (userEmail: string) => void
 }
 
-const divider = makeStyles({
-  root: {
-    background: colors["deep-blue-20"],
-    border: `1px solid ${colors["deep-blue-20"]}`,
-    boxSizing: "content-box",
-    display: "inline",
-    margin: "0.75rem 0.5rem",
-  },
-});
+//Uncomment following lines when addGuest functionality is added
+// const divider = makeStyles({
+//   root: {
+//     background: colors["deep-blue-20"],
+//     border: `1px solid ${colors["deep-blue-20"]}`,
+//     boxSizing: "content-box",
+//     display: "inline",
+//     margin: "0.75rem 0.5rem",
+//   },
+// });
 
-const active = makeStyles({
-  border: {
-    border: `1px solid ${colors["deep-blue-80"]}`,
-  },
-});
+// const active = makeStyles({
+//   border: {
+//     border: `1px solid ${colors["deep-blue-80"]}`,
+//   },
+// });
 
 const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onAddEmployee }) => {
   const { handleModalClose } = useContext(ModalContext);
@@ -38,15 +39,17 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
     label: `${first_name} ${last_name}`,
   }));
 
-  const dividerClass = divider();
-  const activeClass = active();
+  //Uncomment following lines when addGuest functionality is added
+  // const dividerClass = divider();
+  // const activeClass = active();
 
   const [toggleEmployeeAndGuest, setToggleEmployeeAndGuest] = useState(true);
   const showEmployee = toggleEmployeeAndGuest;
   const showGuest = !toggleEmployeeAndGuest;
 
-  const employeeClass = showEmployee ? activeClass.border : "";
-  const guestClass = showGuest ? activeClass.border : "";
+  //Uncomment following lines when addGuest functionality is added
+  // const employeeClass = showEmployee ? activeClass.border : "";
+  // const guestClass = showGuest ? activeClass.border : "";
 
   //Actions
   const handleUserChange = (event: React.ChangeEvent<{}>, value: any | null) => {
@@ -56,27 +59,32 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
     return null
   }
 
-  const toggleEmployeeAndGuestState = () => {
-    setToggleEmployeeAndGuest(!toggleEmployeeAndGuest);
-  };
+  //Uncomment following lines when addGuest functionality is added
+  // const toggleEmployeeAndGuestState = () => {
+  //   setToggleEmployeeAndGuest(!toggleEmployeeAndGuest);
+  // };
 
   return (
     <>
       <H4>Add people to the list</H4>
       <Stack spacing="1.5rem" maxWidth="26rem" mx="auto">
         <P>
-          You can add a futurice colleague or an external guest. If it’s a new colleague that
-          doesn’t have FUM access yet, please add as a guest.
-				</P>
+          You can add a futurice colleague
+          {/* Uncomment following lines  when addGuest functionality is added */}
+          {/* You can add a futurice colleague or an external guest. If it’s a new colleague that
+          doesn’t have FUM access yet, please add as a guest. */}
+        </P>
         <HR />
         <Flex>
-          <ButtonDiscrete className={employeeClass} onClick={toggleEmployeeAndGuestState}>
+          {/* Uncomment following lines when addGuest functionality is added */}
+          {/* <ButtonDiscrete className={employeeClass} 
+          onClick={toggleEmployeeAndGuestState}>
             Futurice employee
-					</ButtonDiscrete>
-          <Box className={dividerClass.root} />
+					</ButtonDiscrete> */}
+          {/* <Box className={dividerClass.root} />
           <ButtonDiscrete className={guestClass} onClick={toggleEmployeeAndGuestState}>
             Guest
-					</ButtonDiscrete>
+					</ButtonDiscrete> */}
         </Flex>
         {showEmployee && (
           <>

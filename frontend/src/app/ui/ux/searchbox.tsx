@@ -11,7 +11,6 @@ const useStyles = makeStyles(() => ({
     borderRadius: "0 3px 3px 0",
     height: "36px",
     width: "36px",
-
   },
   popupIndicatorOpen: {
     "& .MuiSvgIcon-root": {

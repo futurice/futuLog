@@ -38,6 +38,7 @@ export const Button = styled((props: MuiButtonProps) => <MuiButton {...props} di
     color: colors["deep-blue-80"],
     border: `1px solid ${colors.white}`,
 
+
     "&:hover": {
       boxShadow: "2px 2px 4px rgba(10, 3, 37, 0.2)",
       border: `1px solid ${colors["deep-blue-80"]}`,

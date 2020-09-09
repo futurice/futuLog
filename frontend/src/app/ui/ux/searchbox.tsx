@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Autocomplete } from "@material-ui/lab";
 import { AutocompleteProps as MuiAutocompleteProps } from "@material-ui/lab/Autocomplete";
-import { IconArrowDown } from "./icons";
+import { IconArrowDown, IconSearch } from "./icons";
 import { colors } from "./theme";
 
 const useStyles = makeStyles(() => ({
@@ -11,11 +11,18 @@ const useStyles = makeStyles(() => ({
     borderRadius: "0 3px 3px 0",
     height: "36px",
     width: "36px",
-
   },
   popupIndicatorOpen: {
-    "& .MuiSvgIcon-root": {
-      transform: "rotate(180deg)",
+    transform: "rotate(0)",
+  },
+  searchGlassIndicator: {
+    backgroundColor: `${colors["deep-blue-80"]}`,
+    borderRadius: "0 4px 4px 0",
+    height: "40px",
+    width: "40px",
+    marginTop: "-4px",
+    "&:hover, &:focus, &:active": {
+      backgroundColor: `${colors["deep-blue-80"]}`,
     },
   },
 }));
@@ -33,6 +40,20 @@ export const Searchbox = (props: MuiAutocompleteProps<option, boolean, boolean, 
       popupIcon={<IconArrowDown color={colors.white} />}
       classes={{
         popupIndicator: classes.popupIndicator,
+      }}
+    />
+  );
+};
+
+export const Searchbar = (props: MuiAutocompleteProps<option, boolean, boolean, boolean>) => {
+  const classes = useStyles();
+  return (
+    <Autocomplete
+      {...props}
+      fullWidth
+      popupIcon={<IconSearch color={colors.white} />}
+      classes={{
+        popupIndicator: classes.searchGlassIndicator,
         popupIndicatorOpen: classes.popupIndicatorOpen,
       }}
     />

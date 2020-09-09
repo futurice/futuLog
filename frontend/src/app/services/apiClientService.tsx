@@ -99,11 +99,14 @@ export interface IUserBookingsDto {
   userEmail: string;
   site: string;
   date: string;
-  workmode: {
-    type: string;
-    confirmed: boolean;
-    name: string;
-  };
+  workmode: IWorkmodeDto;
+}
+
+export interface IAdminUserWorkmodeDto {
+  email: string;
+  site: string;
+  date: string;
+  workmode: IWorkmodeDto;
 }
 
 export interface IOfficeBookingsRequestDto {
@@ -116,6 +119,11 @@ export interface IUserDataRequestDto {
   user: string;
   startDate: string;
   endDate: string;
+}
+
+export interface IDeleteUserWorkmodeDto {
+  date: string;
+  email: string;
 }
 
 export function createAPIClientService(baseUrl: string) {
@@ -150,6 +158,18 @@ export function createAPIClientService(baseUrl: string) {
       fetchJSON<void>(`${baseUrl}/api/workmode/confirm`, {
         method: "POST",
         body: confirm,
+      }),
+
+    updateUserWorkmode: (request: IAdminUserWorkmodeDto[]) =>
+      fetchJSON<void>(`${baseUrl}/api/admin/workmode/update`, {
+        method: "PUT",
+        body: request,
+      }),
+
+    deleteUserWorkmode: (request: IDeleteUserWorkmodeDto[]) =>
+      fetchJSON<void>(`${baseUrl}/api/admin/workmode/remove`, {
+        method: "DELETE",
+        body: request,
       }),
 
     getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),

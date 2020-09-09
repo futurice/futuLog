@@ -1,4 +1,4 @@
-import React, { useState, useCallback, createContext } from "react";
+import React, { useState, useCallback, createContext, useContext } from "react";
 import { queryCache, useMutation } from "react-query";
 import dayjs from "dayjs";
 
@@ -9,27 +9,47 @@ import {
   ICapacityDto,
   IOfficeBookingsRequestDto,
   IOfficeSpaceDto,
-  IUserDto
+  IUserDto,
+  Workmode,
+  IAdminUserWorkmodeDto,
+  IWorkmodeDto,
+  IDeleteUserWorkmodeDto
 } from "../../services/apiClientService";
 import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from "./types";
 import { VisitorsToolbar } from "./VisitorsToolbar";
 import { BookingsTable } from "./BookingsTable";
 import { CenteredSpinner, CenteredSpinnerContainer } from "../ux/spinner";
+import { ModalContext } from "app/providers/ModalProvider";
+
 
 interface IOfficeVisitsPanel {
   offices: IOfficeSpaceDto[];
+  users: IUserDto[];
+}
+
+interface IModalState {
+  site: string;
+  date: string;
 }
 
 interface IEditOfficeVisitsContext {
   isEditing: boolean,
   onToggleAllRows: (date: string) => void,
   onToggleRow: (email: string, date: string) => void,
+  setModalInfo: (site: string, date: string) => void,
+  onAddEmployee: (email: string) => void,
+  onDeleteEmployee: (site: string, date: string) => void,
+  users: IUserDto[],
 }
 
 export const EditOfficeVisitsContext = createContext<IEditOfficeVisitsContext>({
   isEditing: false,
   onToggleAllRows: (date: string) => { },
   onToggleRow: (email: string, date: string) => { },
+  setModalInfo: (site: string, date: string) => { },
+  onAddEmployee: (email: string) => { },
+  onDeleteEmployee: (site: string, date: string) => { },
+  users: []
 });
 
 const childTableHead = (isEditing: boolean): ICollapsibleTableHead[] => {
@@ -107,10 +127,13 @@ export function mapBookingsForUI({
 }
 
 export function OfficeVisitsPanel({
-  offices
+  offices,
+  users
 }: IOfficeVisitsPanel) {
   const { apiClient } = useServices();
   const today = dayjs().utc().startOf("day");
+
+  const { handleModalClose } = useContext(ModalContext);
 
   const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
   const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
@@ -118,6 +141,16 @@ export function OfficeVisitsPanel({
   const [rows, setRows] = useState<ITableDataDto[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
+  const [modalState, setModalState] = useState<IModalState>({
+    date: '',
+    site: ''
+  });
+  const setModalInfo = useCallback((site: string, date: string) => {
+    setModalState({ date, site })
+  },
+    [setModalState],
+  );
+
   const toggleIsEditing = useCallback(() => {
     setIsEditing(!isEditing);
   },
@@ -157,6 +190,61 @@ export function OfficeVisitsPanel({
       },
     }
   );
+
+  const [updateUserWorkmode] = useMutation(
+    (request: IAdminUserWorkmodeDto[]) => apiClient.updateUserWorkmode(request),
+    {
+      onSuccess: async () => {
+        await mutateOfficeBookings({
+          site: currentSite,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+        handleModalClose()
+      }
+    }
+  );
+  const [deleteUserWorkmode] = useMutation(
+    (request: IDeleteUserWorkmodeDto[]) => apiClient.deleteUserWorkmode(request),
+    {
+      onSuccess: async () => {
+        await mutateOfficeBookings({
+          site: currentSite,
+          startDate: startDateStr,
+          endDate: endDateStr
+        });
+        handleModalClose()
+      }
+    }
+  );
+
+
+  const onAddEmployee = (email: string) => {
+    let { site, date: unformatedDate } = modalState;
+    const date = dayjs(unformatedDate).format("YYYY-MM-DD")
+
+    const workmode: IWorkmodeDto = {
+      type: Workmode.Office,
+      confirmed: true,
+      name: Workmode.Office,
+    }
+    updateUserWorkmode([{ date, site, workmode, email }]);
+  };
+
+  const onDeleteEmployee = (site: string, date: string) => {
+
+    const formattedDate = dayjs(date).format("YYYY-MM-DD");
+    const dayIndex = rows.findIndex((row) => row.date === date);
+    const visitors = rows.find((row) => row.date === date)?.visitors.filter(v => v.checked);
+
+    const selectedUsers: IDeleteUserWorkmodeDto[] = visitors ? visitors.map(v => {
+      return { email: v.email, date: formattedDate }
+    }) : [];
+
+    console.log(selectedUsers);
+    deleteUserWorkmode(selectedUsers)
+  }
+
 
   const onToggleAllRows = useCallback((date: string) => {
     const toggledSelectAll = !selectAll;
@@ -219,6 +307,10 @@ export function OfficeVisitsPanel({
                 isEditing,
                 onToggleAllRows,
                 onToggleRow,
+                setModalInfo,
+                onAddEmployee,
+                onDeleteEmployee,
+                users,
               }}
             >
               <CollapsibleTable

@@ -15,27 +15,27 @@ export function CSVButton({ filename, data, disabled }: ICSVButton) {
   return (
     disabled ? (
       <Button
-        variant="outlined"
-        color="primary"
+        variant="contained"
+        color="secondary"
         disabled={disabled}
       >
         Export list
       </Button>
     ) : (
-      <CSVLink
-        style={{ textDecoration: "none" }}
-        data={data}
-        filename={`${filename}.csv`}
-        rel="noreferrer noopener"
-        target="_blank"
-      >
-        <Button
-          variant="outlined"
-          color="primary"
+        <CSVLink
+          style={{ textDecoration: "none" }}
+          data={data}
+          filename={`${filename}.csv`}
+          rel="noreferrer noopener"
+          target="_blank"
         >
-          Export list
+          <Button
+            variant="contained"
+            color="secondary"
+          >
+            Export list
         </Button>
-      </CSVLink>
-    )
+        </CSVLink>
+      )
   )
 }

@@ -1,18 +1,21 @@
 import React, { useContext } from "react";
 import { Table, TableBody, TableHead, TableRow } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-
-import { colors } from "../ux/theme";
 import { Checkbox } from "../ux/checkbox";
 import { TableCell } from "./styled";
 import { ICollapsibleTableHead } from "./types";
 import { mapBookingsForUI } from "./OfficeVisitsPanel";
 import { EditOfficeVisitsContext } from './OfficeVisitsPanel';
-
+import { Button } from "../ux/buttons";
+import { HorizontalStack } from "../ux/containers";
+import { ModalContext } from '../../providers/ModalProvider';
+import AddEmployeeModalContent from "./AddEmployeeModalContent";
+import DeleteEmployeeModalContent from "./DeleteEmployeeModalContent";
+import { colors } from "../ux/theme";
 
 interface IBookingsTable {
   row: ReturnType<typeof mapBookingsForUI>,
-  head: ICollapsibleTableHead[]
+  head: ICollapsibleTableHead[],
 }
 
 const useChildTableStyles = makeStyles({
@@ -35,12 +38,12 @@ const useTableHeadCellStyles = makeStyles({
   }
 });
 
-
 export function BookingsTable({ row, head }: IBookingsTable) {
   const tableClasses = useChildTableStyles();
   const cellClasses = useChildCellStyles();
   const headCellClasses = useTableHeadCellStyles();
-  const { isEditing, onToggleAllRows, onToggleRow } = useContext(EditOfficeVisitsContext);
+  const { isEditing, onToggleAllRows, onToggleRow, setModalInfo, onAddEmployee, onDeleteEmployee, users } = useContext(EditOfficeVisitsContext);
+  const { handleModalOpen, setModalState, setSelected } = useContext(ModalContext);
 
   return (
     <Table
@@ -71,12 +74,44 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               scope="row"
               style={{ paddingLeft: "20px" }}
             >{i + 1}</TableCell>
-            {/* TODO: when edit button is clicked checkbox column will be displayed */}
             {isEditing && <TableCell className={cellClasses.root}><Checkbox checked={checked} onClick={() => onToggleRow(email, row.date)} /></TableCell>}
             <TableCell className={cellClasses.root}>{name}</TableCell>
             <TableCell className={cellClasses.root}>{email}</TableCell>
           </TableRow>
         ))}
+
+        {isEditing ?
+          (<TableRow>
+            <TableCell colSpan={3}>
+              <HorizontalStack
+                spacing="0.8rem"
+                marginTop="1.25rem"
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    handleModalOpen()
+                    setSelected(<DeleteEmployeeModalContent date={row.date} email={"dummy data"} onDeleteEmployee={onDeleteEmployee} />)
+                  }}
+                >
+                  Remove People
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => {
+                    handleModalOpen()
+                    setModalInfo(row.site, row.date)
+                    setModalState(true)
+                    setSelected(<AddEmployeeModalContent users={users} onAddEmployee={onAddEmployee} />)
+                  }}
+                >
+                  Add people
+              </Button>
+              </HorizontalStack>
+            </TableCell>
+          </TableRow>) : null}
       </TableBody>
     </Table>
   )

@@ -8,7 +8,7 @@ import { Theme } from "app/ui/ux/theme";
 import { IconClose } from "app/ui/ux/icons";
 import { OfficeController } from "app/ui/ux/officeController";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
-import { useMutation } from "react-query";
+
 import {
   Workmode,
   IWorkmodeDto,
@@ -35,6 +35,7 @@ interface IPlanningCalendarDay {
   workmode: Workmode;
   isLoading?: boolean;
   isExpanded?: boolean;
+  office?: string;
   onSelectWorkmodes: (workmodes: IUserWorkmodeDto[]) => void;
   onClose: () => void;
 }
@@ -95,11 +96,21 @@ function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
   return Math.min(...capacities);
 }
 
+function hasUserBookedOffice(user: IUserDto, bookings: ICapacityDto[], office?: IOfficeSpaceDto) {
+  const officeBookings = office && bookings.find(b => b.site === office.site);
+  if (officeBookings) {
+    return officeBookings.people.findIndex(p => p.email === user.email) !== -1;
+  } else {
+    return false;
+  }
+}
+
 export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   date,
   workmode,
   isLoading,
   isExpanded,
+  office,
   onSelectWorkmodes,
   onClose,
 }) => {
@@ -119,7 +130,10 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey())!;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey())!;
-  const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
+  const initialOffice = office ? office : (userShift ? userShift.site : undefined);
+  const [currentOfficeState, setCurrentOfficeState] = useState(initialOffice);
+
+  const userOffice = (offices || []).find((office) => currentOfficeState && office.site === currentOfficeState);
 
   const officeBookingsRes = useQuery(
     userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
@@ -130,18 +144,6 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         startDate: startDateStr,
         endDate: endDateStr,
       })
-  );
-
-  const [registerSiteShift] = useMutation(
-    (currentOffice: string) =>
-      apiClient.registerSiteShift({ shiftName: "default", site: currentOffice }),
-    {
-      onSuccess: () => queryCache.refetchQueries(userShiftQueryKey()),
-    }
-  );
-
-  const [currentOfficeState, setCurrentOfficeState] = useState(
-    userOffice ? userOffice.site : undefined
   );
 
   const onSelectDateRange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -170,17 +172,16 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         (date) =>
           ({
             userEmail: user.email,
-            site: userOffice?.site,
+            site: currentOfficeState,
             date: date.format("YYYY-MM-DD"),
             workmode: localWorkmode,
           } as IUserWorkmodeDto)
       );
     await onSelectWorkmodes(workmodes);
-    if (currentOfficeState) {
-      registerSiteShift(currentOfficeState);
-    }
     setIsChanged(false);
   };
+
+
 
   return (
     <Root className="PlanningCalendarDay">
@@ -198,6 +199,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         >
           {(officeBookings) => {
             const officeCapacity = userOffice ? getOfficeCapacity(userOffice, officeBookings) : 0;
+            const userIsBooked = hasUserBookedOffice(user, officeBookings, userOffice);
 
             return (
               <>
@@ -238,6 +240,7 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                     disabled={officeBookingsRes.status === "loading"}
                     workmode={localWorkmode}
                     officeCapacity={officeCapacity}
+                    userIsBooked={userIsBooked}
                     onSelectWorkmode={onSelectLocalWorkmode}
                   />
                 </Box>

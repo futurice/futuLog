@@ -34,6 +34,7 @@ interface IWorkmodeButtons {
   officeCapacity: number;
   disabled?: boolean;
   onSelectWorkmode: (workmode: IWorkmodeDto) => any;
+  userIsBooked?: boolean;
 }
 
 const List = styled("ul")({
@@ -57,8 +58,13 @@ export const WorkmodeButtons: React.FC<IWorkmodeButtons> = ({
   officeCapacity,
   disabled,
   onSelectWorkmode,
+  userIsBooked,
 }) => {
   const isOfficeConfirmed = workmode.type === Workmode.Office && workmode.confirmed;
+
+  if (!userIsBooked && officeCapacity === 0 && workmode.type === Workmode.Office) {
+    onSelectWorkmode({ type: Workmode.Home });
+  }
 
   return (
     <List>

@@ -111,7 +111,7 @@ export const OfficeController = ({ userOffice, officeBookings, onSelectOffice }:
   const officeClass = officeState ? activeClass.border : "";
   const bookedClass = whoBookedState ? activeClass.border : "";
   const bookedArrow = whoBookedState ? <IconArrowUp /> : <IconArrowDown />;
-  const users = officeBookings.length > 0 ? officeBookings[0].people : [];
+  const users = (officeBookings && officeBookings.length > 0) ? officeBookings[0].people : [];
   const list_holderClass = list_holder();
   const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
 

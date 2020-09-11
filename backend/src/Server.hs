@@ -9,7 +9,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.ByteString.Lazy.Char8 (pack)
-import Data.ClientRequest (SetShift (..), shiftName, Capacity(..))
+import Data.ClientRequest (Capacity (..), SetShift (..), shiftName)
 import Data.Config (Shift (name), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
@@ -41,7 +41,7 @@ swaggerHandler = swaggerSchemaUIServer swagger
         & info . version .~ "1.0"
 
 apiHandler :: Server ProtectedAPI
-apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler :<|> pure user) :<|> adminHandler
+apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler user :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
 workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHandler :<|> DB.queryWorkmode email :<|> queryBatch
@@ -64,13 +64,15 @@ shiftHandler MkUser {email} = getShift :<|> setShift :<|> getShifts
         then DB.saveShift email x $> NoContent
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
-officeHandler :: Server OfficeAPI
-officeHandler = getOffices :<|> getBooked
+officeHandler :: User -> Server OfficeAPI
+officeHandler (MkUser {isAdmin}) = getOffices :<|> getBooked
   where
     getOffices = offices <$> ask
     getBooked office start end = withDefaultDays (DB.getOfficeBooked office) start end >>= \capacities -> do
       today <- liftIO $ utctDay <$> getCurrentTime
-      pure $ fmap (\cap@(MkCapacity {date}) -> if date < today then cap {people = []} else cap) capacities
+      if isAdmin
+        then pure capacities
+        else pure (fmap (\cap@(MkCapacity {date}) -> if date < today then cap {people = []} else cap) capacities)
 
 adminHandler :: AdminUser -> Server AdminAPI
 adminHandler _ = shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler

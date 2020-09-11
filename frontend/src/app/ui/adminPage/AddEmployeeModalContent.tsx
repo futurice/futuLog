@@ -10,7 +10,9 @@ import { Searchbar } from "../ux/searchbox";
 
 interface AddEmployeeModalContent {
   users: IUserDto[],
-  onAddEmployee: (userEmail: string) => void
+  site: string,
+  date: string,
+  onAddEmployee: (userEmail: string, site: string, date: string,) => void
 }
 
 //Styling for Add guest / add employee button
@@ -30,7 +32,7 @@ interface AddEmployeeModalContent {
 //   },
 // });
 
-const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onAddEmployee }) => {
+const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onAddEmployee, site, date }) => {
   const { handleModalClose } = useContext(ModalContext);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "" });
 
@@ -126,7 +128,7 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => onAddEmployee(currentUser.email)}
+                onClick={() => onAddEmployee(currentUser.email, date, site)}
               >
                 Add
 							</Button>

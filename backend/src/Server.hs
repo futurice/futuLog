@@ -9,7 +9,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.ByteString.Lazy.Char8 (pack)
-import Data.ClientRequest (SetShift (..), shiftName)
+import Data.ClientRequest (SetShift (..), shiftName, Capacity(..))
 import Data.Config (Shift (name), shiftSite)
 import Data.Env (Env (..))
 import Data.Functor (($>))
@@ -68,7 +68,9 @@ officeHandler :: Server OfficeAPI
 officeHandler = getOffices :<|> getBooked
   where
     getOffices = offices <$> ask
-    getBooked office = withDefaultDays $ DB.getOfficeBooked office
+    getBooked office start end = withDefaultDays (DB.getOfficeBooked office) start end >>= \capacities -> do
+      today <- liftIO $ utctDay <$> getCurrentTime
+      pure $ fmap (\cap@(MkCapacity {date}) -> if date < today then cap {people = []} else cap) capacities
 
 adminHandler :: AdminUser -> Server AdminAPI
 adminHandler _ = shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler

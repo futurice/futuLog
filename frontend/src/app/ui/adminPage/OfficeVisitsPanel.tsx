@@ -37,7 +37,7 @@ interface IEditOfficeVisitsContext {
   onToggleAllRows: (date: string) => void,
   onToggleRow: (email: string, date: string) => void,
   setModalInfo: (site: string, date: string) => void,
-  onAddEmployee: (email: string) => void,
+  onAddEmployee: (email: string, formatedDate: string, site: string) => void,
   onDeleteEmployee: (site: string, date: string) => void,
   users: IUserDto[],
 }
@@ -47,7 +47,7 @@ export const EditOfficeVisitsContext = createContext<IEditOfficeVisitsContext>({
   onToggleAllRows: (date: string) => { },
   onToggleRow: (email: string, date: string) => { },
   setModalInfo: (site: string, date: string) => { },
-  onAddEmployee: (email: string) => { },
+  onAddEmployee: (email: string, formatedDate: string, site: string) => { },
   onDeleteEmployee: (site: string, date: string) => { },
   users: []
 });
@@ -218,11 +218,8 @@ export function OfficeVisitsPanel({
     }
   );
 
-
-  const onAddEmployee = (email: string) => {
-    let { site, date: unformatedDate } = modalState;
-    const date = dayjs(unformatedDate).format("YYYY-MM-DD")
-
+  const onAddEmployee = (email: string, formatedDate: string, site: string) => {
+    const date = dayjs(formatedDate).format("YYYY-MM-DD")
     const workmode: IWorkmodeDto = {
       type: Workmode.Office,
       confirmed: true,
@@ -240,11 +237,8 @@ export function OfficeVisitsPanel({
     const selectedUsers: IDeleteUserWorkmodeDto[] = visitors ? visitors.map(v => {
       return { email: v.email, date: formattedDate }
     }) : [];
-
-    console.log(selectedUsers);
     deleteUserWorkmode(selectedUsers)
   }
-
 
   const onToggleAllRows = useCallback((date: string) => {
     const toggledSelectAll = !selectAll;

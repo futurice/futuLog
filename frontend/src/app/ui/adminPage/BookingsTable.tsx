@@ -104,7 +104,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                     handleModalOpen()
                     setModalInfo(row.site, row.date)
                     setModalState(true)
-                    setSelected(<AddEmployeeModalContent users={users} onAddEmployee={onAddEmployee} />)
+                    setSelected(<AddEmployeeModalContent users={users} onAddEmployee={onAddEmployee} site={row.site} date={row.date} />)
                   }}
                 >
                   Add people

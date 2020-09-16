@@ -33,11 +33,7 @@ export function TabPanel(props: ITabPanelProps) {
       aria-labelledby={`tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box p={3}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box p={3}>{children}</Box>}
     </div>
   );
 }
@@ -48,7 +44,6 @@ function a11yProps(index: any) {
     "aria-controls": `tabpanel-${index}`,
   };
 }
-
 
 export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
   const { apiClient: apiClientService } = useServices();
@@ -61,7 +56,6 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
   };
 
   return (
-
     <Stack
       className="AdminPage"
       display="flex"
@@ -70,52 +64,37 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
       p={[]}
       spacing={[]}
     >
-      {
-        isFetching ? (
-          <CenteredSpinner />
-        ) : (
-            <>
-              <Stack
-                className="AdminPageTitle"
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                mx="auto"
-                p={["0.5rem", "1rem", "2.5rem"]}
-                spacing={["0.5rem", "1rem", "2.5rem"]}
-              >
-                <H2Center>Who was in the office?</H2Center>
-              </Stack>
-              <TabsWrapper>
-                <Tabs
-                  value={tab}
-                  onChange={handleTabChange}
-                  aria-label="Admin page tabs"
-                >
-                  <Tab label="Office visits" {...a11yProps(0)} />
-                  <Tab label="Person tracking" {...a11yProps(1)} />
-                </Tabs>
-                <TabsPanelWrapper bgColor={`${colors["deep-blue-10"]}`}>
-                  <TabPanel
-                    value={tab}
-                    index={0}
-                  >
-                    <OfficeVisitsPanel offices={offices} users={users || []} />
-                  </TabPanel>
-                  <TabPanel
-                    value={tab}
-                    index={1}
-                  >
-                    <PersonTrackingPanel
-                      users={users || []}
-                      offices={offices || []}
-                    />
-                  </TabPanel>
-                </TabsPanelWrapper>
-              </TabsWrapper>
-            </>
-          )
-      }
+      {isFetching ? (
+        <CenteredSpinner />
+      ) : (
+        <>
+          <Stack
+            className="AdminPageTitle"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            mx="auto"
+            p={["0.5rem", "1rem", "2.5rem"]}
+            spacing={["0.5rem", "1rem", "2.5rem"]}
+          >
+            <H2Center>Who was in the office?</H2Center>
+          </Stack>
+          <TabsWrapper>
+            <Tabs value={tab} onChange={handleTabChange} aria-label="Admin page tabs">
+              <Tab label="Office visits" {...a11yProps(0)} />
+              <Tab label="Person tracking" {...a11yProps(1)} />
+            </Tabs>
+            <TabsPanelWrapper bgColor={`${colors["deep-blue-10"]}`}>
+              <TabPanel value={tab} index={0}>
+                <OfficeVisitsPanel offices={offices} users={users || []} />
+              </TabPanel>
+              <TabPanel value={tab} index={1}>
+                <PersonTrackingPanel users={users || []} offices={offices} />
+              </TabPanel>
+            </TabsPanelWrapper>
+          </TabsWrapper>
+        </>
+      )}
     </Stack>
   );
-}
+};

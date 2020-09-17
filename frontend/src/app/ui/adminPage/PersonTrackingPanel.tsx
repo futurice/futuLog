@@ -217,7 +217,7 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
     updateUserWorkmode([{ date, site, workmode, email }]);
   };
 
-  const onDeleteEmployee = (site: string, date: string) => {
+  const onDeleteEmployee = (date: string) => {
     const formattedDate = dayjs(date).format("YYYY-MM-DD");
     const visitors = rows.find((row) => row.date === date)?.visitors.filter((v) => v.checked);
 

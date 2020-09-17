@@ -61,8 +61,8 @@ export function BookingsTable({ row, head }: IBookingsTable) {
               {checked ? (
                 <Checkbox value={checked} onClick={() => onToggleAllRows(row.date)} />
               ) : (
-                title
-              )}
+                  title
+                )}
             </TableCell>
           ))}
         </TableRow>
@@ -100,7 +100,6 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                     setSelected(
                       <DeleteEmployeeModalContent
                         date={row.date}
-                        email={"dummy data"}
                         onDeleteEmployee={onDeleteEmployee}
                       />
                     );

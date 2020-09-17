@@ -5,12 +5,11 @@ import { Button } from "../ux/buttons";
 import { ModalContext } from '../../providers/ModalProvider';
 
 interface IDeleteUserModalContent {
-  onDeleteEmployee: (email: string, date: string) => void;
-  email: string;
+  onDeleteEmployee: (date: string) => void;
   date: string;
 }
 
-const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmployee, email, date }) => {
+const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmployee, date }) => {
   const { handleModalClose } = useContext(ModalContext);
 
   return (
@@ -36,7 +35,7 @@ const DeleteUserModalContent: React.FC<IDeleteUserModalContent> = ({ onDeleteEmp
           <Button
             variant="contained"
             color="primary"
-            onClick={() => onDeleteEmployee(email, date)}
+            onClick={() => onDeleteEmployee(date)}
           >
             Remove
           </Button>

@@ -85,6 +85,7 @@ const parentTableHead = (
 
 const mapBookingsForUI = ({
   bookings,
+  user,
   offices,
 }: {
   bookings: ICapacityDto;
@@ -102,6 +103,7 @@ const mapBookingsForUI = ({
   return {
     date: dayjs(date).format("D MMM YYYY") || "",
     site: site || "",
+    person: user,
     visitors: mappedPeople,
     utilisation: `${mappedPeople.length} people (max ${maxPeople})`,
   };

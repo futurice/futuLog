@@ -1,4 +1,4 @@
-import React, { useState, useCallback, createContext, useContext } from "react";
+import React, { useState, useCallback, useContext } from "react";
 import { useMutation } from "react-query";
 import dayjs from "dayjs";
 
@@ -53,32 +53,32 @@ const parentTableHead = (
   isEditing: boolean,
   toggleIsEditing: () => void
 ): ICollapsibleTableHead[] => [
-  {
-    title: "",
-    width: "5%",
-  },
-  {
-    title: "Date",
-    width: "10%",
-  },
-  {
-    title: "Office",
-    width: "15%",
-  },
-  {
-    title: "Capacity utilisation",
-    width: "15%",
-  },
-  {
-    title: "",
-    width: "45%",
-  },
-  {
-    title: isEditing ? "Exit edit mode" : "Edit list",
-    width: "10%",
-    onClick: toggleIsEditing,
-  },
-];
+    {
+      title: "",
+      width: "5%",
+    },
+    {
+      title: "Date",
+      width: "10%",
+    },
+    {
+      title: "Office",
+      width: "15%",
+    },
+    {
+      title: "Capacity utilisation",
+      width: "15%",
+    },
+    {
+      title: "",
+      width: "45%",
+    },
+    {
+      title: isEditing ? "Exit edit mode" : "Edit list",
+      width: "10%",
+      onClick: toggleIsEditing,
+    },
+  ];
 
 export function mapBookingsForUI({
   bookings,
@@ -199,13 +199,12 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
 
   const onDeleteEmployee = (site: string, date: string) => {
     const formattedDate = dayjs(date).format("YYYY-MM-DD");
-    const dayIndex = rows.findIndex((row) => row.date === date);
     const visitors = rows.find((row) => row.date === date)?.visitors.filter((v) => v.checked);
 
     const selectedUsers: IDeleteUserWorkmodeDto[] = visitors
       ? visitors.map((v) => {
-          return { email: v.email, date: formattedDate };
-        })
+        return { email: v.email, date: formattedDate };
+      })
       : [];
     deleteUserWorkmode(selectedUsers);
   };
@@ -266,25 +265,25 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
           <CenteredSpinner />
         </CenteredSpinnerContainer>
       ) : (
-        <AdminEditContext.Provider
-          value={{
-            isEditing,
-            onToggleAllRows,
-            onToggleRow,
-            onAddEmployee,
-            onDeleteEmployee,
-            users,
-          }}
-        >
-          <CollapsibleTable
-            childComponent={BookingsTable}
-            childTableHead={childTableHead(isEditing)}
-            parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
-            empty={"No result for the selected parameters."}
-            rows={rows}
-          />
-        </AdminEditContext.Provider>
-      )}
+          <AdminEditContext.Provider
+            value={{
+              isEditing,
+              onToggleAllRows,
+              onToggleRow,
+              onAddEmployee,
+              onDeleteEmployee,
+              users,
+            }}
+          >
+            <CollapsibleTable
+              childComponent={BookingsTable}
+              childTableHead={childTableHead(isEditing)}
+              parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
+              empty={"No result for the selected parameters."}
+              rows={rows}
+            />
+          </AdminEditContext.Provider>
+        )}
     </>
   );
 }

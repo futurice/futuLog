@@ -52,36 +52,36 @@ const parentTableHead = (
   isEditing: boolean,
   toggleIsEditing: () => void
 ): ICollapsibleTableHead[] => [
-  {
-    title: "",
-    width: "5%",
-  },
-  {
-    title: "Date",
-    width: "10%",
-  },
-  {
-    title: "Office",
-    width: "10%",
-  },
-  {
-    title: "Person",
-    width: "15%",
-  },
-  {
-    title: "Capacity utilisation",
-    width: "10%",
-  },
-  {
-    title: "",
-    width: "40%",
-  },
-  {
-    title: isEditing ? "Exit edit mode" : "Edit list",
-    width: "10%",
-    onClick: toggleIsEditing,
-  },
-];
+    {
+      title: "",
+      width: "5%",
+    },
+    {
+      title: "Date",
+      width: "10%",
+    },
+    {
+      title: "Office",
+      width: "10%",
+    },
+    {
+      title: "Person",
+      width: "15%",
+    },
+    {
+      title: "Capacity utilisation",
+      width: "10%",
+    },
+    {
+      title: "",
+      width: "40%",
+    },
+    {
+      title: isEditing ? "Exit edit mode" : "Edit list",
+      width: "10%",
+      onClick: toggleIsEditing,
+    },
+  ];
 
 const mapBookingsForUI = ({
   bookings,
@@ -113,7 +113,6 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
 
   const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
   const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
-  const [currentSite, setCurrentSite] = useState((offices && offices[2].site) || "");
   const [currentUser, setCurrentUser] = useState("");
   const [range, setRange] = useState(DAYS_RANGE_OPTIONS[1].value);
   const [rows, setRows] = useState<ITableDataDto[]>([]);
@@ -220,13 +219,12 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
 
   const onDeleteEmployee = (site: string, date: string) => {
     const formattedDate = dayjs(date).format("YYYY-MM-DD");
-    const dayIndex = rows.findIndex((row) => row.date === date);
     const visitors = rows.find((row) => row.date === date)?.visitors.filter((v) => v.checked);
 
     const selectedUsers: IDeleteUserWorkmodeDto[] = visitors
       ? visitors.map((v) => {
-          return { email: v.email, date: formattedDate };
-        })
+        return { email: v.email, date: formattedDate };
+      })
       : [];
     deleteUserWorkmode(selectedUsers);
   };
@@ -288,25 +286,25 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
           <CenteredSpinner />
         </CenteredSpinnerContainer>
       ) : (
-        <AdminEditContext.Provider
-          value={{
-            isEditing,
-            onToggleAllRows,
-            onToggleRow,
-            onAddEmployee,
-            onDeleteEmployee,
-            users,
-          }}
-        >
-          <CollapsibleTable
-            childComponent={BookingsTable}
-            childTableHead={childTableHead(isEditing)}
-            parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
-            empty={"No result for the selected parameters."}
-            rows={rows}
-          />
-        </AdminEditContext.Provider>
-      )}
+          <AdminEditContext.Provider
+            value={{
+              isEditing,
+              onToggleAllRows,
+              onToggleRow,
+              onAddEmployee,
+              onDeleteEmployee,
+              users,
+            }}
+          >
+            <CollapsibleTable
+              childComponent={BookingsTable}
+              childTableHead={childTableHead(isEditing)}
+              parentTableHead={parentTableHead(isEditing, toggleIsEditing)}
+              empty={"No result for the selected parameters."}
+              rows={rows}
+            />
+          </AdminEditContext.Provider>
+        )}
     </>
   );
 }

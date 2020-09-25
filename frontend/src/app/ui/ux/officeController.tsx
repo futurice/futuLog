@@ -12,7 +12,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import { makeStyles } from "@material-ui/core/styles";
 import { Select } from "app/ui/ux/select";
-import { officesQueryKey, userShiftQueryKey } from "app/utils/reactQueryUtils";
+import { officesQueryKey } from "app/utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
 

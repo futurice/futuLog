@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Box } from "@material-ui/core";
 import { useServices } from "app/services/services";
-import { IUserDto, ISetShiftDto, IShiftAssignmentDto, IOfficeSpaceDto } from "app/services/apiClientService";
+import { IUserDto, ISetShiftDto, IShiftAssignmentDto } from "app/services/apiClientService";
 import { PageMargins, Stack, HR, Flex } from "app/ui/ux/containers";
 import { H2 } from "app/ui/ux/text";
 import { AvatarIcon } from "app/ui/siteLayout/AvatarIcon";
-import { userQueryKey, userShiftQueryKey, officesQueryKey } from "app/utils/reactQueryUtils";
+import { userQueryKey, userShiftQueryKey } from "app/utils/reactQueryUtils";
 import { useMutation } from "react-query";
 import { SiteSelector } from "../siteSelector/SiteSector";
 import { Button } from "../ux/buttons";

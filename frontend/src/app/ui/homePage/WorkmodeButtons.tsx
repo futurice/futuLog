@@ -19,6 +19,7 @@ const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <ButtonWithI
   border: `1px solid ${colors["deep-blue-30"]}`,
   background: ({ hoverColor, active }) => (active ? colors[hoverColor] : colors.white),
   fontWeight: ({ active }: IWorkmodeButton) => (active ? "bold" : "normal"),
+  color: colors["deep-blue-80"],
 
   "&:focus": {
     borderWidth: `2px`,

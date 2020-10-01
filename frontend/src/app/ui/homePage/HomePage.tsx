@@ -22,7 +22,7 @@ import { RoutePaths } from "app/ui/app/AppRoutes";
 import { colors } from "app/ui/ux/theme";
 import { Button, LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
-import { IconInfo } from "app/ui/ux/icons";
+import { IconInfo, IconCheck } from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 
@@ -198,7 +198,8 @@ export const HomePage: React.FC = () => {
                         lineHeight="1.75"
                         marginBottom="0"
                       >
-                        ✓<br />
+                      <IconCheck />
+                        <br />
                       You are checked in!
                       <br />
                       Thank you.

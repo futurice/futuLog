@@ -9,3 +9,6 @@
 
 - site: Stockholm
   maxPeople: 15
+
+- site: Helsinki
+  maxPeople: 50

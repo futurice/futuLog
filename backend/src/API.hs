@@ -1,6 +1,6 @@
 module API where
 
-import Data.ClientRequest (Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode, WorkmodeId, AdminWorkmode)
+import Data.ClientRequest (AdminWorkmode, Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode, WorkmodeId, RegisterGuest)
 import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
@@ -30,6 +30,7 @@ type ProtectedAPI =
 
 type API =
   "workmode" :> WorkmodeAPI
+  :<|> "guests" :> GuestAPI
     :<|> "shift" :> ShiftAPI
     :<|> "office" :> OfficeAPI
     :<|> "me" :> Get '[JSON] User
@@ -39,6 +40,9 @@ type WorkmodeAPI =
     :<|> "confirm" :> QueryParam "date" Day :> ReqBody '[JSON] Bool :> Post '[JSON] NoContent
     :<|> "get" :> Capture "date" Day :> Get '[JSON] (Maybe UserWorkmode)
     :<|> "batch" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]
+
+type GuestAPI =
+  "register" :> ReqBody '[JSON] [RegisterGuest] :> Post '[JSON] NoContent
 
 type ShiftAPI =
   "get" :> Get '[JSON] (Maybe ShiftAssignment)

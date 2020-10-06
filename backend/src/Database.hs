@@ -182,6 +182,27 @@ initDatabase connectionString = do
           <> "isAdmin boolean not null"
           <> ")"
       )
+  _ <- liftIO . withResource pool $ \conn ->
+    execute_
+      conn
+      ( "CREATE TABLE IF NOT EXISTS guests ("
+          <> "first_name text not null, "
+          <> "last_name text not null, "
+          <> "user_email text PRIMARY KEY, "
+          <> "phone text not null"
+          <> ")"
+      )
+  _ <- liftIO . withResource pool $ \conn ->
+    execute_
+      conn
+      ( "CREATE TABLE IF NOT EXISTS guest_visits ("
+          <> "user_email text not null, "
+          <> "date date not null, "
+          <> "host text not null, "
+          <> "site text not null, "
+          <> "note text not null"
+          <> ")"
+      )
   pure pool
 
 exec :: (MonadIO m, MonadReader Env m, ToRow r) => Query -> r -> m ()

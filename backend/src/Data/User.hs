@@ -34,3 +34,11 @@ data User
 newtype AdminUser = MkAdmin User
   deriving stock (Show, Eq)
   deriving newtype (ToJSON, FromJSON, ToSchema)
+
+data Guest = MkGuest
+    { first_name :: Text,
+    last_name :: Text,
+    email :: Text,
+    phone :: Text }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (ToJSON, FromJSON, ToSchema, FromRow, ToRow)

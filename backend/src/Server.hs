@@ -41,7 +41,7 @@ swaggerHandler = swaggerSchemaUIServer swagger
         & info . version .~ "1.0"
 
 apiHandler :: Server ProtectedAPI
-apiHandler user = (workmodeHandler user :<|> shiftHandler user :<|> officeHandler user :<|> pure user) :<|> adminHandler
+apiHandler user = (workmodeHandler user :<|> guestHandler :<|> shiftHandler user :<|> officeHandler user :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
 workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHandler :<|> DB.queryWorkmode email :<|> queryBatch
@@ -52,6 +52,9 @@ workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHan
       Left err -> throwError $ err400 {errBody = pack err}
     confirmWorkmodeHandler status = const (pure NoContent) <=< DB.confirmWorkmode email status <=< defaultDay
     queryBatch = withDefaultDays $ DB.queryWorkmodes email
+
+guestHandler :: Server GuestAPI
+guestHandler = undefined
 
 shiftHandler :: User -> Server ShiftAPI
 shiftHandler MkUser {email} = getShift :<|> setShift :<|> getShifts

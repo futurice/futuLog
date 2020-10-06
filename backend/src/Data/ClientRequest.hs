@@ -16,8 +16,9 @@ import GHC.Generics (Generic)
 
 data SetShift
   = MkSetShift
-      {shiftName :: Text,
-      site :: Text}
+      { shiftName :: Text,
+        site :: Text
+      }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema)
 
@@ -26,6 +27,20 @@ data RegisterWorkmode
       { site :: Text,
         date :: Day,
         workmode :: Workmode
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
+
+data RegisterGuest
+  = MkRegisterGuest
+      { site :: Text,
+        date :: Day,
+        name :: Text,
+        surname :: Text,
+        email :: Text,
+        phone :: Text,
+        note :: Text,
+        hostEmail :: Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
@@ -41,10 +56,10 @@ data AdminWorkmode
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 data WorkmodeId
-    = MkWorkmodeId
-        { date :: Day,
-          email :: Text
-        }
+  = MkWorkmodeId
+      { date :: Day,
+        email :: Text
+      }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
@@ -58,6 +73,17 @@ data UserWorkmode
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
+data GuestVisit
+  = MkGuestVisit
+      { email :: Text,
+        date :: Day,
+        host :: Text,
+        site :: Text,
+        note :: Text
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
+
 data Capacity
   = MkCapacity
       { date :: Day,
@@ -67,13 +93,13 @@ data Capacity
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 data Contact
-    = MkContact
-        { date :: Day
-        , site :: Text
-        , people :: [User]
-        }
-    deriving stock (Generic, Show, Eq)
-    deriving anyclass (FromJSON, ToJSON, ToSchema)
+  = MkContact
+      { date :: Day,
+        site :: Text,
+        people :: [User]
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema)
 
 workmodeSite :: RegisterWorkmode -> Text
 workmodeSite = site

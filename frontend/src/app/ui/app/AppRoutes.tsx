@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { useServices } from "app/services/services";
 import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
@@ -8,7 +8,8 @@ import {
   combineQueries,
   officesQueryKey,
   userShiftQueryKey,
-  userQueryKey
+  userQueryKey,
+  userWorkmodeQueryKey,
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { AdminPage } from "app/ui/adminPage/AdminPage";
@@ -18,11 +19,23 @@ import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
 import { PlanningPage } from "app/ui/planningPage/PlanningPage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 import { CenteredSpinner } from "../ux/spinner";
+import { QrBerlin } from "app/ui/QrOffice/QrBerlin";
+import { QrStuttgart } from "app/ui/QrOffice/QrStuttgart"
+import { QrMunich } from "app/ui/QrOffice/QrMunich"
+import {
+  Workmode,
+  IShiftAssignmentDto,
+  ISetShiftDto,
+} from "app/services/apiClientService";
+
 
 export enum RoutePaths {
   Home = "/",
   Welcome = "/welcome",
   Info = "/info",
+  QrBerlin = "/qrberlin",
+  QrMunich = "/qrmunich",
+  QrStuttgart = "/qrstuttgart",
   Planning = "/planning",
   User = "/user",
   Admin = "/admin",
@@ -31,7 +44,7 @@ export enum RoutePaths {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { apiClient: apiClientService, localStorage: localStorageService } = useServices();
+  const { apiClient: apiClientService, localStorage: localStorageService, queryCache } = useServices();
   const [hasVisitedWelcomePage, setHasVisitedWelcomePage] = useState(
     !!localStorageService.getItem("futulog/started")
   );
@@ -39,6 +52,7 @@ export const AppRoutes: React.FC = () => {
     localStorageService.setItem("futulog/started", "true");
     setHasVisitedWelcomePage(true);
   };
+
 
   // Fetch all critical non admin data here
   const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
@@ -75,6 +89,9 @@ export const AppRoutes: React.FC = () => {
             <Route exact path={RoutePaths.Info} component={InfoPage} />
             <Route exact path={RoutePaths.User} component={UserPage} />
             <Route exact path={RoutePaths.Planning} component={PlanningPage} />
+            <Route exact path={RoutePaths.QrBerlin} component={QrBerlin} />
+            <Route exact path={RoutePaths.QrStuttgart} component={QrStuttgart} />
+            <Route exact path={RoutePaths.QrMunich} component={QrMunich} />
 
             {process.env.NODE_ENV !== "production" && (
               <Route exact path={RoutePaths.Playground} component={PlaygroundPage} />

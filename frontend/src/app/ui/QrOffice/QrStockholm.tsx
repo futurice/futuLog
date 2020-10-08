@@ -90,73 +90,63 @@ export const QrStockholm: React.FC = () => {
       })}
       onLoading={(data, children) => children(data || ({} as any), true)}
       onError={(error, children) => children({} as any, false, error)}
-
     >
-    {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) =>
-    <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
 
-      <Card spacing="2rem" textAlign="center">
+      {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) =>
+      <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
+        <Card spacing="2rem" textAlign="center">
 
-        <H2>Where are you working today?</H2>
+          <H2>Where are you working today?</H2>
+          <WorkmodeButton
+            disabled={false}
+            active={true}
+            startIcon={<IconOffice />}
+            hoverColor="jade-green-10"
+            onClick={()=>{}}
+          >
+          Office
+          </WorkmodeButton>
+          <HR/>
+          <Box
+            component={H3}
+            maxWidth="26rem"
+            mx="auto"
+            fontSize="1rem"
+            fontWeight="bold"
+            fontFamily="Futurice"
+            lineHeight="1.75"
+            marginBottom="0"
+          >
+            <IconCheck/>
+            <br />
 
-        <WorkmodeButton
-          disabled={false}
-          active={true}
-          startIcon={<IconOffice />}
-          hoverColor="jade-green-10"
-          onClick={()=>{}}
-        >
-        Office
-
-        </WorkmodeButton>
-        <HR/>
-
-        <Box
-          component={H3}
-          maxWidth="26rem"
-          mx="auto"
-          fontSize="1rem"
-          fontWeight="bold"
-          fontFamily="Futurice"
-          lineHeight="1.75"
-          marginBottom="0"
-        >
-
-          <IconCheck/>
+          You are checked in!
           <br />
 
-        You are checked in!
-        <br />
+          Thank you.
+        </Box>
+        </Card>
+      <br />
 
-        Thank you.
-      </Box>
+      <Card spacing="2rem" textAlign="center">
+        <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
+          <H2>Where will you work in the next two weeks?</H2>
+          <P>
+            Plan in advance where you want to work in the next weeks.
+          </P>
+          <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">
+            Plan
+          </LinkButton>
+          </Stack>
       </Card>
-
-    <br />
-
-    <Card spacing="2rem" textAlign="center">
-      <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-        <H2>Where will you work in the next two weeks?</H2>
-
-        <P>
-          Plan in advance where you want to work in the next weeks.
-        </P>
-
-        <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">
-          Plan
-        </LinkButton>
 
       </Stack>
 
-    </Card>
+    }
 
-  </Stack>
+    </RenderQuery>
 
-  }
-
-  </RenderQuery>
-
-  </Stack>
+    </Stack>
 
 )
 

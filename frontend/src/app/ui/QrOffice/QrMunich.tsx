@@ -21,20 +21,7 @@ import { H2, H3, P } from "app/ui/ux/text";
 import { IconCheck, IconOffice} from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
-
-
-const Card = styled(Stack)(({ theme }) => ({
-  width: "100%",
-  maxWidth: "52rem",
-  backgroundColor: colors["deep-blue-10"],
-  color: colors["deep-blue-80"],
-  [theme.breakpoints.down("sm")]: {
-    padding: "2.5rem 1.25rem",
-  },
-  [theme.breakpoints.up("md")]: {
-    padding: "2.5rem 4rem",
-  },
-}));
+import { Card } from "app/ui/ux/Card"
 
 
 export const QrMunich: React.FC = () => {
@@ -108,42 +95,42 @@ export const QrMunich: React.FC = () => {
     {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) =>
     <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
 
-    <Card spacing="2rem" textAlign="center">
+      <Card spacing="2rem" textAlign="center">
 
-      <H2>Where are you working today?</H2>
+        <H2>Where are you working today?</H2>
 
-      <WorkmodeButton
-        disabled={false}
-        active={true}
-        startIcon={<IconOffice />}
-        hoverColor="jade-green-10"
-        onClick={()=>{}}
-      >
-      Office
+        <WorkmodeButton
+          disabled={false}
+          active={true}
+          startIcon={<IconOffice />}
+          hoverColor="jade-green-10"
+          onClick={()=>{}}
+        >
+        Office
 
-      </WorkmodeButton>
-      <HR/>
+        </WorkmodeButton>
+        <HR/>
 
-      <Box
-        component={H3}
-        maxWidth="26rem"
-        mx="auto"
-        fontSize="1rem"
-        fontWeight="bold"
-        fontFamily="Futurice"
-        lineHeight="1.75"
-        marginBottom="0"
-      >
+        <Box
+          component={H3}
+          maxWidth="26rem"
+          mx="auto"
+          fontSize="1rem"
+          fontWeight="bold"
+          fontFamily="Futurice"
+          lineHeight="1.75"
+          marginBottom="0"
+        >
 
-        <IconCheck/>
+          <IconCheck/>
+          <br />
+
+        You are checked in!
         <br />
 
-      You are checked in!
-      <br />
-
-      Thank you.
-    </Box>
-    </Card>
+        Thank you.
+      </Box>
+      </Card>
 
     <br />
 

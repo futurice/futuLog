@@ -22,6 +22,9 @@ import { CenteredSpinner } from "../ux/spinner";
 import { QrBerlin } from "app/ui/QrOffice/QrBerlin";
 import { QrStuttgart } from "app/ui/QrOffice/QrStuttgart"
 import { QrMunich } from "app/ui/QrOffice/QrMunich"
+import { QrStockholm } from "app/ui/QrOffice/QrStockholm"
+import { QrHelsinki } from "app/ui/QrOffice/QrHelsinki"
+
 import {
   Workmode,
   IShiftAssignmentDto,
@@ -36,6 +39,8 @@ export enum RoutePaths {
   QrBerlin = "/qrberlin",
   QrMunich = "/qrmunich",
   QrStuttgart = "/qrstuttgart",
+  QrStockholm = "/qrstockholm",
+  QrHelsinki = "/qrhelsinki",
   Planning = "/planning",
   User = "/user",
   Admin = "/admin",
@@ -80,6 +85,8 @@ export const AppRoutes: React.FC = () => {
             <Route exact path={RoutePaths.QrBerlin} component={QrBerlin} />
             <Route exact path={RoutePaths.QrStuttgart} component={QrStuttgart} />
             <Route exact path={RoutePaths.QrMunich} component={QrMunich} />
+            <Route exact path={RoutePaths.QrHelsinki} component={QrHelsinki} />
+            <Route exact path={RoutePaths.QrStockholm} component={QrStockholm} />
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />

@@ -25,19 +25,8 @@ import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo } from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
+import { Card } from "app/ui/ux/Card"
 
-const Card = styled(Stack)(({ theme }) => ({
-  width: "100%",
-  maxWidth: "52rem",
-  backgroundColor: colors["deep-blue-10"],
-  color: colors["deep-blue-80"],
-  [theme.breakpoints.down("sm")]: {
-    padding: "2.5rem 1.25rem",
-  },
-  [theme.breakpoints.up("md")]: {
-    padding: "2.5rem 4rem",
-  },
-}));
 
 const InlineIconButton = styled(IconButton)({
   padding: "0.5rem",

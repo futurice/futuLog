@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { Box, styled } from "@material-ui/core";
 import { useQuery, useMutation } from "react-query";
@@ -6,6 +6,7 @@ import { useServices } from "app/services/services";
 import {
   Workmode,
   IShiftAssignmentDto,
+  ISetShiftDto,
 } from "app/services/apiClientService";
 import {
   RenderQuery,
@@ -22,8 +23,6 @@ import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
 
 
-
-
 const Card = styled(Stack)(({ theme }) => ({
   width: "100%",
   maxWidth: "52rem",
@@ -37,11 +36,25 @@ const Card = styled(Stack)(({ theme }) => ({
   },
 }));
 
+
 export const QrMunich: React.FC = () => {
   const { apiClient, queryCache } = useServices();
   const date = new Date().toISOString().slice(0, 10);
+  const [ userConfirmed, setUserConfirmed ] = useState(
+    false
+  );
 
-   useMutation(
+
+  const [registerSiteShift] = useMutation(
+    (request: ISetShiftDto) => apiClient.registerSiteShift(request),
+    {
+      onSuccess: () => {
+        queryCache.refetchQueries(userShiftQueryKey());
+      },
+    }
+  );
+
+  const [registerUserWorkmode] = useMutation(
     () => apiClient.registerUserWorkmode([{ site: "Munich", date: date,
            workmode:{ type: Workmode.Office, confirmed:true} }]),
     {
@@ -49,24 +62,36 @@ export const QrMunich: React.FC = () => {
     }
   );
 
-  useMutation(
+  const [confirmUserWork] = useMutation(
     () => apiClient.confirmUserWorkmode(true),
     {
       onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
     }
   );
 
+
+  const confirmUserOffice = () => {
+    registerSiteShift({ shiftName: "default", site: "Munich" })
+    registerUserWorkmode()
+    confirmUserWork()
+    setUserConfirmed(true)
+  }
+
   const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
 
   const userWorkmodeRes = useQuery(userWorkmodeQueryKey(date), () =>
     apiClient.getUserWorkmode(date).catch(() => null)
   );
-
   const officeBookingsRes = useQuery(
     userShift && officeBookingsQueryKey(userShift.site, date, date),
 
     () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
   );
+
+  if (!userConfirmed) {
+    confirmUserOffice()
+  }
+
 
   return(
     <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
@@ -82,12 +107,11 @@ export const QrMunich: React.FC = () => {
     >
     {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) =>
     <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
-    <br/>
 
     <Card spacing="2rem" textAlign="center">
 
       <H2>Where are you working today?</H2>
-      {console.log(userWorkmode)}
+
       <WorkmodeButton
         disabled={false}
         active={true}

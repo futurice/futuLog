@@ -23,8 +23,6 @@ import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
 
 
-
-
 const Card = styled(Stack)(({ theme }) => ({
   width: "100%",
   maxWidth: "52rem",
@@ -38,13 +36,12 @@ const Card = styled(Stack)(({ theme }) => ({
   },
 }));
 
-var state = false
 
 export const QrStuttgart: React.FC = () => {
   const { apiClient, queryCache } = useServices();
   const date = new Date().toISOString().slice(0, 10);
-  const [hasRegister, setRegister] = useState(
-    true
+  const [ userConfirmed, setUserConfirmed ] = useState(
+    false
   );
 
 
@@ -73,11 +70,11 @@ export const QrStuttgart: React.FC = () => {
   );
 
 
-  const doThing = () => {
+  const confirmUserOffice = () => {
     registerSiteShift({ shiftName: "default", site: "Stuttgart" })
     registerUserWorkmode()
     confirmUserWork()
-    state = true
+    setUserConfirmed(true)
   }
 
   const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
@@ -91,8 +88,8 @@ export const QrStuttgart: React.FC = () => {
     () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
   );
 
-  if (!state) {
-    doThing()
+  if (!userConfirmed) {
+    confirmUserOffice()
   }
 
 
@@ -110,8 +107,6 @@ export const QrStuttgart: React.FC = () => {
     >
     {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) =>
     <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
-    <br/>
-    {console.log(userWorkmodeRes)}
 
     <Card spacing="2rem" textAlign="center">
 

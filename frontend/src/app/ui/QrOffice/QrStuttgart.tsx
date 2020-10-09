@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { RoutePaths } from "app/ui/app/AppRoutes";
-import { Box, styled } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { useQuery, useMutation } from "react-query";
 import { useServices } from "app/services/services";
 import {
@@ -15,14 +15,12 @@ import {
   userWorkmodeQueryKey,
   userShiftQueryKey,
 } from "app/utils/reactQueryUtils";
-import { colors } from "app/ui/ux/theme";
 import { LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
 import { IconCheck, IconOffice} from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
 import { Card } from "app/ui/ux/Card"
-
 
 
 export const QrStuttgart: React.FC = () => {
@@ -121,25 +119,25 @@ export const QrStuttgart: React.FC = () => {
             <IconCheck/>
             <br />
 
-          You are checked in!
-          <br />
+            You are checked in!
+            <br />
 
-          Thank you.
-        </Box>
+            Thank you.
+          </Box>
         </Card>
-      <br />
+        <br />
 
-      <Card spacing="2rem" textAlign="center">
-        <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-          <H2>Where will you work in the next two weeks?</H2>
-          <P>
-            Plan in advance where you want to work in the next weeks.
-          </P>
-          <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">
-            Plan
-          </LinkButton>
+        <Card spacing="2rem" textAlign="center">
+          <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
+            <H2>Where will you work in the next two weeks?</H2>
+            <P>
+              Plan in advance where you want to work in the next weeks.
+            </P>
+            <LinkButton to={RoutePaths.Planning} variant="contained" color="primary">
+              Plan
+            </LinkButton>
           </Stack>
-      </Card>
+        </Card>
 
       </Stack>
 

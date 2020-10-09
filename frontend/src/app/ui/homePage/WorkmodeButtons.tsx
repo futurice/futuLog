@@ -10,7 +10,7 @@ interface IWorkmodeButton extends ButtonProps {
   active?: boolean;
 }
 
-const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <ButtonWithIcon {...props} />)<
+export const WorkmodeButton = styled(({ hoverColor, active, ...props }) => <ButtonWithIcon {...props} />)<
   Theme,
   IWorkmodeButton
 >({

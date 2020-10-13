@@ -41,7 +41,7 @@ swaggerHandler = swaggerSchemaUIServer swagger
         & info . version .~ "1.0"
 
 apiHandler :: Server ProtectedAPI
-apiHandler user = (workmodeHandler user :<|> guestHandler :<|> shiftHandler user :<|> officeHandler user :<|> pure user) :<|> adminHandler
+apiHandler user = (workmodeHandler user :<|> guestHandler user :<|> shiftHandler user :<|> officeHandler user :<|> pure user) :<|> adminHandler
 
 workmodeHandler :: User -> Server WorkmodeAPI
 workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHandler :<|> DB.queryWorkmode email :<|> queryBatch
@@ -53,8 +53,12 @@ workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHan
     confirmWorkmodeHandler status = const (pure NoContent) <=< DB.confirmWorkmode email status <=< defaultDay
     queryBatch = withDefaultDays $ DB.queryWorkmodes email
 
-guestHandler :: Server GuestAPI
-guestHandler = undefined
+guestHandler :: User -> Server GuestAPI
+guestHandler user = registerGuests
+  where
+    registerGuests guests = do
+      --TODO: check if all dates are available
+      mapM_ (DB.saveGuest user) guests $> NoContent
 
 shiftHandler :: User -> Server ShiftAPI
 shiftHandler MkUser {email} = getShift :<|> setShift :<|> getShifts

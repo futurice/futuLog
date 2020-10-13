@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
+import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterGuest (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -143,6 +143,15 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
         (email, site, date, s :: String)
+
+saveGuest :: (MonadIO m, MonadReader Env m) => User -> RegisterGuest -> m ()
+saveGuest (MkUser {email = host}) (MkRegisterGuest {site, date, name, surname, email, phone, note}) = do
+  exec
+    ( "INSERT INTO guests (first_name, last_name, user_email, phone) VALUES (?, ?, ?, ?) ON CONFLICT (user_email) DO "
+        <> "UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, phone = EXCLUDED.phone"
+    )
+    (name, surname, email, phone)
+  exec "INSERT INTO guest_visits (user_email, date, host, site, note) VALUES (?, ?, ?, ?, ?)" (email, date, host, site, note)
 
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
 initDatabase connectionString = do

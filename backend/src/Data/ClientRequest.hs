@@ -39,8 +39,7 @@ data RegisterGuest
         surname :: Text,
         email :: Text,
         phone :: Text,
-        note :: Text,
-        hostEmail :: Text
+        note :: Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)

@@ -12,3 +12,6 @@
 
 - site: Helsinki
   maxPeople: 50
+
+- site: Tampere
+  maxPeople: 30

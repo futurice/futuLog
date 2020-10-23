@@ -1,4 +1,3 @@
-import React from "react";
 import { styled } from "@material-ui/core";
 import { colors } from "app/ui/ux/theme";
 import { Stack } from "app/ui/ux/containers";

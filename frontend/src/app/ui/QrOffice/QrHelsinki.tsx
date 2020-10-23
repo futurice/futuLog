@@ -20,7 +20,7 @@ import { H2, H3, P } from "app/ui/ux/text";
 import { IconCheck, IconOffice} from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
-import { Card } from "app/ui/ux/Card"
+import { Card } from "app/ui/ux/Card";
 
 
 export const QrHelsinki: React.FC = () => {

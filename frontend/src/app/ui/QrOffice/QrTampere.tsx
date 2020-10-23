@@ -23,7 +23,7 @@ import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
 import { Card } from "app/ui/ux/Card";
 
 
-export const QrStuttgart: React.FC = () => {
+export const QrTampere: React.FC = () => {
   const { apiClient, queryCache } = useServices();
   const date = new Date().toISOString().slice(0, 10);
   const [ userConfirmed, setUserConfirmed ] = useState(
@@ -41,7 +41,7 @@ export const QrStuttgart: React.FC = () => {
   );
 
   const [registerUserWorkmode] = useMutation(
-    () => apiClient.registerUserWorkmode([{ site: "Stuttgart", date: date,
+    () => apiClient.registerUserWorkmode([{ site: "Tampere", date: date,
            workmode:{ type: Workmode.Office, confirmed:true} }]),
     {
       onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
@@ -57,7 +57,7 @@ export const QrStuttgart: React.FC = () => {
 
 
   const confirmUserOffice = () => {
-    registerSiteShift({ shiftName: "default", site: "Stuttgart" })
+    registerSiteShift({ shiftName: "default", site: "Tampere" })
     registerUserWorkmode()
     confirmUserWork()
     setUserConfirmed(true)

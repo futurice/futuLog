@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { PageMargins, Stack, HR } from "app/ui/ux/containers";
-import { H2, H4, P } from "app/ui/ux/text";
+import { H2, P } from "app/ui/ux/text";
 import { ISetShiftDto, IShiftAssignmentDto } from "app/services/apiClientService";
 import { userShiftQueryKey } from "app/utils/reactQueryUtils";
 import { useServices } from "../../services/services";

@@ -19,7 +19,6 @@ import {
   officesQueryKey,
 } from "app/utils/reactQueryUtils";
 import { RoutePaths } from "app/ui/app/AppRoutes";
-import { colors } from "app/ui/ux/theme";
 import { Button, LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo, IconCheck } from "app/ui/ux/icons";

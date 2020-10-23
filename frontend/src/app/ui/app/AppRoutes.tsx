@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, useMutation } from "react-query";
+import { useQuery} from "react-query";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { useServices } from "app/services/services";
 import { SiteLayout } from "app/ui/siteLayout/SiteLayout";
@@ -9,7 +9,6 @@ import {
   officesQueryKey,
   userShiftQueryKey,
   userQueryKey,
-  userWorkmodeQueryKey,
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
 import { AdminPage } from "app/ui/adminPage/AdminPage";
@@ -20,16 +19,11 @@ import { PlanningPage } from "app/ui/planningPage/PlanningPage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 import { CenteredSpinner } from "../ux/spinner";
 import { QrBerlin } from "app/ui/QrOffice/QrBerlin";
-import { QrStuttgart } from "app/ui/QrOffice/QrStuttgart"
-import { QrMunich } from "app/ui/QrOffice/QrMunich"
-import { QrStockholm } from "app/ui/QrOffice/QrStockholm"
-import { QrHelsinki } from "app/ui/QrOffice/QrHelsinki"
-
-import {
-  Workmode,
-  IShiftAssignmentDto,
-  ISetShiftDto,
-} from "app/services/apiClientService";
+import { QrStuttgart } from "app/ui/QrOffice/QrStuttgart";
+import { QrMunich } from "app/ui/QrOffice/QrMunich";
+import { QrStockholm } from "app/ui/QrOffice/QrStockholm";
+import { QrHelsinki } from "app/ui/QrOffice/QrHelsinki";
+import { QrTampere } from "app/ui/QrOffice/QrTampere";
 
 
 export enum RoutePaths {
@@ -41,6 +35,7 @@ export enum RoutePaths {
   QrStuttgart = "/qrstuttgart",
   QrStockholm = "/qrstockholm",
   QrHelsinki = "/qrhelsinki",
+  QrTampere = "/qrtampere",
   Planning = "/planning",
   User = "/user",
   Admin = "/admin",
@@ -87,6 +82,7 @@ export const AppRoutes: React.FC = () => {
             <Route exact path={RoutePaths.QrMunich} component={QrMunich} />
             <Route exact path={RoutePaths.QrHelsinki} component={QrHelsinki} />
             <Route exact path={RoutePaths.QrStockholm} component={QrStockholm} />
+            <Route exact path={RoutePaths.QrTampere} component={QrTampere} />
             {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />

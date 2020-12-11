@@ -1,11 +1,11 @@
 - site: Munich
-  maxPeople: 20
+  maxPeople: 8
 
 - site: Berlin
-  maxPeople: 30
+  maxPeople: 12
 
 - site: Stuttgart
-  maxPeople: 10
+  maxPeople: 5
 
 - site: Stockholm
   maxPeople: 15

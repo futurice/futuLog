@@ -3,6 +3,7 @@
 set -eo pipefail
 
 # Be sure to set SSH_USER to the FUM username or you will get errors
+eval $(ssh-agent)
 
 name="futulog-staging"
 

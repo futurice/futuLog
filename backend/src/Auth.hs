@@ -1,8 +1,10 @@
-module Auth (contextProxy, mkAuthServerContext, getAuth64, getCookie, getUsername) where
+module Auth (contextProxy, mkAuthServerContext, makeProxyRequest, getCookie, getUsername) where
 
+import Control.Monad.Catch (MonadThrow)
 import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Aeson (decode)
+import qualified Data.ByteString.Lazy as BL
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Proxy (Proxy (..))
 import qualified Data.Text as T
@@ -63,10 +65,7 @@ verifyLogin :: Manager -> Request -> [Text] -> ExceptT String IO User
 verifyLogin manager req admins = do
   cookie <- getCookie req
   username <- getUsername cookie
-  auth <- getAuth64
-  request <- liftIO $ parseRequest "https://prox.app.futurice.com/contacts/contacts.json"
-  let request' = request {C.requestHeaders = C.requestHeaders request <> [(hAuthorization, "Basic " <> encodeUtf8 auth)]}
-  response <- liftIO $ httpLbs request' manager
+  response <- makeProxyRequest manager "https://prox.app.futurice.com/contacts/contacts.json"
   case decode (responseBody response) of
     Just users -> case filterUser username users of
       [MkContactUser _ a b email] -> withAvatar username $ \p -> MkUser a b email p p p (email `elem` admins)
@@ -77,6 +76,13 @@ verifyLogin manager req admins = do
       url <- liftIO $ T.pack <$> getEnv "SERVICE_URL"
       pure . f $ url <> "/api/avatar/" <> u
     filterUser u = filter (\(MkContactUser fumName _ _ _) -> fumName == u)
+
+makeProxyRequest :: (MonadThrow m, MonadIO m) => Manager -> String -> m (C.Response BL.ByteString)
+makeProxyRequest m url = do
+  auth <- getAuth64
+  request <- parseRequest url
+  let request' = request {C.requestHeaders = C.requestHeaders request <> [(hAuthorization, "Basic " <> encodeUtf8 auth)]}
+  liftIO $ httpLbs request' m
 
 getUsername :: Text -> ExceptT String IO Text
 getUsername c =

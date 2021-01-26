@@ -33,11 +33,14 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
 mkApp :: Manager -> Maybe User -> [Text] -> Env -> IO Application
 mkApp m email admins env = do
   (context, middleware) <- mkAuthServerContext m email admins
-  pure $ applyCors $ middleware $ serveWithContext rootAPI context $
-    ( swaggerHandler
-        :<|> hoistServerWithContext api contextProxy (flip runReaderT env) apiHandler
-        :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
-    )
+  pure $ applyCors $ middleware $
+    serveWithContext
+      rootAPI
+      context
+      ( swaggerHandler
+          :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (apiHandler m)
+          :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
+      )
 
 serveIndex :: Application
 serveIndex _ respond = respond $ responseFile status200 [(hContentType, "text/html")] (frontendPath <> "/index.html") Nothing

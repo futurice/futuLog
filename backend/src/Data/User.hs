@@ -8,7 +8,8 @@ import GHC.Generics (Generic)
 
 data ContactUser
   = MkContactUser
-      { first :: Text,
+      { login :: Text,
+        first :: Text,
         name :: Text,
         email :: Text
       }

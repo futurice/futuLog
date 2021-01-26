@@ -68,12 +68,15 @@ verifyLogin manager req admins = do
   let request' = request {C.requestHeaders = C.requestHeaders request <> [(hAuthorization, "Basic " <> encodeUtf8 auth)]}
   response <- liftIO $ httpLbs request' manager
   case decode (responseBody response) of
-    Just (MkContactUser a b email) -> withAvatar username $ \p -> MkUser a b email p p p (email `elem` admins)
+    Just users -> case filterUser username users of
+      [MkContactUser _ a b email] -> withAvatar username $ \p -> MkUser a b email p p p (email `elem` admins)
+      _ -> throwError "User not found in contacts"
     Nothing -> throwError "Failed to authorize to proxy"
   where
     withAvatar u f = do
       url <- liftIO $ T.pack <$> getEnv "SERVICE_URL"
       pure . f $ url <> "/api/avatar/" <> u
+    filterUser u = filter (\(MkContactUser fumName _ _ _) -> fumName == u)
 
 getUsername :: Text -> ExceptT String IO Text
 getUsername c =

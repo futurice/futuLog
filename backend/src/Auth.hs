@@ -1,23 +1,24 @@
-module Auth (contextProxy, mkAuthServerContext) where
+module Auth (contextProxy, mkAuthServerContext, getAuth64, getCookie, getUsername) where
 
-import Control.Monad.Except (ExceptT, liftEither, runExceptT, throwError)
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Aeson (decode)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Proxy (Proxy (..))
-import Data.Text (Text)
 import qualified Data.Text as T
-import Data.Text (breakOn, isPrefixOf, replace, unpack)
+import Data.Text (Text, breakOn, isPrefixOf, replace)
 import Data.Text.Encoding (encodeUtf8)
-import Data.User (AdminUser (..), FUMUser (..), User (..))
+import Data.Text.Encoding.Base64 (encodeBase64)
+import Data.User (AdminUser (..), ContactUser (..), User (..))
 import qualified Data.Vault.Lazy as V
 import Network.HTTP.Client (Manager, httpLbs, parseRequest, responseBody)
 import qualified Network.HTTP.Client as C
-import Network.HTTP.Types (hCookie, status401)
+import Network.HTTP.Types (hAuthorization, status401)
 import Network.Wai (Middleware, Request, requestHeaders, responseLBS, vault)
 import Servant.API.Experimental.Auth (AuthProtect)
 import Servant.Server (Context (..), Handler, err401, errBody)
 import Servant.Server.Experimental.Auth (AuthHandler, AuthServerData, mkAuthHandler)
+import System.Environment (getEnv)
 import Web.Cookie (parseCookiesText)
 
 type instance AuthServerData (AuthProtect "fum-cookie") = User
@@ -60,23 +61,40 @@ authMiddleware maybeUser key admins m app req respond = do
 
 verifyLogin :: Manager -> Request -> [Text] -> ExceptT String IO User
 verifyLogin manager req admins = do
-  cookieRaw <- liftEither $ maybeToEither "Missing cookie header" $ lookup "cookie" $ requestHeaders req
-  cookie <- liftEither $ maybeToEither "Missing token in cookie" $ lookup "auth_pubtkt" $ parseCookiesText cookieRaw
+  cookie <- getCookie req
   username <- getUsername cookie
-  request <- liftIO $ parseRequest $ "https://fum.futurice.com/fum/api/users/" <> unpack username
-  let request' = request {C.requestHeaders = C.requestHeaders request <> [(hCookie, "auth_pubtkt=" <> encodeUtf8 cookie)]}
+  auth <- getAuth64
+  request <- liftIO $ parseRequest "https://prox.app.futurice.com/contacts/contacts.json"
+  let request' = request {C.requestHeaders = C.requestHeaders request <> [(hAuthorization, "Basic " <> encodeUtf8 auth)]}
   response <- liftIO $ httpLbs request' manager
   case decode (responseBody response) of
-    Just (MkFUMUser a b email d e f) -> pure $ MkUser a b email d e f (email `elem` admins)
-    Nothing -> throwError "Token not accepted by FUM"
+    Just (MkContactUser a b email) -> withAvatar username $ \p -> MkUser a b email p p p (email `elem` admins)
+    Nothing -> throwError "Failed to authorize to proxy"
   where
-    cookie' c = replace "\"" "" c
-    getUsername c =
-      if "uid%3D" `isPrefixOf` cookie' c
-        then
-          let (name, _) = breakOn "%3B" $ T.drop 6 $ cookie' c
-           in pure name
-        else throwError "No username in cookie"
+    withAvatar u f = do
+      url <- liftIO $ T.pack <$> getEnv "SERVICE_URL"
+      pure . f $ url <> "/api/avatar/" <> u
+
+getUsername :: Text -> ExceptT String IO Text
+getUsername c =
+  if "uid%3D" `isPrefixOf` cookie'
+    then
+      let (name, _) = breakOn "%3B" $ T.drop 6 cookie'
+       in pure name
+    else throwError "No username in cookie"
+  where
+    cookie' = replace "\"" "" c
+
+getCookie :: Request -> ExceptT String IO Text
+getCookie =
+  liftEither . maybeToEither "Missing token in cookie" . lookup "auth_pubtkt" . parseCookiesText
+    <=< liftEither . maybeToEither "Missing cookie header" . lookup "cookie" . requestHeaders
+
+getAuth64 :: MonadIO m => m Text
+getAuth64 = do
+  userName <- liftIO $ T.pack <$> getEnv "PROXY_USER"
+  pass <- liftIO $ T.pack <$> getEnv "PROXY_PASS"
+  pure . encodeBase64 $ userName <> ":" <> pass
 
 maybeToEither :: e -> Maybe a -> Either e a
 maybeToEither e = maybe (Left e) Right

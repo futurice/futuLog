@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5e5319f912554b47e83ff79e2552f0bc658d80e94b963463196e7d9d90422975
+-- hash: 8aa4fd9fa19c14a287f9510e9b01ada1ee21e2d7e767836808eb6d236285c8cc
 
 name:           office-tracker
 version:        0.1.0.0
@@ -40,6 +40,7 @@ executable office-tracker
   build-depends:
       aeson
     , base >=4.7 && <5
+    , base64
     , binary
     , bytestring
     , cassava

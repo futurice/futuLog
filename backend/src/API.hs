@@ -1,6 +1,6 @@
 module API where
 
-import Data.ClientRequest (Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode, WorkmodeId, AdminWorkmode)
+import Data.ClientRequest (AdminWorkmode, Capacity, Contact, RegisterWorkmode, SetShift, UserWorkmode, WorkmodeId)
 import Data.Config (OfficeSpace, Shift)
 import Data.Env (ShiftAssignment)
 import Data.Proxy (Proxy (..))
@@ -33,6 +33,7 @@ type API =
     :<|> "shift" :> ShiftAPI
     :<|> "office" :> OfficeAPI
     :<|> "me" :> Get '[JSON] User
+    :<|> "avatar" :> Capture "login" Text :> Raw
 
 type WorkmodeAPI =
   "register" :> ReqBody '[JSON] [RegisterWorkmode] :> Post '[JSON] NoContent

@@ -1,10 +1,10 @@
-FROM haskell:8.8.3 AS backend
+FROM haskell:8.10.2 AS backend
 
 RUN apt-get update && apt-get install -y libpq-dev liblzma-dev
 
 COPY backend/package.yaml backend/stack.yaml backend/stack.yaml.lock backend/Setup.hs ./
 RUN mkdir -p src
-RUN stack build --only-dependencies
+RUN stack setup --install-ghc && stack build --only-dependencies
 
 COPY backend/src/ src/
 RUN stack build

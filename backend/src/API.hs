@@ -48,6 +48,7 @@ type ShiftAPI =
 
 type OfficeAPI =
   "all" :> Get '[JSON] [OfficeSpace]
+    :<|> "updateCapacity" :> ReqBody '[JSON] OfficeSpace :> Put '[JSON] NoContent
     :<|> Capture "site" Text :> "booked" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [Capacity]
 
 type AdminAPI =

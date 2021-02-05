@@ -9,6 +9,7 @@ import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
+import Data.Config (OfficeSpace)
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -77,6 +78,13 @@ shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assi
 
 getPeople :: (MonadIO m, MonadReader Env m) => m [User]
 getPeople = query'_ "SELECT * FROM users"
+
+updateOfficeCapacity ::(MonadIO m, MonadReader Env m) => OfficeSpace -> m ()
+updateOfficeCapacity = 
+   exec ( "INSERT INTO office_capacities (site, max_people) "
+          <> "VALUES (?, ?) ON CONFLICT (site) DO "
+          <> "UPDATE SET max_people = EXCLUDED.max_people "
+        )
 
 -- TODO: Optimize
 getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]
@@ -180,6 +188,14 @@ initDatabase connectionString = do
           <> "portrait_thumb_url text not null, "
           <> "portrait_badge_url text not null, "
           <> "isAdmin boolean not null"
+          <> ")"
+      )
+  _ <- liftIO . withResource pool $ \conn ->
+    execute_
+      conn
+      ( "CREATE TABLE IF NOT EXISTS office_capacities ("
+          <> "site text PRIMARY KEY, "
+          <> "max_people integer not null "
           <> ")"
       )
   pure pool

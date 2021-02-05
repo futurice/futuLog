@@ -1,4 +1,4 @@
-module Data.CSV where
+module Data.ShiftAssignment where
 
 import Data.Csv ((.:), FromNamedRecord (..))
 import Data.Text (Text)

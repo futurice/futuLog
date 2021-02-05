@@ -4,6 +4,7 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import GHC.Generics (Generic)
+import Database.PostgreSQL.Simple.ToRow (ToRow (..))
 
 data Shift
   = MkShift
@@ -23,7 +24,7 @@ data OfficeSpace
         maxPeople :: Int
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON, ToSchema)
+  deriving anyclass (ToJSON, FromJSON, ToSchema, ToRow)
 
 officeSite :: OfficeSpace -> Text
 officeSite = site

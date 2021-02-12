@@ -79,12 +79,13 @@ shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assi
 getPeople :: (MonadIO m, MonadReader Env m) => m [User]
 getPeople = query'_ "SELECT * FROM users"
 
-updateOfficeCapacity ::(MonadIO m, MonadReader Env m) => OfficeSpace -> m ()
-updateOfficeCapacity = 
-   exec ( "INSERT INTO office_capacities (site, max_people) "
-          <> "VALUES (?, ?) ON CONFLICT (site) DO "
-          <> "UPDATE SET max_people = EXCLUDED.max_people "
-        )
+updateOfficeCapacity :: (MonadIO m, MonadReader Env m) => OfficeSpace -> m ()
+updateOfficeCapacity =
+  exec
+    ( "INSERT INTO office_capacities (site, max_people) "
+        <> "VALUES (?, ?) ON CONFLICT (site) DO "
+        <> "UPDATE SET max_people = EXCLUDED.max_people "
+    )
 
 -- TODO: Optimize
 getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]

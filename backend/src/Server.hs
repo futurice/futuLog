@@ -82,7 +82,7 @@ shiftHandler MkUser {email} = getShift :<|> setShift :<|> getShifts
         else throwError $ err400 {errBody = "specified shift does not exist"}
 
 officeHandler :: User -> Server OfficeAPI
-officeHandler (MkUser {isAdmin}) = getOffices :<|> updateOfficeCapacity:<|> getBooked
+officeHandler (MkUser {isAdmin}) = getOffices :<|> updateOfficeCapacity :<|> getBooked
   where
     getOffices = offices <$> ask
     getBooked office start end = withDefaultDays (DB.getOfficeBooked office) start end >>= \capacities -> do

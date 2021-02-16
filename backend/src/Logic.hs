@@ -2,14 +2,14 @@ module Logic (registerWorkmode) where
 
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
-import Data.ClientRequest (RegisterWorkmode (..), Capacity(people))
+import Data.ClientRequest (Capacity (people), RegisterWorkmode (..))
 import Data.Config (Shift (..), maxPeople, officeSite, shiftSite)
 import Data.Env (Env (..), ShiftAssignment (..))
 import Data.Maybe (listToMaybe)
 import Data.Text (Text)
 import Data.Time.Calendar (dayOfWeek)
 import Data.Time.Clock (getCurrentTime, utctDay)
-import Data.User (User (..))
+import Data.User (User (MkUser, email))
 import Data.Workmode (Workmode (..))
 import Database (getLastShiftsFor, getOfficeBooked, saveWorkmode)
 
@@ -29,7 +29,7 @@ registerWorkmode user@(MkUser {email}) mode@(MkRegisterWorkmode {workmode, site 
               shifts <- getLastShiftsFor email
               case shifts of
                 [] -> pure $ Left "You are not signed into any shift, please set a shift first"
-                shift:_ -> checkShift user mode shift
+                shift : _ -> checkShift user mode shift
   where
     isOffice (Office _) = True
     isOffice _ = False

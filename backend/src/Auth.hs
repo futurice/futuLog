@@ -68,14 +68,11 @@ verifyLogin manager req admins = do
   response <- makeProxyRequest manager "https://prox.app.futurice.com/contacts/contacts.json"
   case decode (responseBody response) of
     Just users -> case filterUser username users of
-      [MkContactUser _ a b email] -> withAvatar username $ \p -> MkUser a b email p p p (email `elem` admins)
+      [MkContactUser _ name email thumb image] -> pure $ MkUser name email image thumb (email `elem` admins)
       _ -> throwError "User not found in contacts"
     Nothing -> throwError "Failed to authorize to proxy"
   where
-    withAvatar u f = do
-      url <- liftIO $ T.pack <$> getEnv "SERVICE_URL"
-      pure . f $ url <> "/api/avatar/" <> u
-    filterUser u = filter (\(MkContactUser fumName _ _ _) -> fumName == u)
+    filterUser u = filter (\(MkContactUser fumName _ _ _ _) -> fumName == u)
 
 makeProxyRequest :: (MonadThrow m, MonadIO m) => Manager -> String -> m (C.Response BL.ByteString)
 makeProxyRequest m url = do

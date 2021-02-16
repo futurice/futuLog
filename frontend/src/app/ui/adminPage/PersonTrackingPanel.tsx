@@ -94,7 +94,7 @@ const mapBookingsForUI = ({
 }): ITableDataDto => {
   const { people, date, site } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
-    name: `${person.first_name} ${person.last_name}`,
+    name: person.name,
     email: person.email,
     checked: false,
   }));
@@ -160,7 +160,7 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
             data.map((item: ICapacityDto) => {
               return mapBookingsForUI({
                 bookings: item,
-                user: `${user?.first_name} ${user?.last_name}`,
+                user: user?.name,
                 offices: offices || [],
               });
             });

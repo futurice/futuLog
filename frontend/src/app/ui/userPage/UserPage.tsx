@@ -49,7 +49,7 @@ export const UserPage: React.FC = () => {
           >
             <AvatarIcon src={user?.portrait_thumb_url} />
             <Box fontWeight="bold" padding="1rem">
-              {user?.first_name} {user?.last_name}
+              {user?.name}
             </Box>
           </Box>
           <Button href="https://login.futurice.com/?logout=true" variant="outlined" color="primary">

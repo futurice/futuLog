@@ -91,7 +91,7 @@ export function mapBookingsForUI({
 }): ITableDataDto {
   const { people, date } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
-    name: `${person.first_name} ${person.last_name}`,
+    name: person.name,
     email: person.email,
     checked: false,
   }));

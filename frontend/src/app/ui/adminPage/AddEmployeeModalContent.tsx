@@ -36,9 +36,9 @@ const AddEmployeeModalContent: React.FC<AddEmployeeModalContent> = ({ users, onA
   const { handleModalClose } = useContext(ModalContext);
   const [currentUser, setCurrentUser] = useState({ name: "", email: "" });
 
-  const usersOptions = (users).map(({ first_name, last_name, email }) => ({
+  const usersOptions = (users).map(({ name, email }) => ({
     value: email,
-    label: `${first_name} ${last_name}`,
+    label: name,
   }));
 
   {/* TODO: Uncomment following lines when addGuest functionality is added */ }

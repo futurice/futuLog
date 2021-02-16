@@ -32,11 +32,9 @@ const e = encodeURIComponent;
 
 export interface IUserDto {
   email: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   portrait_full_url: string;
   portrait_thumb_url: string;
-  portrait_badge_url: string;
   isAdmin: boolean;
 }
 

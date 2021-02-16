@@ -132,10 +132,10 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
         "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
         (email, site, date, "Office" :: String, confirmed)
   exec
-    ( "INSERT INTO users (first_name, last_name, user_email, portrait_full_url, portrait_thumb_url, portrait_badge_url, isAdmin) "
-        <> "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (user_email) DO "
-        <> "UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, portrait_full_url = EXCLUDED.portrait_full_url, "
-        <> "portrait_thumb_url = EXCLUDED.portrait_thumb_url, portrait_badge_url = EXCLUDED.portrait_badge_url, isAdmin = EXCLUDED.isAdmin"
+    ( "INSERT INTO users (name, user_email, portrait_full_url, portrait_thumb_url, isAdmin) "
+        <> "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_email) DO "
+        <> "UPDATE SET name = EXCLUDED.name, portrait_full_url = EXCLUDED.portrait_full_url, "
+        <> "portrait_thumb_url = EXCLUDED.portrait_thumb_url, isAdmin = EXCLUDED.isAdmin"
     )
     user
   where
@@ -173,12 +173,10 @@ initDatabase connectionString = do
     execute_
       conn
       ( "CREATE TABLE IF NOT EXISTS users ("
-          <> "first_name text not null, "
-          <> "last_name text not null, "
+          <> "name text not null, "
           <> "user_email text PRIMARY KEY, "
           <> "portrait_full_url text not null, "
           <> "portrait_thumb_url text not null, "
-          <> "portrait_badge_url text not null, "
           <> "isAdmin boolean not null"
           <> ")"
       )

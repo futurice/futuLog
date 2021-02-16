@@ -53,9 +53,9 @@ export function TrackingToolbar({
   onDateChange,
   onSearch,
 }: ITrackingToolbar) {
-  const usersOptions = (users || []).map(({ first_name, last_name, email }) => ({
+  const usersOptions = (users || []).map(({ name, email }) => ({
     value: email,
-    label: `${first_name} ${last_name}`,
+    label: name,
   }));
   const csvData: ICSVDataItem[] = trackingTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));

@@ -9,21 +9,20 @@ import GHC.Generics (Generic)
 data ContactUser
   = MkContactUser
       { login :: Text,
-        first :: Text,
         name :: Text,
-        email :: Text
+        email :: Text,
+        thumb :: Text,
+        image :: Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
 data User
   = MkUser
-      { first_name :: Text,
-        last_name :: Text,
+      { name :: Text,
         email :: Text,
         portrait_full_url :: Text,
         portrait_thumb_url :: Text,
-        portrait_badge_url :: Text,
         isAdmin :: Bool
       }
   deriving stock (Generic, Show, Eq)

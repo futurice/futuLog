@@ -21,7 +21,7 @@ import qualified Data.Text.Lazy as LT
 import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
-import Data.User (AdminUser (..), User (..))
+import Data.User (AdminUser (..), User (MkUser, email, isAdmin))
 import qualified Database as DB
 import Logic (registerWorkmode)
 import Network.HTTP.Client (Manager, Response (responseBody, responseHeaders, responseStatus))

@@ -152,6 +152,9 @@ isAdmin env user = do
     [] -> pure Nothing
     (_ : _) -> pure . Just $ MkAdmin user {Data.User.isAdmin = True}
 
+addAdmin :: (MonadIO m, MonadReader Env m) => Text -> m ()
+addAdmin = exec "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_email) DO NOTHING" . Only
+
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
 initDatabase connectionString = do
   pool <- liftIO $ createPool (retry $ connectPostgreSQL connectionString) close 2 60 10

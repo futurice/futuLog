@@ -6,6 +6,8 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Aeson (decode)
 import qualified Data.ByteString.Lazy as BL
 import Data.ByteString.Lazy.Char8 (pack)
+import Data.Env (Env)
+import Data.Maybe (isJust)
 import Data.Proxy (Proxy (..))
 import qualified Data.Text as T
 import Data.Text (Text, breakOn, isPrefixOf, replace)
@@ -13,6 +15,7 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.User (AdminUser (..), ContactUser (..), User (..))
 import qualified Data.Vault.Lazy as V
+import qualified Database as DB
 import Network.HTTP.Client (Manager, httpLbs, parseRequest, responseBody)
 import qualified Network.HTTP.Client as C
 import Network.HTTP.Types (hAuthorization, status401)
@@ -32,10 +35,10 @@ type ContextContent = '[AuthHandler Request User, AuthHandler Request AdminUser]
 contextProxy :: Proxy ContextContent
 contextProxy = Proxy
 
-mkAuthServerContext :: Manager -> Maybe User -> [Text] -> IO (Context ContextContent, Middleware)
-mkAuthServerContext m user admins = do
+mkAuthServerContext :: Manager -> Maybe User -> Env -> IO (Context ContextContent, Middleware)
+mkAuthServerContext m user env = do
   key <- V.newKey
-  pure (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware user key admins m)
+  pure (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware user key m env)
 
 authHandler :: V.Key User -> AuthHandler Request User
 authHandler key = mkAuthHandler $ login key
@@ -52,23 +55,26 @@ login key req = either throw401 pure (maybeToEither "No user data received from 
   where
     throw401 msg = throwError $ err401 {errBody = msg}
 
-authMiddleware :: Maybe User -> V.Key User -> [Text] -> Manager -> Middleware
-authMiddleware maybeUser key admins m app req respond = do
+authMiddleware :: Maybe User -> V.Key User -> Manager -> Env -> Middleware
+authMiddleware maybeUser key m env app req respond = do
   eitherUser <- case maybeUser of
-    Just x -> pure $ Right x
-    _ -> runExceptT $ verifyLogin m req admins
+    Just x -> DB.isAdmin env x >>= \admin -> pure $ Right x {isAdmin = isJust admin}
+    _ -> runExceptT $ verifyLogin m env req
   case eitherUser of
     Left e -> respond $ responseLBS status401 [] $ pack e
     Right user -> app (req {vault = V.insert key user (vault req)}) respond
 
-verifyLogin :: Manager -> Request -> [Text] -> ExceptT String IO User
-verifyLogin manager req admins = do
+verifyLogin :: Manager -> Env -> Request -> ExceptT String IO User
+verifyLogin manager env req = do
   cookie <- getCookie req
   username <- getUsername cookie
   response <- makeProxyRequest manager "https://prox.app.futurice.com/contacts/contacts.json"
   case decode (responseBody response) of
     Just users -> case filterUser username users of
-      [MkContactUser _ name email thumb image] -> pure $ MkUser name email image thumb (email `elem` admins)
+      [MkContactUser _ name email thumb image] -> do
+        let user = MkUser name email image thumb False
+        admin <- DB.isAdmin env user
+        pure $ user {isAdmin = isJust admin}
       _ -> throwError "User not found in contacts"
     Nothing -> throwError "Failed to authorize to proxy"
   where

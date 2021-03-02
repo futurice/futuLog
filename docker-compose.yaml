@@ -7,6 +7,7 @@ services:
         command: ./office-tracker --devEmail office-tracker@futurice.com
         environment:
             DB_URL: postgresql://postgres:example_password@db:5432/office
+            INITIAL_ADMIN: office-tracker@futurice.com
         ports:
             - "8000:8000"
         depends_on:

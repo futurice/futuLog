@@ -92,7 +92,7 @@ officeHandler (MkUser {isAdmin}) = getOffices :<|> getBooked
         else pure (fmap (\cap@(MkCapacity {date}) -> if date < today then cap {people = []} else cap) capacities)
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler
+adminHandler _ = addAdminHandler :<|> shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople :<|> bookingsHandler :<|> contactsHandler
   where
     shiftCSVAddHandler = \case
       MultipartData [] [payload] -> CSV.saveShifts (fdPayload payload) >>= \case
@@ -101,6 +101,7 @@ adminHandler _ = shiftCSVAddHandler :<|> adminWorkmodeHandler :<|> DB.getPeople 
       _ -> throwError $ err400 {errBody = "This endpoint only expects a single file and no other values"}
     bookingsHandler email = withDefaultDays $ DB.queryWorkmodes email
     contactsHandler email = withDefaultDays $ DB.queryContacts email
+    addAdminHandler email = DB.addAdmin email $> "Added user " <> email <> " as admin."
 
 adminWorkmodeHandler :: Server AdminWorkmodeAPI
 adminWorkmodeHandler = workmodeRangeHandler :<|> deleteWorkmodeHandler :<|> updateWorkmodeHandler

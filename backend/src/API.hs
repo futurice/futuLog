@@ -51,7 +51,8 @@ type OfficeAPI =
     :<|> Capture "site" Text :> "booked" :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [Capacity]
 
 type AdminAPI =
-  "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent
+  "add" :> Capture "email" Text :> Put '[PlainText] Text
+    :<|> "shift" :> "csv" :> "add" :> MultipartForm Mem (MultipartData Mem) :> Post '[JSON] NoContent
     :<|> "workmode" :> AdminWorkmodeAPI
     :<|> "people" :> Get '[JSON] [User]
     :<|> "bookings" :> Capture "user" Text :> QueryParam "startDate" Day :> QueryParam "endDate" Day :> Get '[JSON] [UserWorkmode]

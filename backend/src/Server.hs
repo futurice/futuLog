@@ -30,12 +30,11 @@ import Network.Wai (responseLBS)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
 import Servant.Multipart (MultipartData (..), fdPayload)
-import Servant.Server (Handler, ServerT, err400, errBody)
+import Servant.Server (Handler, err400, errBody)
 import qualified Servant.Server as S
 import Servant.Swagger (toSwagger)
 import Servant.Swagger.UI (swaggerSchemaUIServer)
-
-type Server api = ServerT api (ReaderT Env Handler)
+import Types (Server)
 
 swaggerHandler :: S.Server SwaggerAPI
 swaggerHandler = swaggerSchemaUIServer swagger

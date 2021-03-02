@@ -7,18 +7,19 @@ import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.User (User)
+import OpenID (OpenIDAPI)
 import Servant.API
 import Servant.CSV.Cassava (CSV)
 import Servant.Multipart (Mem, MultipartData, MultipartForm)
 import Servant.Swagger.UI (SwaggerSchemaUI)
 
-api :: Proxy ProtectedAPI
+api :: Proxy (OpenIDAPI :<|> ProtectedAPI)
 api = Proxy
 
 rootAPI :: Proxy RootAPI
 rootAPI = Proxy
 
-type RootAPI = SwaggerAPI :<|> ProtectedAPI :<|> Raw
+type RootAPI = SwaggerAPI :<|> (OpenIDAPI :<|> ProtectedAPI) :<|> Raw
 
 type SwaggerAPI = SwaggerSchemaUI "swagger-ui" "swagger.json"
 

@@ -36,10 +36,16 @@ cradle:
     - path: "./src/Logic.hs"
       component: "office-tracker:exe:office-tracker"
 
+    - path: "./src/OpenID.hs"
+      component: "office-tracker:exe:office-tracker"
+
     - path: "./src/Orphans.hs"
       component: "office-tracker:exe:office-tracker"
 
     - path: "./src/Server.hs"
+      component: "office-tracker:exe:office-tracker"
+
+    - path: "./src/Types.hs"
       component: "office-tracker:exe:office-tracker"
 
     - path: "./src/Paths_office_tracker.hs"

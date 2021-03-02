@@ -17,6 +17,7 @@ import Network.HTTP.Types.Status (status200)
 import Network.Wai (Application, Middleware, requestHeaders, responseFile)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsResourcePolicy)
+import OpenID (openidHandler)
 import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
 import Servant.Server.StaticFiles (serveDirectoryWith)
@@ -38,7 +39,7 @@ mkApp m email env = do
       rootAPI
       context
       ( swaggerHandler
-          :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (apiHandler m)
+          :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (openidHandler m :<|> apiHandler m)
           :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
       )
 

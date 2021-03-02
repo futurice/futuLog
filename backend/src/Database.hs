@@ -18,6 +18,7 @@ import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
 import Data.User (User (..))
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
+import System.Environment (lookupEnv)
 
 getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
 getAllWorkmodes office start end =
@@ -180,6 +181,12 @@ initDatabase connectionString = do
           <> "isAdmin boolean not null"
           <> ")"
       )
+  _ <- liftIO . withResource pool $ \conn -> execute_ conn "CREATE TABLE IF NOT EXISTS admins (user_email text PRIMARY KEY)"
+  admin <- liftIO $ lookupEnv "INITAL_ADMIN"
+  _ <- case admin of
+    Just x -> liftIO . withResource pool $ \conn ->
+      execute conn "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_email) DO NOTHING" (Only x)
+    Nothing -> pure 0
   pure pool
 
 exec :: (MonadIO m, MonadReader Env m, ToRow r) => Query -> r -> m ()

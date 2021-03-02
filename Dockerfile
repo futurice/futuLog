@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y libpq5 ca-certificates
 
 # Add backend
 COPY --from=0 office-tracker .
-COPY offices.yaml shifts.yaml admins.yaml ./
+COPY offices.yaml shifts.yaml ./
 EXPOSE 8000
 
 # Add frontend

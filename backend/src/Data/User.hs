@@ -1,4 +1,4 @@
-module Data.User (User (..), AdminUser (..), ContactUser (MkContactUser)) where
+module Data.User (User (..), AdminUser (..), ContactUser (MkContactUser), getUserEmail) where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Swagger (ToSchema)
@@ -27,6 +27,9 @@ data User
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToJSON, FromJSON, ToSchema, FromRow, ToRow)
+
+getUserEmail :: User -> Text
+getUserEmail MkUser {email} = email
 
 newtype AdminUser = MkAdmin User
   deriving stock (Show, Eq)

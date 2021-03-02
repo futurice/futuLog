@@ -5,7 +5,7 @@ module Database where
 import Control.Monad (when)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (MonadReader, ask)
+import Control.Monad.Reader (MonadReader, ReaderT (runReaderT), ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
@@ -15,7 +15,7 @@ import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
-import Data.User (User (..))
+import Data.User (AdminUser (..), User (..), getUserEmail)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 import System.Environment (lookupEnv)
@@ -145,6 +145,13 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
         "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
         (email, site, date, s :: String)
 
+isAdmin :: MonadIO m => Env -> User -> m (Maybe AdminUser)
+isAdmin env user = do
+  (admin :: [Only Text]) <- flip runReaderT env $ query' "SELECT * FROM admins WHERE user_email = ?" (Only $ getUserEmail user)
+  case admin of
+    [] -> pure Nothing
+    (_ : _) -> pure . Just $ MkAdmin user {Data.User.isAdmin = True}
+
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
 initDatabase connectionString = do
   pool <- liftIO $ createPool (retry $ connectPostgreSQL connectionString) close 2 60 10
@@ -182,7 +189,7 @@ initDatabase connectionString = do
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn -> execute_ conn "CREATE TABLE IF NOT EXISTS admins (user_email text PRIMARY KEY)"
-  admin <- liftIO $ lookupEnv "INITAL_ADMIN"
+  admin <- liftIO $ lookupEnv "INITIAL_ADMIN"
   _ <- case admin of
     Just x -> liftIO . withResource pool $ \conn ->
       execute conn "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_email) DO NOTHING" (Only x)

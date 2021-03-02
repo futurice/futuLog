@@ -42,6 +42,7 @@ packages:
 allow-newer: true
 extra-deps:
     - servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686
+    - openid-connect-0.1.0.0@sha256:f5ea75350e07e9043ed3bf7d64a5a38628a206e2d681ab28c0f56efe11c01427,5057
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

@@ -50,6 +50,7 @@ dependencies:
     - insert-ordered-containers
     - lens
     - mtl
+    - openid-connect
     - postgresql-simple
     - resource-pool
     - retry

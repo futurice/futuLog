@@ -8,6 +8,10 @@ services:
         environment:
             DB_URL: postgresql://postgres:example_password@db:5432/office
             INITIAL_ADMIN: office-tracker@futurice.com
+            OPENID_CLIENT_ID: futulog
+            OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
+            OPENID_REDIRECT_URI: http://office-tracker:8000/return
+            OPENID_CONFIG_URI: http://keycloak:8080/auth/realms/futulog/.well-known/openid-configuration
         ports:
             - "8000:8000"
         depends_on:
@@ -18,3 +22,29 @@ services:
         environment:
             POSTGRES_DB: office
             POSTGRES_PASSWORD: example_password
+
+    keycloak:
+        image: jboss/keycloak:12.0.4
+        command: "-b 0.0.0.0 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/import.json -Dkeycloak.migration.strategy=OVERWRITE_EXISTING -Dkeycloak.profile.feature.upload_scripts=enabled"
+        environment:
+            KEYCLOAK_USER: admin
+            KEYCLOAK_PASSWORD: admin
+            DB_VENDOR: POSTGRES
+            DB_ADDR: keycloak_db
+            DB_DATABASE: keycloak
+            DB_USER: keycloak
+            DB_SCHEMA: public
+            DB_PASSWORD: keycloak
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./keycloak-import.json:/tmp/import.json
+        depends_on:
+            - keycloak_db
+
+    keycloak_db:
+        image: postgres:12.3
+        environment:
+            POSTGRES_DB: keycloak
+            POSTGRES_USER: keycloak
+            POSTGRES_PASSWORD: keycloak

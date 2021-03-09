@@ -1,0 +1,120 @@
+{
+    "id": "futulog",
+    "realm": "futulog",
+    "users": [
+        {
+            "username": "service-account-futulog",
+            "enabled": true,
+            "serviceAccountClientId": "futulog"
+        },
+        {
+            "username": "testuser1",
+            "enabled": true,
+            "email": "testuser1@example.org",
+            "firstName": "Test",
+            "lastName": "User1",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "testuser1"
+                }
+            ],
+            "realmRoles": ["user"],
+            "clientRoles": {
+                "account": ["view-profile", "manage-account"]
+            }
+        },
+        {
+            "username": "testuser2",
+            "enabled": true,
+            "email": "testuser2@example.org",
+            "firstName": "Test",
+            "lastName": "User2",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "testuser2"
+                }
+            ],
+            "realmRoles": ["user"],
+            "clientRoles": {
+                "account": ["view-profile", "manage-account"]
+            }
+        },
+        {
+            "username": "testuser3",
+            "enabled": true,
+            "email": "testuser3@example.org",
+            "firstName": "Test",
+            "lastName": "User3",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "testuser3"
+                }
+            ],
+            "realmRoles": ["user"],
+            "clientRoles": {
+                "account": ["view-profile", "manage-account"]
+            }
+        }
+    ],
+    "clients": [
+        {
+            "id": "2e926c3c-05f5-4b73-a060-12b19ca946f2",
+            "clientId": "futulog",
+            "baseUrl": "http://office-tracker:8000/",
+            "enabled": true,
+            "clientAuthenticatorType": "client-secret",
+            "secret": "2a914a74-fcba-491d-8d7c-fcff63b04097",
+            "redirectUris": ["http://office-tracker:8000/return"],
+            "standardFlowEnabled": true,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": true,
+            "authorizationServicesEnabled": true,
+            "protocol": "openid-connect",
+            "authorizationSettings": {
+                "allowRemoteResourceManagement": true,
+                "policyEnforcementMode": "ENFORCING",
+                "resources": [
+                    {
+                        "name": "Default Resource",
+                        "type": "urn:futulog:resources:default",
+                        "ownerManagedAccess": false,
+                        "attributes": {},
+                        "_id": "01d816bc-25fe-420d-a724-4140858307b4",
+                        "uris": ["/*"]
+                    }
+                ],
+                "policies": [
+                    {
+                        "id": "eaddcbfa-690a-451a-a4a5-3d8be3dca6bb",
+                        "name": "Default Policy",
+                        "description": "A policy that grants access only for users within this realm",
+                        "type": "js",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "AFFIRMATIVE",
+                        "config": {
+                            "code": "// by default, grants any permission associated with this policy\n$evaluation.grant();\n"
+                        }
+                    },
+                    {
+                        "id": "8a911d7f-105a-40de-8397-041ea8c6a4d2",
+                        "name": "Default Permission",
+                        "description": "A permission that applies to the default resource type",
+                        "type": "resource",
+                        "logic": "POSITIVE",
+                        "decisionStrategy": "UNANIMOUS",
+                        "config": {
+                            "defaultResourceType": "urn:futulog:resources:default",
+                            "applyPolicies": "[\"Default Policy\"]"
+                        }
+                    }
+                ],
+                "scopes": [],
+                "decisionStrategy": "UNANIMOUS"
+            }
+        }
+    ],
+    "keycloakVersion": "12.0.4"
+}

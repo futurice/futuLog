@@ -1,6 +1,7 @@
 {
     "id": "futulog",
     "realm": "futulog",
+    "enabled": true,
     "users": [
         {
             "username": "service-account-futulog",
@@ -63,11 +64,11 @@
         {
             "id": "2e926c3c-05f5-4b73-a060-12b19ca946f2",
             "clientId": "futulog",
-            "baseUrl": "http://office-tracker:8000/",
+            "baseUrl": "http://localhost:8000/",
             "enabled": true,
             "clientAuthenticatorType": "client-secret",
             "secret": "2a914a74-fcba-491d-8d7c-fcff63b04097",
-            "redirectUris": ["http://office-tracker:8000/return"],
+            "redirectUris": ["http://localhost:8000/return"],
             "standardFlowEnabled": true,
             "directAccessGrantsEnabled": true,
             "serviceAccountsEnabled": true,

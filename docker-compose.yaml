@@ -6,19 +6,20 @@ services:
         tty: true
         command: ./office-tracker --devEmail office-tracker@futurice.com
         environment:
-            DB_URL: postgresql://postgres:example_password@db:5432/office
+            DB_URL: postgresql://postgres:example_password@localhost:5432/office
             INITIAL_ADMIN: office-tracker@futurice.com
             OPENID_CLIENT_ID: futulog
             OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
-            OPENID_REDIRECT_URI: http://office-tracker:8000/return
-            OPENID_CONFIG_URI: http://keycloak:8080/auth/realms/futulog/.well-known/openid-configuration
-        ports:
-            - "8000:8000"
+            OPENID_REDIRECT_URI: http://localhost:8000/return
+            OPENID_CONFIG_URI: http://localhost:8080/auth/realms/futulog/.well-known/openid-configuration
+        network_mode: "host"
         depends_on:
             - db
 
     db:
         image: postgres:12.3
+        ports:
+            - "5432:5432"
         environment:
             POSTGRES_DB: office
             POSTGRES_PASSWORD: example_password

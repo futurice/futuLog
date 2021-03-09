@@ -12,12 +12,16 @@ packages:
   original:
     hackage: servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686
 - completed:
-    hackage: openid-connect-0.1.0.0@sha256:f5ea75350e07e9043ed3bf7d64a5a38628a206e2d681ab28c0f56efe11c01427,5057
+    name: openid-connect
+    version: 0.1.0.0
+    git: https://github.com/jvanbruegge/openid-connect.git
     pantry-tree:
-      size: 2058
-      sha256: d17d31badfdce34655c8e3a1bf5562284750a4bbbafb234f58bba83ca5784bb0
+      size: 2765
+      sha256: 0a89c5edae21bbe15c7b7c07284d74331969b356c95a8fefc8601e66e1afc6c6
+    commit: 3cb4197f787971205b896d30162b559a9d5d7337
   original:
-    hackage: openid-connect-0.1.0.0@sha256:f5ea75350e07e9043ed3bf7d64a5a38628a206e2d681ab28c0f56efe11c01427,5057
+    git: https://github.com/jvanbruegge/openid-connect.git
+    commit: 3cb4197f787971205b896d30162b559a9d5d7337
 snapshots:
 - completed:
     size: 563100

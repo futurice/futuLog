@@ -17,11 +17,11 @@ packages:
     git: https://github.com/jvanbruegge/openid-connect.git
     pantry-tree:
       size: 2765
-      sha256: 0a89c5edae21bbe15c7b7c07284d74331969b356c95a8fefc8601e66e1afc6c6
-    commit: 3cb4197f787971205b896d30162b559a9d5d7337
+      sha256: 9731363b6e8badeba42dc8fc56ae93db2b444eea53e031ebe18012ea0c41496b
+    commit: 0a973bee8958b294d2f0a7bec825fac80cb91a8f
   original:
     git: https://github.com/jvanbruegge/openid-connect.git
-    commit: 3cb4197f787971205b896d30162b559a9d5d7337
+    commit: 0a973bee8958b294d2f0a7bec825fac80cb91a8f
 snapshots:
 - completed:
     size: 563100

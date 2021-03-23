@@ -7,7 +7,6 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.ByteString.Lazy as BL
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Env (Env)
-import Data.Maybe (isJust)
 import Data.Proxy (Proxy (..))
 import qualified Data.Text as T
 import Data.Text (Text, breakOn, isPrefixOf, replace)
@@ -18,8 +17,8 @@ import qualified Data.Vault.Lazy as V
 import qualified Database as DB
 import Network.HTTP.Client (Manager, httpLbs, parseRequest)
 import qualified Network.HTTP.Client as C
-import Network.HTTP.Types (hAuthorization, status401)
-import Network.Wai (Middleware, Request, requestHeaders, responseLBS, vault)
+import Network.HTTP.Types (hAuthorization, hLocation, status302)
+import Network.Wai (Middleware, Request (pathInfo), requestHeaders, responseLBS, vault)
 import Servant.API.Experimental.Auth (AuthProtect)
 import Servant.Server (Context (..), Handler, err401, errBody)
 import Servant.Server.Experimental.Auth (AuthHandler, AuthServerData, mkAuthHandler)
@@ -56,16 +55,20 @@ login key req = either throw401 pure (maybeToEither "No user data received from 
     throw401 msg = throwError $ err401 {errBody = msg}
 
 authMiddleware :: V.Key User -> Manager -> Env -> Middleware
-authMiddleware key m env app req respond = runExceptT (verifyLogin m env req) >>= \case
-  Left e -> respond $ responseLBS status401 [] $ pack e
-  Right user -> app (req {vault = V.insert key user (vault req)}) respond
+authMiddleware key m env app req respond = case pathInfo req of
+  ["login"] -> app req respond
+  ["return"] -> app req respond
+  _ -> runExceptT (verifyLogin m env req) >>= \case
+    Left e -> respond $ responseLBS status302 [(hLocation, "/login")] $ pack e
+    Right user -> app (req {vault = V.insert key user (vault req)}) respond
 
 verifyLogin :: Manager -> Env -> Request -> ExceptT String IO User
-verifyLogin _ _ _ = do
-  pure $ MkUser "Temp User" "temp@user" "" "" True
+verifyLogin _ env req = getCookie req >>= DB.checkUser env >>= \case
+  Nothing -> throwError "accessToken not recognized"
+  Just (Left _token) -> undefined
+  Just (Right user) -> pure user
 
-{-cookie <- getCookie req
-username <- getUsername cookie
+{-username <- getUsername cookie
 response <- makeProxyRequest manager "https://prox.app.futurice.com/contacts/contacts.json"
 case decode (responseBody response) of
   Just users -> case filterUser username users of
@@ -97,7 +100,7 @@ getUsername c =
 
 getCookie :: Request -> ExceptT String IO Text
 getCookie =
-  liftEither . maybeToEither "Missing token in cookie" . lookup "auth_pubtkt" . parseCookiesText
+  liftEither . maybeToEither "Missing token in cookie" . lookup "_Host-accessToken" . parseCookiesText
     <=< liftEither . maybeToEither "Missing cookie header" . lookup "cookie" . requestHeaders
 
 getAuth64 :: MonadIO m => m Text

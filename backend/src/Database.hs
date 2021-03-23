@@ -10,12 +10,13 @@ import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
+import Data.Functor ((<&>))
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
-import Data.User (AdminUser (..), OpenIdUser, User (..), getUserEmail)
+import Data.User (AdminUser (..), OpenIdUser (MkOpenIdUser), User (..), getUserEmail)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 import System.Environment (lookupEnv)
@@ -153,6 +154,14 @@ saveUser =
       <> "SET name = EXCLUDED.name, portrait_thumb_url = EXCLUDED.portrait_thumb_url, expire_date = EXCLUDED.expire_date, "
       <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token"
 
+checkUser :: MonadIO m => Env -> Text -> m (Maybe (Either Text User))
+checkUser env token = runReaderT (query' "SELECT * FROM users WHERE access_token = ?" $ Only token) env >>= \case
+  [MkOpenIdUser userName userEmail picture expire _ refreshToken] -> liftIO getCurrentTime <&> \now ->
+    if now > expire
+      then Left <$> refreshToken
+      else Just . Right $ MkUser userName userEmail picture picture False
+  _ -> pure Nothing
+
 isAdmin :: MonadIO m => Env -> User -> m (Maybe AdminUser)
 isAdmin env user = do
   (admin :: [Only Text]) <- flip runReaderT env $ query' "SELECT * FROM admins WHERE user_email = ?" (Only $ getUserEmail user)
@@ -195,7 +204,7 @@ initDatabase connectionString = do
           <> "name text not null, "
           <> "user_email text PRIMARY KEY, "
           <> "portrait_thumb_url text not null, "
-          <> "expire_date timestamp not null, "
+          <> "expire_date timestamptz not null, "
           <> "access_token text not null, "
           <> "refresh_token text"
           <> ")"

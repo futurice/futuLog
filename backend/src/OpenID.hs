@@ -23,6 +23,7 @@ import Data.Time (UTCTime, addUTCTime, getCurrentTime)
 import Data.User (OpenIdUser (..))
 import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), httpLbs)
+import Network.HTTP.Types (hLocation)
 import Network.URI (parseURI, uriToString)
 import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecretText), Credentials (..), HTTPS, Provider (providerDiscovery), RedirectTo (..), UserReturnFromRedirect (..), authenticationRedirect, authenticationSuccess, defaultAuthenticationRequest, discoveryAndKeys, email, openid, profile)
 import OpenID.Connect.TokenResponse
@@ -30,7 +31,7 @@ import Servant.API hiding (URI)
 import Servant.Server (err302, err400, err403, errBody, errHeaders)
 import System.Environment (getEnv)
 import Types (Server)
-import Web.Cookie (SetCookie, defaultSetCookie, parseCookies, renderSetCookie, sameSiteStrict, setCookieHttpOnly, setCookieName, setCookiePath, setCookieSameSite, setCookieSecure, setCookieValue)
+import Web.Cookie (defaultSetCookie, parseCookies, renderSetCookie, sameSiteStrict, setCookieHttpOnly, setCookieName, setCookiePath, setCookieSameSite, setCookieSecure, setCookieValue)
 
 type OpenIDAPI =
   Login :<|> Success :<|> Failure
@@ -42,7 +43,7 @@ type Success =
     :> QueryParam "code" Text
     :> QueryParam "state" Text
     :> Header "cookie" SessionCookie
-    :> Get '[JSON] (Headers '[Header "set-cookie" SetCookie] NoContent)
+    :> Get '[JSON] NoContent
 
 type Failure =
   "return"
@@ -99,16 +100,17 @@ saveUser now token = do
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 
-getCookie :: Text -> SetCookie
+getCookie :: Text -> ByteString
 getCookie token =
-  defaultSetCookie
-    { setCookieSecure = True,
-      setCookieName = "accessToken",
-      setCookieValue = encodeUtf8 token,
-      setCookieHttpOnly = True,
-      setCookieSameSite = Just sameSiteStrict,
-      setCookiePath = Just "/api"
-    }
+  BL.toStrict . toLazyByteString . renderSetCookie $
+    defaultSetCookie
+      { setCookieSecure = True,
+        setCookieName = "_Host-accessToken",
+        setCookieValue = encodeUtf8 token,
+        setCookieHttpOnly = True,
+        setCookieSameSite = Just sameSiteStrict,
+        setCookiePath = Just "/"
+      }
 
 success :: Manager -> Server Success
 success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
@@ -126,8 +128,13 @@ success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
     Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
     Right token -> saveUser now token >>= \case
       Left err -> throwError err403 {errBody = err}
-      Right () -> pure $ addHeader (getCookie $ accessToken token) NoContent
-success _ _ _ _ = noHeader <$> failed (Just "missing params") Nothing Nothing
+      Right () ->
+        throwError
+          err302
+            { errHeaders =
+                [("Set-Cookie", getCookie (accessToken token)), (hLocation, "/")]
+            }
+success _ _ _ _ = failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure
 failed err _ _ = throwError $ err400 {errBody = maybe "authentication failure" (LChar8.fromStrict . encodeUtf8) err}

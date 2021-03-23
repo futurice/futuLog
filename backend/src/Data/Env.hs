@@ -10,13 +10,15 @@ import Database.PostgreSQL.Simple (Connection)
 import Database.PostgreSQL.Simple.FromRow (FromRow (..))
 import GHC.Generics (Generic)
 import Network.HTTP.Client (Manager)
+import OpenID.Connect.Client.Provider (Provider)
 
 data Env
   = MkEnv
       { offices :: [OfficeSpace],
         shifts :: [Shift],
         pool :: Pool Connection,
-        manager :: Manager
+        manager :: Manager,
+        provider :: Provider
       }
 
 data ShiftAssignment

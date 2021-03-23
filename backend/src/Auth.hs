@@ -10,7 +10,7 @@ import Data.Text (Text)
 import Data.User (AdminUser (..), User (..))
 import qualified Data.Vault.Lazy as V
 import qualified Database as DB
-import Network.HTTP.Types (hLocation, status302)
+import Network.HTTP.Types (hLocation, status302, status401)
 import Network.Wai (Middleware, Request (pathInfo), requestHeaders, responseLBS, vault)
 import OpenID (refreshAccessToken)
 import Servant.API.Experimental.Auth (AuthProtect)
@@ -50,8 +50,10 @@ authMiddleware :: V.Key User -> Env -> Middleware
 authMiddleware key env app req respond = case pathInfo req of
   ["login"] -> app req respond
   ["return"] -> app req respond
-  _ -> runReaderT (runExceptT (verifyLogin req)) env >>= \case
-    Left e -> respond $ responseLBS status302 [(hLocation, "/login")] $ pack e
+  path -> runReaderT (runExceptT (verifyLogin req)) env >>= \case
+    Left e -> case path of
+      "api" : _ -> respond $ responseLBS status401 [] $ pack e
+      _ -> respond $ responseLBS status302 [(hLocation, "/login")] $ pack e
     Right user -> app (req {vault = V.insert key user (vault req)}) respond
 
 verifyLogin :: (MonadReader Env m, MonadIO m) => Request -> ExceptT String m User

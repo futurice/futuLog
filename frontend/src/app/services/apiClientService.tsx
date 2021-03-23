@@ -19,6 +19,8 @@ function fetchJSON<T>(url: string, init?: IRequestInit | undefined): Promise<T> 
       // Content-Type: application/json, so just revert to null
       // value if the JSON parsing fails
       return res.json().catch(() => null);
+    } else if (res.status === 401) {
+        window.location.reload();
     } else {
       return res.text().then(
         (message) => Promise.reject(Error(message)),

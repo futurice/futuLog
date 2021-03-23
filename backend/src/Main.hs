@@ -1,6 +1,7 @@
 module Main where
 
 import API (api, rootAPI)
+import Control.Exception (throwIO)
 import Control.Monad.Reader (runReaderT)
 import Data.Char (isSpace)
 import Data.Env (Env (..))
@@ -9,13 +10,16 @@ import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Yaml (decodeFileThrow, decodeThrow)
 import Database (initDatabase)
+import Network.HTTP.Client (Manager)
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types.Header (hContentType, hOrigin)
 import Network.HTTP.Types.Status (status200)
+import Network.URI (parseURI)
 import Network.Wai (Application, Middleware, requestHeaders, responseFile)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsResourcePolicy)
-import OpenID (openidHandler)
+import OpenID (https, openidHandler)
+import OpenID.Connect.Client.Provider (Provider, discoveryAndKeys)
 import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
 import Servant.Server.StaticFiles (serveDirectoryWith)
@@ -60,6 +64,15 @@ main = do
       else decodeThrow . encodeUtf8 $ pack shiftsFile
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
+  provider <- mkProvider manager
+  app <- mkApp MkEnv {offices, shifts, pool, manager, provider}
   putStrLn $ "Running server on port " <> show port
-  app <- mkApp MkEnv {offices, shifts, pool, manager}
   run port app
+
+mkProvider :: Manager -> IO Provider
+mkProvider m = do
+  Just configUri <- parseURI <$> getEnv "OPENID_CONFIG_URI"
+  result <- discoveryAndKeys (https m) configUri
+  case result of
+    Right (provider, _) -> pure provider
+    Left err -> throwIO err

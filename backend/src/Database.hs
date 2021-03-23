@@ -146,7 +146,12 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
         (email, site, date, s :: String)
 
 saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
-saveUser = exec "INSERT INTO users (name, user_email, portrait_thumb_url, expire_date, access_token, refresh_token) VALUES (?,?,?,?,?,?)"
+saveUser =
+  exec $
+    "INSERT INTO users (name, user_email, portrait_thumb_url, expire_date, access_token, refresh_token) VALUES (?,?,?,?,?,?) "
+      <> "ON CONFLICT (user_email) DO UPDATE "
+      <> "SET name = EXCLUDED.name, portrait_thumb_url = EXCLUDED.portrait_thumb_url, expire_date = EXCLUDED.expire_date, "
+      <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token"
 
 isAdmin :: MonadIO m => Env -> User -> m (Maybe AdminUser)
 isAdmin env user = do

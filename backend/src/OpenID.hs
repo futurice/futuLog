@@ -30,7 +30,7 @@ import Servant.API hiding (URI)
 import Servant.Server (err302, err400, err403, errBody, errHeaders)
 import System.Environment (getEnv)
 import Types (Server)
-import Web.Cookie (parseCookies, renderSetCookie)
+import Web.Cookie (SetCookie, defaultSetCookie, parseCookies, renderSetCookie, sameSiteStrict, setCookieHttpOnly, setCookieName, setCookiePath, setCookieSameSite, setCookieSecure, setCookieValue)
 
 type OpenIDAPI =
   Login :<|> Success :<|> Failure
@@ -42,7 +42,7 @@ type Success =
     :> QueryParam "code" Text
     :> QueryParam "state" Text
     :> Header "cookie" SessionCookie
-    :> Get '[JSON] NoContent
+    :> Get '[JSON] (Headers '[Header "set-cookie" SetCookie] NoContent)
 
 type Failure =
   "return"
@@ -99,6 +99,17 @@ saveUser now token = do
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 
+getCookie :: Text -> SetCookie
+getCookie token =
+  defaultSetCookie
+    { setCookieSecure = True,
+      setCookieName = "accessToken",
+      setCookieValue = encodeUtf8 token,
+      setCookieHttpOnly = True,
+      setCookieSameSite = Just sameSiteStrict,
+      setCookiePath = Just "/api"
+    }
+
 success :: Manager -> Server Success
 success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
   let browser =
@@ -115,8 +126,8 @@ success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
     Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
     Right token -> saveUser now token >>= \case
       Left err -> throwError err403 {errBody = err}
-      Right () -> pure NoContent
-success _ _ _ _ = failed (Just "missing params") Nothing Nothing
+      Right () -> pure $ addHeader (getCookie $ accessToken token) NoContent
+success _ _ _ _ = noHeader <$> failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure
 failed err _ _ = throwError $ err400 {errBody = maybe "authentication failure" (LChar8.fromStrict . encodeUtf8) err}

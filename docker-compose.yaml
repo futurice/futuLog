@@ -4,10 +4,9 @@ services:
         build: .
         image: futurice/office-tracker:latest
         tty: true
-        command: ./office-tracker --devEmail office-tracker@futurice.com
         environment:
             DB_URL: postgresql://postgres:example_password@localhost:5432/office
-            INITIAL_ADMIN: office-tracker@futurice.com
+            INITIAL_ADMIN: testuser1@example.org
             OPENID_CLIENT_ID: futulog
             OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
             OPENID_REDIRECT_URI: http://localhost:8000/return

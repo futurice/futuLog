@@ -7,7 +7,6 @@ import Data.Env (Env (..))
 import Data.String (fromString)
 import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
-import Data.User (User (..))
 import Data.Yaml (decodeFileThrow, decodeThrow)
 import Database (initDatabase)
 import Network.HTTP.Client (Manager)
@@ -22,7 +21,7 @@ import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
 import Servant.Server.StaticFiles (serveDirectoryWith)
 import Server (apiHandler, contextProxy, mkAuthServerContext, swaggerHandler)
-import System.Environment (getArgs, getEnv)
+import System.Environment (getEnv)
 import WaiAppStatic.Storage.Filesystem (defaultWebAppSettings)
 import WaiAppStatic.Types (StaticSettings (..))
 
@@ -31,9 +30,9 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
   [] -> Just simpleCorsResourcePolicy
   (x : _) -> Just simpleCorsResourcePolicy {corsOrigins = Just ([x], True)}
 
-mkApp :: Manager -> Maybe User -> Env -> IO Application
-mkApp m email env = do
-  (context, middleware) <- mkAuthServerContext m email env
+mkApp :: Manager -> Env -> IO Application
+mkApp m env = do
+  (context, middleware) <- mkAuthServerContext m env
   pure $ applyCors $ middleware $
     serveWithContext
       rootAPI
@@ -54,10 +53,6 @@ frontendPath = "./static"
 
 main :: IO ()
 main = do
-  args <- getArgs
-  let devEmail = case args of
-        "--devEmail" : x : _ -> Just x
-        _ -> Nothing
   offices <- decodeFileThrow "./offices.yaml"
   shiftsFile <- readFile "./shifts.yaml"
   shifts <-
@@ -66,11 +61,6 @@ main = do
       else decodeThrow . encodeUtf8 $ pack shiftsFile
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
-  let devUser = do
-        email <- devEmail
-        pure $ MkUser "Dev User" (pack email) "" "" False
-  case devEmail of
-    Nothing -> putStrLn $ "Running server on port " <> show port
-    Just email -> putStrLn $ "Running development server on port " <> show port <> " with logged in email " <> email
-  app <- mkApp manager devUser MkEnv {offices, shifts, pool}
+  putStrLn $ "Running server on port " <> show port
+  app <- mkApp manager MkEnv {offices, shifts, pool}
   run port app

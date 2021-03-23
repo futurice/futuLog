@@ -35,10 +35,10 @@ type ContextContent = '[AuthHandler Request User, AuthHandler Request AdminUser]
 contextProxy :: Proxy ContextContent
 contextProxy = Proxy
 
-mkAuthServerContext :: Manager -> Maybe User -> Env -> IO (Context ContextContent, Middleware)
-mkAuthServerContext m user env = do
+mkAuthServerContext :: Manager -> Env -> IO (Context ContextContent, Middleware)
+mkAuthServerContext m env = do
   key <- V.newKey
-  pure (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware user key m env)
+  pure (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware key m env)
 
 authHandler :: V.Key User -> AuthHandler Request User
 authHandler key = mkAuthHandler $ login key
@@ -55,14 +55,10 @@ login key req = either throw401 pure (maybeToEither "No user data received from 
   where
     throw401 msg = throwError $ err401 {errBody = msg}
 
-authMiddleware :: Maybe User -> V.Key User -> Manager -> Env -> Middleware
-authMiddleware maybeUser key m env app req respond = do
-  eitherUser <- case maybeUser of
-    Just x -> DB.isAdmin env x >>= \admin -> pure $ Right x {isAdmin = isJust admin}
-    _ -> runExceptT $ verifyLogin m env req
-  case eitherUser of
-    Left e -> respond $ responseLBS status401 [] $ pack e
-    Right user -> app (req {vault = V.insert key user (vault req)}) respond
+authMiddleware :: V.Key User -> Manager -> Env -> Middleware
+authMiddleware key m env app req respond = runExceptT (verifyLogin m env req) >>= \case
+  Left e -> respond $ responseLBS status401 [] $ pack e
+  Right user -> app (req {vault = V.insert key user (vault req)}) respond
 
 verifyLogin :: Manager -> Env -> Request -> ExceptT String IO User
 verifyLogin _ _ _ = do

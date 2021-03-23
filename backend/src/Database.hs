@@ -15,7 +15,7 @@ import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
-import Data.User (AdminUser (..), User (..), getUserEmail)
+import Data.User (AdminUser (..), OpenIdUser, User (..), getUserEmail)
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 import System.Environment (lookupEnv)
@@ -145,6 +145,9 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
         "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
         (email, site, date, s :: String)
 
+saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
+saveUser = exec "INSERT INTO users (name, user_email, portrait_thumb_url, expire_date, access_token, refresh_token) VALUES (?,?,?,?,?,?)"
+
 isAdmin :: MonadIO m => Env -> User -> m (Maybe AdminUser)
 isAdmin env user = do
   (admin :: [Only Text]) <- flip runReaderT env $ query' "SELECT * FROM admins WHERE user_email = ?" (Only $ getUserEmail user)
@@ -186,9 +189,10 @@ initDatabase connectionString = do
       ( "CREATE TABLE IF NOT EXISTS users ("
           <> "name text not null, "
           <> "user_email text PRIMARY KEY, "
-          <> "portrait_full_url text not null, "
           <> "portrait_thumb_url text not null, "
-          <> "isAdmin boolean not null"
+          <> "expire_date timestamp not null, "
+          <> "access_token text not null, "
+          <> "refresh_token text"
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn -> execute_ conn "CREATE TABLE IF NOT EXISTS admins (user_email text PRIMARY KEY)"

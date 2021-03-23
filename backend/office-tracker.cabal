@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0592cc9d29f67901af9d663b583c4ebf1c2c685e685417b41d515080df54c2df
+-- hash: fb2d4445456aa67346e4589e4c7ff96e97e1df5bad5b4e84d80c6d42629bf3dc
 
 name:           office-tracker
 version:        0.1.0.0
@@ -55,6 +55,7 @@ executable office-tracker
     , insert-ordered-containers
     , jose
     , lens
+    , lens-aeson
     , mtl
     , network-uri
     , openid-connect

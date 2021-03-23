@@ -3,7 +3,7 @@ module Auth (contextProxy, mkAuthServerContext, makeProxyRequest, getCookie, get
 import Control.Monad.Catch (MonadThrow)
 import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.Aeson (decode)
+--import Data.Aeson (decode)
 import qualified Data.ByteString.Lazy as BL
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Env (Env)
@@ -13,10 +13,10 @@ import qualified Data.Text as T
 import Data.Text (Text, breakOn, isPrefixOf, replace)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Text.Encoding.Base64 (encodeBase64)
-import Data.User (AdminUser (..), ContactUser (..), User (..))
+import Data.User (AdminUser (..), User (..))
 import qualified Data.Vault.Lazy as V
 import qualified Database as DB
-import Network.HTTP.Client (Manager, httpLbs, parseRequest, responseBody)
+import Network.HTTP.Client (Manager, httpLbs, parseRequest)
 import qualified Network.HTTP.Client as C
 import Network.HTTP.Types (hAuthorization, status401)
 import Network.Wai (Middleware, Request, requestHeaders, responseLBS, vault)
@@ -65,20 +65,22 @@ authMiddleware maybeUser key m env app req respond = do
     Right user -> app (req {vault = V.insert key user (vault req)}) respond
 
 verifyLogin :: Manager -> Env -> Request -> ExceptT String IO User
-verifyLogin manager env req = do
-  cookie <- getCookie req
-  username <- getUsername cookie
-  response <- makeProxyRequest manager "https://prox.app.futurice.com/contacts/contacts.json"
-  case decode (responseBody response) of
-    Just users -> case filterUser username users of
-      [MkContactUser _ name email thumb image] -> do
-        let user = MkUser name email image thumb False
-        admin <- DB.isAdmin env user
-        pure $ user {isAdmin = isJust admin}
-      _ -> throwError "User not found in contacts"
-    Nothing -> throwError "Failed to authorize to proxy"
-  where
-    filterUser u = filter (\(MkContactUser fumName _ _ _ _) -> fumName == u)
+verifyLogin _ _ _ = do
+  pure $ MkUser "Temp User" "temp@user" "" "" True
+
+{-cookie <- getCookie req
+username <- getUsername cookie
+response <- makeProxyRequest manager "https://prox.app.futurice.com/contacts/contacts.json"
+case decode (responseBody response) of
+  Just users -> case filterUser username users of
+    [MkContactUser _ name email thumb image] -> do
+      let user = MkUser name email image thumb False
+      admin <- DB.isAdmin env user
+      pure $ user {isAdmin = isJust admin}
+    _ -> throwError "User not found in contacts"
+  Nothing -> throwError "Failed to authorize to proxy"
+where
+  filterUser u = filter (\(MkContactUser fumName _ _ _ _) -> fumName == u) -}
 
 makeProxyRequest :: (MonadThrow m, MonadIO m) => Manager -> String -> m (C.Response BL.ByteString)
 makeProxyRequest m url = do

@@ -1,19 +1,27 @@
 module OpenID (openidHandler, OpenIDAPI) where
 
 import Control.Exception (throwIO)
-import Control.Lens (preview)
+import Control.Lens (firstOf, preview)
+import Control.Lens.At (at)
 import Control.Monad.Except (throwError)
-import Control.Monad.IO.Class (liftIO)
-import Crypto.JWT (ClaimsSet, uri)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Reader (MonadReader)
+import Crypto.JWT (ClaimsSet, unregisteredClaims, uri)
+import Data.Aeson.Lens (_String)
 import Data.ByteString (ByteString)
 import Data.ByteString.Builder (toLazyByteString)
 import qualified Data.ByteString.Char8 as Char8
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as LChar8
-import Data.Maybe (fromJust)
+import Data.Env (Env)
+import Data.Functor (($>))
+import Data.Maybe (fromJust, fromMaybe)
 import Data.String (fromString)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8)
-import Data.Time (getCurrentTime)
+import Data.Time (UTCTime, addUTCTime, getCurrentTime)
+import Data.User (OpenIdUser (..))
+import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), httpLbs)
 import Network.URI (parseURI, uriToString)
 import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecretText), Credentials (..), HTTPS, Provider (providerDiscovery), RedirectTo (..), UserReturnFromRedirect (..), authenticationRedirect, authenticationSuccess, defaultAuthenticationRequest, discoveryAndKeys, email, openid, profile)
@@ -34,14 +42,14 @@ type Success =
     :> QueryParam "code" Text
     :> QueryParam "state" Text
     :> Header "cookie" SessionCookie
-    :> Get '[JSON] (TokenResponse ClaimsSet)
+    :> Get '[JSON] NoContent
 
 type Failure =
   "return"
     :> QueryParam "error" Text
     :> QueryParam "state" Text
     :> Header "cookie" SessionCookie
-    :> Get '[JSON] (TokenResponse ClaimsSet)
+    :> Get '[JSON] NoContent
 
 newtype SessionCookie = MkSessionCookie ByteString
 
@@ -81,6 +89,16 @@ login m = do
             }
         )
 
+saveUser :: (MonadIO m, MonadReader Env m) => UTCTime -> TokenResponse ClaimsSet -> m (Either BL.ByteString ())
+saveUser now token = do
+  let get key = firstOf (unregisteredClaims . at key . traverse . _String) (idToken token)
+      expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn token) now
+  case (get "name", get "email") of
+    (Just n, Just e) -> do
+      let user = MkOpenIdUser n e (fromMaybe "/default_picture.png" $ get "picture") expireDate (accessToken token) (refreshToken token)
+      DB.saveUser user $> Right ()
+    _ -> pure $ Left "email and/or name not part of the id token"
+
 success :: Manager -> Server Success
 success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
   let browser =
@@ -95,7 +113,9 @@ success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
   r <- liftIO $ authenticationSuccess (https m) now provider creds browser
   case r of
     Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
-    Right token -> pure token
+    Right token -> saveUser now token >>= \case
+      Left err -> throwError err403 {errBody = err}
+      Right () -> pure NoContent
 success _ _ _ _ = failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure

@@ -6,7 +6,8 @@ import Control.Monad.Reader (MonadReader (ask), ReaderT (runReaderT))
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Env (Env)
 import Data.Proxy (Proxy (..))
-import Data.Text (Text)
+import Data.Text (Text, intercalate)
+import Data.Text.Encoding (encodeUtf8)
 import Data.User (AdminUser (..), User (..))
 import qualified Data.Vault.Lazy as V
 import qualified Database as DB
@@ -53,8 +54,10 @@ authMiddleware key env app req respond = case pathInfo req of
   path -> runReaderT (runExceptT (verifyLogin req)) env >>= \case
     Left e -> case path of
       "api" : _ -> respond $ responseLBS status401 [] $ pack e
-      _ -> respond $ responseLBS status302 [(hLocation, "/login")] $ pack e
+      _ -> respond $ responseLBS status302 [(hLocation, "/login"), ("Set-Cookie", cookie path)] $ pack e
     Right user -> app (req {vault = V.insert key user (vault req)}) respond
+  where
+    cookie path = encodeUtf8 $ "prevUrl=/" <> intercalate "/" path <> ";HttpOnly;Secure;Path=/return"
 
 verifyLogin :: (MonadReader Env m, MonadIO m) => Request -> ExceptT String m User
 verifyLogin req = getCookie req >>= DB.checkUser >>= \case

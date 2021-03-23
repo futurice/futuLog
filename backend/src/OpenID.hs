@@ -53,7 +53,11 @@ type Failure =
     :> Header "cookie" SessionCookie
     :> Get '[JSON] NoContent
 
-newtype SessionCookie = MkSessionCookie ByteString
+data SessionCookie
+  = MkSessionCookie
+      { session :: ByteString,
+        prevUrl :: Maybe ByteString
+      }
 
 openidHandler :: Server OpenIDAPI
 openidHandler = login :<|> success :<|> failed
@@ -134,12 +138,12 @@ getCookie token =
       }
 
 success :: Server Success
-success (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
+success (Just code) (Just state) (Just MkSessionCookie {session, prevUrl}) = do
   let browser =
         UserReturnFromRedirect
           { afterRedirectCodeParam = encodeUtf8 code,
             afterRedirectStateParam = encodeUtf8 state,
-            afterRedirectSessionCookie = cookie
+            afterRedirectSessionCookie = session
           }
   now <- liftIO getCurrentTime
   m <- asks manager
@@ -154,7 +158,10 @@ success (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
         throwError
           err302
             { errHeaders =
-                [("Set-Cookie", getCookie (accessToken token)), (hLocation, "/")]
+                [ ("Set-Cookie", getCookie (accessToken token)),
+                  ("Set-Cookie", "prevUrl=\"\"; Path=/return; Secure; HttpOnly; Expires=Thu Jan 01 1970 00:00:00 GMT"),
+                  (hLocation, fromMaybe "/" prevUrl)
+                ]
             }
 success _ _ _ = failed (Just "missing params") Nothing Nothing
 
@@ -168,6 +175,8 @@ https m req = do
 
 instance FromHttpApiData SessionCookie where
   parseUrlPiece = parseHeader . encodeUtf8
-  parseHeader bs = case lookup "session" (parseCookies bs) of
-    Nothing -> Left "session cookie missing"
-    Just val -> Right (MkSessionCookie val)
+  parseHeader bs =
+    let c = parseCookies bs
+     in case lookup "session" c of
+          Nothing -> Left "session cookie missing"
+          Just val -> Right (MkSessionCookie val $ lookup "prevUrl" c)

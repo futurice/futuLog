@@ -9,7 +9,6 @@ import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Yaml (decodeFileThrow, decodeThrow)
 import Database (initDatabase)
-import Network.HTTP.Client (Manager)
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types.Header (hContentType, hOrigin)
 import Network.HTTP.Types.Status (status200)
@@ -30,15 +29,15 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
   [] -> Just simpleCorsResourcePolicy
   (x : _) -> Just simpleCorsResourcePolicy {corsOrigins = Just ([x], True)}
 
-mkApp :: Manager -> Env -> IO Application
-mkApp m env = do
-  (context, middleware) <- mkAuthServerContext m env
+mkApp :: Env -> IO Application
+mkApp env = do
+  (context, middleware) <- runReaderT mkAuthServerContext env
   pure $ applyCors $ middleware $
     serveWithContext
       rootAPI
       context
       ( swaggerHandler
-          :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (openidHandler m :<|> apiHandler m)
+          :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (openidHandler :<|> apiHandler)
           :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
       )
 
@@ -62,5 +61,5 @@ main = do
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
   putStrLn $ "Running server on port " <> show port
-  app <- mkApp manager MkEnv {offices, shifts, pool}
+  app <- mkApp MkEnv {offices, shifts, pool, manager}
   run port app

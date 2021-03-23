@@ -9,14 +9,15 @@ import Data.Time.Calendar (Day)
 import Database.PostgreSQL.Simple (Connection)
 import Database.PostgreSQL.Simple.FromRow (FromRow (..))
 import GHC.Generics (Generic)
+import Network.HTTP.Client (Manager)
 
 data Env
   = MkEnv
       { offices :: [OfficeSpace],
         shifts :: [Shift],
-        pool :: Pool Connection
+        pool :: Pool Connection,
+        manager :: Manager
       }
-  deriving stock (Show)
 
 data ShiftAssignment
   = MkShiftAssignment

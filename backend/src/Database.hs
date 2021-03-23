@@ -5,7 +5,7 @@ module Database where
 import Control.Monad (when)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (MonadReader, ReaderT (runReaderT), ask)
+import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
 import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
@@ -154,17 +154,17 @@ saveUser =
       <> "SET name = EXCLUDED.name, portrait_thumb_url = EXCLUDED.portrait_thumb_url, expire_date = EXCLUDED.expire_date, "
       <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token"
 
-checkUser :: MonadIO m => Env -> Text -> m (Maybe (Either Text User))
-checkUser env token = runReaderT (query' "SELECT * FROM users WHERE access_token = ?" $ Only token) env >>= \case
+checkUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe (Either Text User))
+checkUser token = query' "SELECT * FROM users WHERE access_token = ?" (Only token) >>= \case
   [MkOpenIdUser userName userEmail picture expire _ refreshToken] -> liftIO getCurrentTime <&> \now ->
     if now > expire
       then Left <$> refreshToken
       else Just . Right $ MkUser userName userEmail picture picture False
   _ -> pure Nothing
 
-isAdmin :: MonadIO m => Env -> User -> m (Maybe AdminUser)
-isAdmin env user = do
-  (admin :: [Only Text]) <- flip runReaderT env $ query' "SELECT * FROM admins WHERE user_email = ?" (Only $ getUserEmail user)
+isAdmin :: (MonadIO m, MonadReader Env m) => User -> m (Maybe AdminUser)
+isAdmin user = do
+  (admin :: [Only Text]) <- query' "SELECT * FROM admins WHERE user_email = ?" (Only $ getUserEmail user)
   case admin of
     [] -> pure Nothing
     (_ : _) -> pure . Just $ MkAdmin user {Data.User.isAdmin = True}

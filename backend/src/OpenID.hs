@@ -1,11 +1,11 @@
-module OpenID (openidHandler, OpenIDAPI) where
+module OpenID (openidHandler, refreshAccessToken, OpenIDAPI) where
 
 import Control.Exception (throwIO)
 import Control.Lens (firstOf, preview)
 import Control.Lens.At (at)
-import Control.Monad.Except (throwError)
+import Control.Monad.Except (ExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (MonadReader)
+import Control.Monad.Reader (MonadReader (ask), asks)
 import Crypto.JWT (ClaimsSet, unregisteredClaims, uri)
 import Data.Aeson.Lens (_String)
 import Data.ByteString (ByteString)
@@ -13,14 +13,14 @@ import Data.ByteString.Builder (toLazyByteString)
 import qualified Data.ByteString.Char8 as Char8
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as LChar8
-import Data.Env (Env)
+import Data.Env (Env, manager)
 import Data.Functor (($>))
 import Data.Maybe (fromJust, fromMaybe)
 import Data.String (fromString)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time (UTCTime, addUTCTime, getCurrentTime)
-import Data.User (OpenIdUser (..))
+import Data.User (OpenIdUser (..), User)
 import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), httpLbs)
 import Network.HTTP.Types (hLocation)
@@ -54,8 +54,8 @@ type Failure =
 
 newtype SessionCookie = MkSessionCookie ByteString
 
-openidHandler :: Manager -> Server OpenIDAPI
-openidHandler m = login m :<|> success m :<|> failed
+openidHandler :: Server OpenIDAPI
+openidHandler = login :<|> success :<|> failed
 
 mkCredentials :: IO Credentials
 mkCredentials = do
@@ -72,9 +72,16 @@ mkProvider m = do
     Right (provider, _) -> pure provider
     Left err -> throwIO err
 
-login :: Manager -> Server Login
-login m = do
+refreshAccessToken :: (MonadReader Env m, MonadIO m) => Text -> ExceptT String m User
+refreshAccessToken _ = do
+  liftIO $ putStrLn "foo"
+  env <- ask
+  undefined env
+
+login :: Server Login
+login = do
   creds <- liftIO mkCredentials
+  m <- asks manager
   provider <- liftIO $ mkProvider m
   let req = defaultAuthenticationRequest (openid <> email <> profile) creds
   r <- liftIO $ authenticationRedirect (providerDiscovery provider) req
@@ -112,8 +119,8 @@ getCookie token =
         setCookiePath = Just "/"
       }
 
-success :: Manager -> Server Success
-success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
+success :: Server Success
+success (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
   let browser =
         UserReturnFromRedirect
           { afterRedirectCodeParam = encodeUtf8 code,
@@ -121,6 +128,7 @@ success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
             afterRedirectSessionCookie = cookie
           }
   now <- liftIO getCurrentTime
+  m <- asks manager
   provider <- liftIO $ mkProvider m
   creds <- liftIO mkCredentials
   r <- liftIO $ authenticationSuccess (https m) now provider creds browser
@@ -134,7 +142,7 @@ success m (Just code) (Just state) (Just (MkSessionCookie cookie)) = do
             { errHeaders =
                 [("Set-Cookie", getCookie (accessToken token)), (hLocation, "/")]
             }
-success _ _ _ _ = failed (Just "missing params") Nothing Nothing
+success _ _ _ = failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure
 failed err _ _ = throwError $ err400 {errBody = maybe "authentication failure" (LChar8.fromStrict . encodeUtf8) err}

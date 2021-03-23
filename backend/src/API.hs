@@ -34,7 +34,6 @@ type API =
     :<|> "shift" :> ShiftAPI
     :<|> "office" :> OfficeAPI
     :<|> "me" :> Get '[JSON] User
-    :<|> "avatar" :> Capture "login" Text :> Raw
 
 type WorkmodeAPI =
   "register" :> ReqBody '[JSON] [RegisterWorkmode] :> Post '[JSON] NoContent

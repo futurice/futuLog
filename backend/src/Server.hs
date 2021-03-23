@@ -1,13 +1,13 @@
 module Server (apiHandler, swaggerHandler, mkAuthServerContext, contextProxy, Server) where
 
 import API
-import Auth (contextProxy, makeProxyRequest, mkAuthServerContext)
+import Auth (contextProxy, mkAuthServerContext)
 import qualified CSV
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad ((<=<))
-import Control.Monad.Except (runExceptT, throwError)
+import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Reader (ask)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.ClientRequest (Capacity (..), SetShift (..), shiftName)
 import Data.Config (Shift (name), shiftSite)
@@ -16,21 +16,15 @@ import Data.Functor (($>))
 import Data.Maybe (listToMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
-import Data.Text (Text, unpack)
-import qualified Data.Text.Lazy as LT
-import Data.Text.Lazy.Encoding (encodeUtf8)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import Data.User (AdminUser (..), User (MkUser, email, isAdmin))
 import qualified Database as DB
 import Logic (registerWorkmode)
-import Network.HTTP.Client (Manager, Response (responseBody, responseHeaders, responseStatus))
-import Network.HTTP.Types (status401)
-import Network.Wai (responseLBS)
 import Orphans ()
 import Servant.API ((:<|>) (..), (:>), NoContent (..))
 import Servant.Multipart (MultipartData (..), fdPayload)
-import Servant.Server (Handler, err400, errBody)
+import Servant.Server (err400, errBody)
 import qualified Servant.Server as S
 import Servant.Swagger (toSwagger)
 import Servant.Swagger.UI (swaggerSchemaUIServer)
@@ -45,19 +39,10 @@ swaggerHandler = swaggerSchemaUIServer swagger
         & info . title .~ "Office Tracker API"
         & info . version .~ "1.0"
 
-apiHandler :: Manager -> Server ProtectedAPI
-apiHandler m user =
-  (workmodeHandler user :<|> shiftHandler user :<|> officeHandler user :<|> pure user :<|> avatarHander m)
+apiHandler :: Server ProtectedAPI
+apiHandler user =
+  (workmodeHandler user :<|> shiftHandler user :<|> officeHandler user :<|> pure user)
     :<|> adminHandler
-
-avatarHander :: Manager -> Text -> S.Tagged (ReaderT Env Handler) S.Application
-avatarHander m user = S.Tagged $ \_ res -> runExceptT go >>= \case
-  Left err -> res $ responseLBS status401 [] (encodeUtf8 $ LT.pack err)
-  Right response -> res response
-  where
-    go = do
-      res <- makeProxyRequest m $ "https://prox.app.futurice.com/avatar/fum/" <> unpack user
-      pure $ responseLBS (responseStatus res) (responseHeaders res) (responseBody res)
 
 workmodeHandler :: User -> Server WorkmodeAPI
 workmodeHandler user@(MkUser {email}) = regWorkmode :<|> flip confirmWorkmodeHandler :<|> DB.queryWorkmode email :<|> queryBatch

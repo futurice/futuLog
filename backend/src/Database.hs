@@ -78,7 +78,7 @@ shiftQuery :: Query
 shiftQuery = "SELECT * FROM shift_assignments WHERE user_email = ? ORDER BY assignment_date DESC LIMIT 1"
 
 getPeople :: (MonadIO m, MonadReader Env m) => m [User]
-getPeople = query'_ "SELECT * FROM users"
+getPeople = query'_ "SELECT name,user_email,picture,false FROM users"
 
 -- TODO: Optimize
 getOfficeBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Capacity]
@@ -99,7 +99,7 @@ getOfficeBooked office start end =
       ( \(day, emails :: [Text]) ->
           MkCapacity day
             <$> query'
-              "SELECT * FROM users WHERE user_email IN ?"
+              "SELECT name,user_email,picture,false FROM users WHERE user_email IN ?"
               (Only $ In emails)
       )
 
@@ -120,7 +120,7 @@ saveShift email MkSetShift {shiftName = name, site = office} = do
         (email, office, name)
 
 saveWorkmode :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m ()
-saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = do
+saveWorkmode (MkUser {email}) MkRegisterWorkmode {site, date, workmode} = do
   exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
@@ -133,13 +133,6 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
       exec
         "INSERT INTO workmodes (user_email, site, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
         (email, site, date, "Office" :: String, confirmed)
-  exec
-    ( "INSERT INTO users (name, user_email, portrait_full_url, portrait_thumb_url, isAdmin) "
-        <> "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_email) DO "
-        <> "UPDATE SET name = EXCLUDED.name, portrait_full_url = EXCLUDED.portrait_full_url, "
-        <> "portrait_thumb_url = EXCLUDED.portrait_thumb_url, isAdmin = EXCLUDED.isAdmin"
-    )
-    user
   where
     mkSimpleQuery s =
       exec
@@ -149,17 +142,27 @@ saveWorkmode user@(MkUser {email}) MkRegisterWorkmode {site, date, workmode} = d
 saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
 saveUser =
   exec $
-    "INSERT INTO users (name, user_email, portrait_thumb_url, expire_date, access_token, refresh_token) VALUES (?,?,?,?,?,?) "
+    "INSERT INTO users (name, user_email, picture, expire_date, access_token, refresh_token) VALUES (?,?,?,?,?,?) "
       <> "ON CONFLICT (user_email) DO UPDATE "
-      <> "SET name = EXCLUDED.name, portrait_thumb_url = EXCLUDED.portrait_thumb_url, expire_date = EXCLUDED.expire_date, "
+      <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, expire_date = EXCLUDED.expire_date, "
       <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token"
+
+updateAccessToken :: (MonadIO m, MonadReader Env m) => Text -> Text -> UTCTime -> Maybe Text -> m (Maybe User)
+updateAccessToken oldRefreshToken accessToken expireDate = fmap listToMaybe . \case
+  Nothing -> query' (q "") (accessToken, expireDate, oldRefreshToken)
+  Just refreshToken -> query' (q ", refresh_token = ?") (accessToken, expireDate, refreshToken, oldRefreshToken)
+  where
+    q x =
+      "UPDATE users SET access_token = ?, expire_date = ?"
+        <> x
+        <> " WHERE refresh_token = ? RETURNING name, user_email, picture, false"
 
 checkUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe (Either Text User))
 checkUser token = query' "SELECT * FROM users WHERE access_token = ?" (Only token) >>= \case
   [MkOpenIdUser userName userEmail picture expire _ refreshToken] -> liftIO getCurrentTime <&> \now ->
     if now > expire
       then Left <$> refreshToken
-      else Just . Right $ MkUser userName userEmail picture picture False
+      else Just . Right $ MkUser userName userEmail picture False
   _ -> pure Nothing
 
 isAdmin :: (MonadIO m, MonadReader Env m) => User -> m (Maybe AdminUser)
@@ -203,7 +206,7 @@ initDatabase connectionString = do
       ( "CREATE TABLE IF NOT EXISTS users ("
           <> "name text not null, "
           <> "user_email text PRIMARY KEY, "
-          <> "portrait_thumb_url text not null, "
+          <> "picture text not null, "
           <> "expire_date timestamptz not null, "
           <> "access_token text not null, "
           <> "refresh_token text"

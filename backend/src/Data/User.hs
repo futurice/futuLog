@@ -23,8 +23,7 @@ data User
   = MkUser
       { name :: Text,
         email :: Text,
-        portrait_full_url :: Text,
-        portrait_thumb_url :: Text,
+        portrait :: Text,
         isAdmin :: Bool
       }
   deriving stock (Generic, Show, Eq)
@@ -35,4 +34,4 @@ getUserEmail MkUser {email} = email
 
 newtype AdminUser = MkAdmin User
   deriving stock (Show, Eq)
-  deriving newtype (ToJSON, FromJSON, ToSchema)
+  deriving newtype (ToJSON, ToSchema)

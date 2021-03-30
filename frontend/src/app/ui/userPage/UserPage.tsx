@@ -47,7 +47,7 @@ export const UserPage: React.FC = () => {
             alignItems="center"
             flexWrap="wrap"
           >
-            <AvatarIcon src={user?.portrait_thumb_url} />
+            <AvatarIcon src={user?.picture} />
             <Box fontWeight="bold" padding="1rem">
               {user?.name}
             </Box>

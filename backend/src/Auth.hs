@@ -3,8 +3,11 @@ module Auth (contextProxy, mkAuthServerContext) where
 import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader (ask), ReaderT (runReaderT))
+import Data.Bifunctor (second)
+import Data.ByteString (ByteString)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Env (Env)
+import Data.Functor ((<&>))
 import Data.Proxy (Proxy (..))
 import Data.Text (Text, intercalate)
 import Data.Text.Encoding (encodeUtf8)
@@ -12,7 +15,7 @@ import Data.User (AdminUser (..), User (..))
 import qualified Data.Vault.Lazy as V
 import qualified Database as DB
 import Network.HTTP.Types (hLocation, status302, status401)
-import Network.Wai (Middleware, Request (pathInfo), requestHeaders, responseLBS, vault)
+import Network.Wai (Middleware, Request (pathInfo), mapResponseHeaders, requestHeaders, responseLBS, vault)
 import OpenID (refreshAccessToken)
 import Servant.API.Experimental.Auth (AuthProtect)
 import Servant.Server (Context (..), Handler, err401, errBody)
@@ -55,15 +58,17 @@ authMiddleware key env app req respond = case pathInfo req of
     Left e -> case path of
       "api" : _ -> respond $ responseLBS status401 [] $ pack e
       _ -> respond $ responseLBS status302 [(hLocation, "/login"), ("Set-Cookie", cookie path)] $ pack e
-    Right user -> app (req {vault = V.insert key user (vault req)}) respond
+    Right (user, tokenCookie) ->
+      let req' = req {vault = V.insert key user (vault req)}
+       in app req' (\res -> let res' = maybe res (\c -> mapResponseHeaders (("Set-Cookie", c) :) res) tokenCookie in respond res')
   where
     cookie path = encodeUtf8 $ "prevUrl=/" <> intercalate "/" path <> ";HttpOnly;Secure;Path=/return"
 
-verifyLogin :: (MonadReader Env m, MonadIO m) => Request -> ExceptT String m User
+verifyLogin :: (MonadReader Env m, MonadIO m) => Request -> ExceptT String m (User, Maybe ByteString)
 verifyLogin req = getCookie req >>= DB.checkUser >>= \case
   Nothing -> throwError "accessToken not recognized"
-  Just (Left token) -> refreshAccessToken token
-  Just (Right user) -> pure user
+  Just (Left token) -> refreshAccessToken token <&> second Just
+  Just (Right user) -> pure (user, Nothing)
 
 getCookie :: Monad m => Request -> ExceptT String m Text
 getCookie =

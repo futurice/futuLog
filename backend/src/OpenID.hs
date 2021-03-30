@@ -6,6 +6,7 @@ import Control.Monad.Except (ExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
 import Crypto.JWT (ClaimsSet, unregisteredClaims, uri)
+import Data.Aeson (eitherDecode)
 import Data.Aeson.Lens (_String)
 import Data.ByteString (ByteString)
 import Data.ByteString.Builder (toLazyByteString)
@@ -74,14 +75,20 @@ mkCredentials = do
   redirectUri <- getEnv "OPENID_REDIRECT_URI"
   pure $ Credentials clientID (AssignedSecretText secretText) (fromJust $ preview uri (fromString redirectUri))
 
-refreshAccessToken :: (MonadReader Env m, MonadIO m) => Text -> ExceptT String m User
+refreshAccessToken :: (MonadReader Env m, MonadIO m) => Text -> ExceptT String m (User, ByteString)
 refreshAccessToken token = asks (tokenEndpoint . providerDiscovery . provider) >>= \case
   Nothing -> throwError "Provider does not specify a token endpoint"
   Just (URI url) -> do
     m <- asks manager
     request <- liftIO $ requestFromURI url
     (clientID, secret) <- liftIO getClientSecret
-    let body = "grant_type=refresh_token&refresh_token=" <> encodeUtf8 token
+    let body =
+          "grant_type=refresh_token&refresh_token="
+            <> encodeUtf8 token
+            <> "&client_id="
+            <> encodeUtf8 clientID
+            <> "&client_secret="
+            <> encodeUtf8 secret
         auth = "Basic " <> encodeBase64 (clientID <> ":" <> secret)
         req' =
           request
@@ -95,7 +102,14 @@ refreshAccessToken token = asks (tokenEndpoint . providerDiscovery . provider) >
     response <- liftIO $ httpLbs req' m
     if not (statusIsSuccessful $ responseStatus response)
       then throwError . show $ responseBody response
-      else undefined
+      else case eitherDecode (responseBody response) of
+        Left err -> throwError err
+        Right (newToken :: TokenResponse (Maybe Text)) -> do
+          now <- liftIO getCurrentTime
+          let expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn newToken) now
+          DB.updateAccessToken token (accessToken newToken) expireDate (refreshToken newToken) >>= \case
+            Nothing -> throwError "token not found in database"
+            Just u -> pure (u, getCookie $ accessToken newToken)
 
 login :: Server Login
 login = do
@@ -121,7 +135,8 @@ saveUser now token = do
       expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn token) now
   case (get "name", get "email") of
     (Just n, Just e) -> do
-      let user = MkOpenIdUser n e (fromMaybe "/default_picture.png" $ get "picture") expireDate (accessToken token) (refreshToken token)
+      let pic = fromMaybe "/static/default_picture.png" $ get "picture"
+          user = MkOpenIdUser n e pic expireDate (accessToken token) (refreshToken token)
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 

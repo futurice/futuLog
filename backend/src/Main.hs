@@ -35,7 +35,7 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
 
 mkApp :: Env -> IO Application
 mkApp env = do
-  (context, middleware) <- runReaderT mkAuthServerContext env
+  (context, middleware) <- mkAuthServerContext env
   pure $ applyCors $ middleware $
     serveWithContext
       rootAPI

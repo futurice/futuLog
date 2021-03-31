@@ -2,7 +2,7 @@ module Auth (contextProxy, mkAuthServerContext) where
 
 import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (MonadReader (ask), ReaderT (runReaderT))
+import Control.Monad.Reader (MonadReader, ReaderT (runReaderT))
 import Data.Bifunctor (second)
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy.Char8 (pack)
@@ -31,10 +31,9 @@ type ContextContent = '[AuthHandler Request User, AuthHandler Request AdminUser]
 contextProxy :: Proxy ContextContent
 contextProxy = Proxy
 
-mkAuthServerContext :: (MonadReader Env m, MonadIO m) => m (Context ContextContent, Middleware)
-mkAuthServerContext = do
+mkAuthServerContext :: MonadIO m => Env -> m (Context ContextContent, Middleware)
+mkAuthServerContext env = do
   key <- liftIO V.newKey
-  env <- ask
   pure (authHandler key :. adminAuthHandler key env :. EmptyContext, authMiddleware key env)
 
 authHandler :: V.Key User -> AuthHandler Request User

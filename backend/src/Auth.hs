@@ -1,5 +1,6 @@
 module Auth (contextProxy, mkAuthServerContext) where
 
+import Control.Monad ((>=>))
 import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ReaderT (runReaderT))
@@ -32,17 +33,17 @@ contextProxy :: Proxy ContextContent
 contextProxy = Proxy
 
 mkAuthServerContext :: MonadIO m => Env -> m (Context ContextContent, Middleware)
-mkAuthServerContext env = do
-  key <- liftIO V.newKey
-  pure (authHandler key :. adminAuthHandler key env :. EmptyContext, authMiddleware key env)
+mkAuthServerContext env = liftIO V.newKey <&> \key ->
+  (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware key env)
 
 authHandler :: V.Key User -> AuthHandler Request User
 authHandler key = mkAuthHandler $ login key
 
-adminAuthHandler :: V.Key User -> Env -> AuthHandler Request AdminUser
-adminAuthHandler key env = mkAuthHandler $ \req -> login key req >>= flip runReaderT env . DB.isAdmin >>= \case
-  Just admin -> pure admin
-  Nothing -> throwError $ err401 {errBody = "User is not an admin"}
+adminAuthHandler :: V.Key User -> AuthHandler Request AdminUser
+adminAuthHandler key = mkAuthHandler $
+  login key >=> \case
+    user@MkUser {isAdmin} | isAdmin -> pure $ MkAdmin user
+    _ -> throwError $ err401 {errBody = "User is not an admin"}
 
 login :: V.Key User -> Request -> Handler User
 login key req = either throw401 pure (maybeToEither "No user data received from middleware" $ V.lookup key (vault req))

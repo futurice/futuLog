@@ -16,7 +16,7 @@ import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime (utctDay), getCurrentTime)
-import Data.User (AdminUser (..), OpenIdUser (MkOpenIdUser), User (..), getUserEmail)
+import Data.User (OpenIdUser, User (..))
 import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 import System.Environment (lookupEnv)
@@ -42,7 +42,7 @@ queryContacts email start end =
       ( \t@(site, date) ->
           MkContact date site
             <$> query'
-              ( "SELECT * FROM users WHERE user_email IN ("
+              ( "SELECT name,user_email,picture,false FROM users WHERE user_email IN ("
                   <> "SELECT user_email FROM workmodes WHERE workmode = 'Office' AND site = ? AND date = ?"
                   <> ")"
               )
@@ -51,9 +51,9 @@ queryContacts email start end =
 
 updateWorkmodes :: (MonadIO m, MonadReader Env m) => [AdminWorkmode] -> m ()
 updateWorkmodes = mapM_ $ \(MkAdminWorkmode {email, site, date, workmode}) -> do
-  users <- query' "SELECT * FROM users WHERE user_email = ?" (Only email)
+  users <- query' "SELECT user_email FROM users WHERE user_email = ?" (Only email)
   case users of
-    [user] -> saveWorkmode user $ MkRegisterWorkmode site date workmode
+    [Only user] -> saveWorkmode user $ MkRegisterWorkmode site date workmode
     _ -> pure ()
 
 deleteWorkmodes :: (MonadIO m, MonadReader Env m) => [WorkmodeId] -> m ()
@@ -119,8 +119,8 @@ saveShift email MkSetShift {shiftName = name, site = office} = do
         "INSERT INTO shift_assignments (user_email, assignment_date, site, shift_name) VALUES (?, current_date, ?, ?)"
         (email, office, name)
 
-saveWorkmode :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m ()
-saveWorkmode (MkUser {email}) MkRegisterWorkmode {site, date, workmode} = do
+saveWorkmode :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m ()
+saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
   exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
@@ -158,19 +158,17 @@ updateAccessToken oldRefreshToken accessToken expireDate = fmap listToMaybe . \c
         <> " WHERE refresh_token = ? RETURNING name, user_email, picture, false"
 
 checkUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe (Either Text User))
-checkUser token = query' "SELECT * FROM users WHERE access_token = ?" (Only token) >>= \case
-  [MkOpenIdUser userName userEmail picture expire _ refreshToken] -> liftIO getCurrentTime <&> \now ->
+checkUser token = query' q (Only token) >>= \case
+  [(userName, userEmail, picture, expire, _ :: Text, refreshToken, admin)] -> liftIO getCurrentTime <&> \now ->
     if now > expire
       then Left <$> refreshToken
-      else Just . Right $ MkUser userName userEmail picture False
+      else Just . Right $ MkUser userName userEmail picture admin
   _ -> pure Nothing
-
-isAdmin :: (MonadIO m, MonadReader Env m) => User -> m (Maybe AdminUser)
-isAdmin user = do
-  (admin :: [Only Text]) <- query' "SELECT * FROM admins WHERE user_email = ?" (Only $ getUserEmail user)
-  case admin of
-    [] -> pure Nothing
-    (_ : _) -> pure . Just $ MkAdmin user {Data.User.isAdmin = True}
+  where
+    q =
+      "SELECT users.*, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin "
+        <> "FROM users LEFT JOIN admins ON users.user_email = admins.user_email "
+        <> "WHERE access_token = ?"
 
 addAdmin :: (MonadIO m, MonadReader Env m) => Text -> m ()
 addAdmin = exec "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_email) DO NOTHING" . Only

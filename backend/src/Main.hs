@@ -9,7 +9,7 @@ import Data.String (fromString)
 import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Yaml (decodeFileThrow, decodeThrow)
-import Database (initDatabase)
+import Database (initDatabase, retry)
 import Network.HTTP.Client (Manager)
 import Network.HTTP.Client.TLS (newTlsManager)
 import Network.HTTP.Types.Header (hContentType, hOrigin)
@@ -72,7 +72,7 @@ main = do
 mkProvider :: Manager -> IO Provider
 mkProvider m = do
   Just configUri <- parseURI <$> getEnv "OPENID_CONFIG_URI"
-  result <- discoveryAndKeys (https m) configUri
+  result <- retry "identity provider" $ discoveryAndKeys (https m) configUri
   case result of
     Right (provider, _) -> pure provider
     Left err -> throwIO err

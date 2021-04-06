@@ -184,7 +184,7 @@ addAdmin = exec "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_em
 
 initDatabase :: MonadIO m => ByteString -> m (Pool Connection)
 initDatabase connectionString = do
-  pool <- liftIO $ createPool (retry $ connectPostgreSQL connectionString) close 2 60 10
+  pool <- liftIO $ createPool (retry "database" $ connectPostgreSQL connectionString) close 2 60 10
   _ <- liftIO . withResource pool $ \conn ->
     execute_
       conn
@@ -244,9 +244,9 @@ query' q x = do
   conns <- pool <$> ask
   liftIO . withResource conns $ \conn -> query conn q x
 
-retry :: (MonadIO m, MonadMask m) => m a -> m a
-retry x = recoverAll (exponentialBackoff 100) $ \RetryStatus {rsIterNumber} ->
+retry :: (MonadIO m, MonadMask m) => String -> m a -> m a
+retry msg x = recoverAll (exponentialBackoff 100) $ \RetryStatus {rsIterNumber} ->
   when
     (rsIterNumber > 0)
-    (liftIO $ putStrLn "failed to connect to database, retrying")
+    (liftIO $ putStrLn $ "failed to connect to " <> msg <> ", retrying")
     *> x

@@ -7,9 +7,9 @@ services:
         environment:
             DB_URL: postgresql://postgres:example_password@localhost:5432/office
             INITIAL_ADMIN: testuser1@example.org
+            PUBLIC_URI: http://localhost:8000
             OPENID_CLIENT_ID: futulog
             OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
-            OPENID_REDIRECT_URI: http://localhost:8000/return
             OPENID_CONFIG_URI: http://localhost:8080/auth/realms/futulog/.well-known/openid-configuration
         network_mode: "host"
         depends_on:

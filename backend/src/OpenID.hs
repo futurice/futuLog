@@ -2,7 +2,7 @@ module OpenID (openidHandler, https, refreshAccessToken, OpenIDAPI) where
 
 import Control.Lens (firstOf, preview)
 import Control.Lens.At (at)
-import Control.Monad.Except (ExceptT, throwError)
+import Control.Monad.Except (ExceptT (..), runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
 import Crypto.JWT (ClaimsSet, unregisteredClaims, uri)
@@ -27,7 +27,7 @@ import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), RequestBody (RequestBodyBS), Response (responseBody, responseStatus), httpLbs, method, requestBody, requestFromURI, requestHeaders)
 import Network.HTTP.Types (hAuthorization, hContentType, hLocation, statusIsSuccessful)
 import Network.URI (parseURI, uriToString)
-import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecretText), Credentials (..), Discovery (endSessionEndpoint, tokenEndpoint), HTTPS, Provider (providerDiscovery), RedirectTo (..), UserReturnFromRedirect (..), authenticationRedirect, authenticationSuccess, defaultAuthenticationRequest, email, openid, profile, uriToText)
+import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecretText), Credentials (..), Discovery (endSessionEndpoint, tokenEndpoint), HTTPS, Provider (providerDiscovery), RedirectTo (..), UserReturnFromRedirect (..), authenticationRedirect, authenticationSuccess', decodeTokenResponse, defaultAuthenticationRequest, email, openid, profile, uriToText)
 import OpenID.Connect.Client.Provider (URI (..))
 import OpenID.Connect.TokenResponse
 import Servant.API hiding (URI)
@@ -75,8 +75,8 @@ getClientSecret = do
 mkCredentials :: IO Credentials
 mkCredentials = do
   (clientID, secretText) <- getClientSecret
-  redirectUri <- getEnv "OPENID_REDIRECT_URI"
-  pure $ Credentials clientID (AssignedSecretText secretText) (fromJust $ preview uri (fromString redirectUri))
+  redirectUri <- getEnv "PUBLIC_URI"
+  pure $ Credentials clientID (AssignedSecretText secretText) (fromJust $ preview uri (fromString $ redirectUri <> "/return"))
 
 refreshAccessToken :: (MonadReader Env m, MonadIO m) => Text -> ExceptT String m (User, ByteString)
 refreshAccessToken token = asks (tokenEndpoint . providerDiscovery . provider) >>= \case
@@ -110,7 +110,7 @@ refreshAccessToken token = asks (tokenEndpoint . providerDiscovery . provider) >
         Right (newToken :: TokenResponse (Maybe Text)) -> do
           now <- liftIO getCurrentTime
           let expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn newToken) now
-          DB.updateAccessToken token (accessToken newToken) expireDate (refreshToken newToken) >>= \case
+          DB.updateAccessToken token (accessToken newToken) expireDate (refreshToken newToken) (idToken newToken) >>= \case
             Nothing -> throwError "token not found in database"
             Just u -> pure (u, getCookie $ accessToken newToken)
 
@@ -135,25 +135,27 @@ login = do
 logout :: Server Logout
 logout user = do
   endSessionUri <- asks $ endSessionEndpoint . providerDiscovery . provider
-  DB.logoutUser $ User.email user
+  rawIdToken <- DB.logoutUser $ User.email user
+  publicUri <- liftIO $ getEnv "PUBLIC_URI"
+  let args = maybe "" (\t -> "?id_token_hint=" <> t <> "&post_logout_redirect_uri=" <> pack publicUri <> "/") rawIdToken
   case endSessionUri of
     Nothing -> throwError err400 {errBody = "Identity provider does not provide an end_session_endpoint"}
     Just (URI u) ->
       throwError
         err302
           { errHeaders =
-              [ ("Location", encodeUtf8 (uriToText u))
+              [ ("Location", encodeUtf8 (uriToText u <> args))
               ]
           }
 
-saveUser :: (MonadIO m, MonadReader Env m) => UTCTime -> TokenResponse ClaimsSet -> m (Either BL.ByteString ())
-saveUser now token = do
+saveUser :: (MonadIO m, MonadReader Env m) => UTCTime -> TokenResponse ClaimsSet -> Text -> m (Either BL.ByteString ())
+saveUser now token rawIdToken = do
   let get key = firstOf (unregisteredClaims . at key . traverse . _String) (idToken token)
       expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn token) now
   case (get "name", get "email") of
     (Just n, Just e) -> do
       let pic = fromMaybe "/static/default_picture.png" $ get "picture"
-          user = MkOpenIdUser n e pic (Just expireDate) (Just $ accessToken token) (refreshToken token)
+          user = MkOpenIdUser n e pic (Just expireDate) (Just $ accessToken token) (refreshToken token) (Just rawIdToken)
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 
@@ -181,20 +183,25 @@ success (Just code) (Just state) (Just MkSessionCookie {session, prevUrl}) = do
   m <- asks manager
   provider <- asks provider
   creds <- liftIO mkCredentials
-  r <- liftIO $ authenticationSuccess (https m) now provider creds browser
-  case r of
-    Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
-    Right token -> saveUser now token >>= \case
-      Left err -> throwError err403 {errBody = err}
-      Right () ->
-        throwError
-          err302
-            { errHeaders =
-                [ ("Set-Cookie", getCookie (accessToken token)),
-                  ("Set-Cookie", "prevUrl=\"\"; Path=/return; Secure; HttpOnly; Expires=Thu Jan 01 1970 00:00:00 GMT"),
-                  (hLocation, fromMaybe "/" prevUrl)
-                ]
-            }
+  liftIO
+    ( runExceptT $ do
+        rawToken <- ExceptT $ authenticationSuccess' (https m) now provider creds browser
+        token <- ExceptT $ decodeTokenResponse rawToken now provider creds browser
+        pure (idToken rawToken, token)
+    )
+    >>= \case
+      Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
+      Right (rawIdToken, token) -> saveUser now token rawIdToken >>= \case
+        Left err -> throwError err403 {errBody = err}
+        Right () ->
+          throwError
+            err302
+              { errHeaders =
+                  [ ("Set-Cookie", getCookie (accessToken token)),
+                    ("Set-Cookie", "prevUrl=\"\"; Path=/return; Secure; HttpOnly; Expires=Thu Jan 01 1970 00:00:00 GMT"),
+                    (hLocation, fromMaybe "/" prevUrl)
+                  ]
+              }
 success _ _ _ = failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure

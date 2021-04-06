@@ -17,14 +17,14 @@ packages:
     git: https://github.com/jvanbruegge/openid-connect.git
     pantry-tree:
       size: 2765
-      sha256: 9ba811576d6bd6dbf012b700eb4ed7e14af756bcf09ddd4e60e88de6a5c56048
-    commit: 6027c71084ef6f42a85428ce4c84ec100d21e906
+      sha256: 6a23ecef55cdf259b811aa5e4b4dafc65f0e5cd9cc4b37ae77ed66735bf6b712
+    commit: bfa2b029cba9b35d94d6f93fb3d50cb46b2cf263
   original:
     git: https://github.com/jvanbruegge/openid-connect.git
-    commit: 6027c71084ef6f42a85428ce4c84ec100d21e906
+    commit: bfa2b029cba9b35d94d6f93fb3d50cb46b2cf263
 snapshots:
 - completed:
-    size: 563100
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/0.yaml
-    sha256: e93a85871577ea3423d5f3454b2b6bd37c2c2123c79faf511dfb64f5b49a9f8b
-  original: lts-17.0
+    size: 565720
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/8.yaml
+    sha256: 76bf8992ff8dfe6eda9c02f81866138c2369344d5011ab39ae403457c4448b03
+  original: lts-17.8

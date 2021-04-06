@@ -142,27 +142,33 @@ saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
 saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
 saveUser =
   exec $
-    "INSERT INTO users (name, user_email, picture, expire_date, access_token, refresh_token) VALUES (?,?,?,?,?,?) "
+    "INSERT INTO users (name, user_email, picture, expire_date, access_token, refresh_token, id_token) VALUES (?,?,?,?,?,?,?) "
       <> "ON CONFLICT (user_email) DO UPDATE "
       <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, expire_date = EXCLUDED.expire_date, "
-      <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token"
+      <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token, id_token = EXCLUDED.id_token"
 
-updateAccessToken :: (MonadIO m, MonadReader Env m) => Text -> Text -> UTCTime -> Maybe Text -> m (Maybe User)
-updateAccessToken oldRefreshToken accessToken expireDate = fmap listToMaybe . \case
-  Nothing -> query' (q "") (accessToken, expireDate, oldRefreshToken)
-  Just refreshToken -> query' (q ", refresh_token = ?") (accessToken, expireDate, refreshToken, oldRefreshToken)
+updateAccessToken :: (MonadIO m, MonadReader Env m) => Text -> Text -> UTCTime -> Maybe Text -> Maybe Text -> m (Maybe User)
+updateAccessToken oldRefreshToken accessToken expireDate idToken = fmap listToMaybe . \case
+  Nothing -> query' (q "") (accessToken, expireDate, idToken, oldRefreshToken)
+  Just refreshToken -> query' (q ", refresh_token = ?") (accessToken, expireDate, refreshToken, idToken, oldRefreshToken)
   where
     q x =
-      "UPDATE users SET access_token = ?, expire_date = ?"
+      "UPDATE users SET access_token = ?, expire_date = ?, id_token = ?"
         <> x
         <> " WHERE refresh_token = ? RETURNING name, user_email, picture, false"
 
-logoutUser :: (MonadIO m, MonadReader Env m) => Text -> m ()
-logoutUser = exec "UPDATE users SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ?" . Only
+logoutUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe Text)
+logoutUser userEmail =
+  query'
+    "UPDATE users SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ? RETURNING id_token"
+    (Only userEmail)
+    <&> \case
+      [Only token] -> token
+      _ -> Nothing
 
 checkUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe (Either Text User))
 checkUser token = query' q (Only token) >>= \case
-  [(userName, userEmail, picture, expire, _ :: Text, refreshToken, admin)] -> liftIO getCurrentTime <&> \now ->
+  [(userName, userEmail, picture, expire, _ :: Text, refreshToken, _ :: Maybe Text, admin)] -> liftIO getCurrentTime <&> \now ->
     if now > expire
       then Left <$> refreshToken
       else Just . Right $ MkUser userName userEmail picture admin
@@ -210,7 +216,8 @@ initDatabase connectionString = do
           <> "picture text not null, "
           <> "expire_date timestamptz, "
           <> "access_token text, "
-          <> "refresh_token text"
+          <> "refresh_token text, "
+          <> "id_token text"
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn -> execute_ conn "CREATE TABLE IF NOT EXISTS admins (user_email text PRIMARY KEY)"

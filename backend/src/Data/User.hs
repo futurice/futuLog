@@ -14,7 +14,8 @@ data OpenIdUser
         picture :: Text,
         expire :: Maybe UTCTime,
         accessToken :: Maybe Text,
-        refreshToken :: Maybe Text
+        refreshToken :: Maybe Text,
+        rawIdToken :: Maybe Text
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (ToRow, FromRow)

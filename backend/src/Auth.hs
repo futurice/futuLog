@@ -18,14 +18,9 @@ import qualified Database as DB
 import Network.HTTP.Types (hLocation, status302, status401)
 import Network.Wai (Middleware, Request (pathInfo), mapResponseHeaders, requestHeaders, responseLBS, vault)
 import OpenID (refreshAccessToken)
-import Servant.API.Experimental.Auth (AuthProtect)
 import Servant.Server (Context (..), Handler, err401, errBody)
-import Servant.Server.Experimental.Auth (AuthHandler, AuthServerData, mkAuthHandler)
+import Servant.Server.Experimental.Auth (AuthHandler, mkAuthHandler)
 import Web.Cookie (parseCookiesText)
-
-type instance AuthServerData (AuthProtect "fum-cookie") = User
-
-type instance AuthServerData (AuthProtect "admin") = AdminUser
 
 type ContextContent = '[AuthHandler Request User, AuthHandler Request AdminUser]
 

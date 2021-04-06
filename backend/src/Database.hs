@@ -157,6 +157,9 @@ updateAccessToken oldRefreshToken accessToken expireDate = fmap listToMaybe . \c
         <> x
         <> " WHERE refresh_token = ? RETURNING name, user_email, picture, false"
 
+logoutUser :: (MonadIO m, MonadReader Env m) => Text -> m ()
+logoutUser = exec "UPDATE users SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ?" . Only
+
 checkUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe (Either Text User))
 checkUser token = query' q (Only token) >>= \case
   [(userName, userEmail, picture, expire, _ :: Text, refreshToken, admin)] -> liftIO getCurrentTime <&> \now ->
@@ -205,8 +208,8 @@ initDatabase connectionString = do
           <> "name text not null, "
           <> "user_email text PRIMARY KEY, "
           <> "picture text not null, "
-          <> "expire_date timestamptz not null, "
-          <> "access_token text not null, "
+          <> "expire_date timestamptz, "
+          <> "access_token text, "
           <> "refresh_token text"
           <> ")"
       )

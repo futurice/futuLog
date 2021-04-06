@@ -24,7 +24,7 @@ type RootAPI = SwaggerAPI :<|> (OpenIDAPI :<|> ProtectedAPI) :<|> Raw
 type SwaggerAPI = SwaggerSchemaUI "swagger-ui" "swagger.json"
 
 type ProtectedAPI =
-  "api" :> AuthProtect "fum-cookie"
+  "api" :> AuthProtect "openid-connect"
     :> ( API
            :<|> AuthProtect "admin" :> "admin" :> AdminAPI
        )

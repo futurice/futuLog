@@ -12,8 +12,8 @@ data OpenIdUser
       { name :: Text,
         email :: Text,
         picture :: Text,
-        expire :: UTCTime,
-        accessToken :: Text,
+        expire :: Maybe UTCTime,
+        accessToken :: Maybe Text,
         refreshToken :: Maybe Text
       }
   deriving stock (Generic, Show, Eq)

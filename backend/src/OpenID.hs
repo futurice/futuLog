@@ -22,11 +22,12 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.Time (UTCTime, addUTCTime, getCurrentTime)
 import Data.User (OpenIdUser (..), User)
+import qualified Data.User as User
 import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), RequestBody (RequestBodyBS), Response (responseBody, responseStatus), httpLbs, method, requestBody, requestFromURI, requestHeaders)
 import Network.HTTP.Types (hAuthorization, hContentType, hLocation, statusIsSuccessful)
 import Network.URI (parseURI, uriToString)
-import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecretText), Credentials (..), Discovery (tokenEndpoint), HTTPS, Provider (providerDiscovery), RedirectTo (..), UserReturnFromRedirect (..), authenticationRedirect, authenticationSuccess, defaultAuthenticationRequest, email, openid, profile)
+import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecretText), Credentials (..), Discovery (endSessionEndpoint, tokenEndpoint), HTTPS, Provider (providerDiscovery), RedirectTo (..), UserReturnFromRedirect (..), authenticationRedirect, authenticationSuccess, defaultAuthenticationRequest, email, openid, profile, uriToText)
 import OpenID.Connect.Client.Provider (URI (..))
 import OpenID.Connect.TokenResponse
 import Servant.API hiding (URI)
@@ -36,7 +37,7 @@ import Types (Server)
 import Web.Cookie (defaultSetCookie, parseCookies, renderSetCookie, sameSiteStrict, setCookieHttpOnly, setCookieName, setCookiePath, setCookieSameSite, setCookieSecure, setCookieValue)
 
 type OpenIDAPI =
-  Login :<|> Success :<|> Failure
+  Login :<|> Success :<|> Failure :<|> Logout
 
 type Login = "login" :> Get '[PlainText] NoContent
 
@@ -54,6 +55,8 @@ type Failure =
     :> Header "cookie" SessionCookie
     :> Get '[JSON] NoContent
 
+type Logout = AuthProtect "openid-connect" :> "logout" :> Get '[JSON] NoContent
+
 data SessionCookie
   = MkSessionCookie
       { session :: ByteString,
@@ -61,7 +64,7 @@ data SessionCookie
       }
 
 openidHandler :: Server OpenIDAPI
-openidHandler = login :<|> success :<|> failed
+openidHandler = login :<|> success :<|> failed :<|> logout
 
 getClientSecret :: IO (Text, Text)
 getClientSecret = do
@@ -129,6 +132,20 @@ login = do
             }
         )
 
+logout :: Server Logout
+logout user = do
+  endSessionUri <- asks $ endSessionEndpoint . providerDiscovery . provider
+  DB.logoutUser $ User.email user
+  case endSessionUri of
+    Nothing -> throwError err400 {errBody = "Identity provider does not provide an end_session_endpoint"}
+    Just (URI u) ->
+      throwError
+        err302
+          { errHeaders =
+              [ ("Location", encodeUtf8 (uriToText u))
+              ]
+          }
+
 saveUser :: (MonadIO m, MonadReader Env m) => UTCTime -> TokenResponse ClaimsSet -> m (Either BL.ByteString ())
 saveUser now token = do
   let get key = firstOf (unregisteredClaims . at key . traverse . _String) (idToken token)
@@ -136,7 +153,7 @@ saveUser now token = do
   case (get "name", get "email") of
     (Just n, Just e) -> do
       let pic = fromMaybe "/static/default_picture.png" $ get "picture"
-          user = MkOpenIdUser n e pic expireDate (accessToken token) (refreshToken token)
+          user = MkOpenIdUser n e pic (Just expireDate) (Just $ accessToken token) (refreshToken token)
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 

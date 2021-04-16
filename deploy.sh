@@ -35,7 +35,7 @@ if [[ "$1" != "deploy" ]]; then
     read -p "Are you sure you want to deploy to playswarm (yes/no)" confirm
 fi
 if [[ "$confirm" == "yes" ]]; then
-    playswarm app:deploy -i "$image" -t "$tag" -n "$name"
+    playswarm app:deploy --open=true -i "$image" -t "$tag" -n "$name"
 else
     echo "aborting..."
 fi

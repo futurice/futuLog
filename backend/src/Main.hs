@@ -8,6 +8,8 @@ import Data.Env (Env (..))
 import Data.String (fromString)
 import Data.Text (pack)
 import Data.Text.Encoding (encodeUtf8)
+import Data.Time.Clock (getCurrentTime)
+import Data.Time.Format.ISO8601 (iso8601Show)
 import Data.Yaml (decodeFileThrow, decodeThrow)
 import Database (initDatabase, retry)
 import Network.HTTP.Client (Manager)
@@ -56,12 +58,15 @@ frontendPath = "./static"
 
 main :: IO ()
 main = do
+  time <- getCurrentTime
+  putStrLn $ "---- Restart: " <> iso8601Show time <> " ----"
   offices <- decodeFileThrow "./offices.yaml"
   shiftsFile <- readFile "./shifts.yaml"
   shifts <-
     if all isSpace shiftsFile
       then pure []
       else decodeThrow . encodeUtf8 $ pack shiftsFile
+  putStrLn "initializing database"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
   provider <- mkProvider manager

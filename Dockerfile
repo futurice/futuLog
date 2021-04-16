@@ -20,9 +20,11 @@ COPY frontend/src ./src
 COPY frontend/public ./public
 RUN npm run build
 
-FROM debian:buster
+FROM debian:buster AS service
 
 RUN apt-get update && apt-get install -y libpq5 ca-certificates
+
+COPY ./startup.sh ./
 
 # Add backend
 COPY --from=0 office-tracker .
@@ -32,4 +34,4 @@ EXPOSE 8000
 # Add frontend
 COPY --from=1 build ./static
 
-CMD ["./office-tracker"]
+CMD ["./startup.sh"]

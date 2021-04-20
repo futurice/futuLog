@@ -27,6 +27,7 @@ import Servant.Server (hoistServerWithContext, serveWithContext)
 import Servant.Server.StaticFiles (serveDirectoryWith)
 import Server (apiHandler, contextProxy, mkAuthServerContext, swaggerHandler)
 import System.Environment (getEnv)
+import System.IO (hFlush, stdout)
 import WaiAppStatic.Storage.Filesystem (defaultWebAppSettings)
 import WaiAppStatic.Types (StaticSettings (..))
 
@@ -59,19 +60,19 @@ frontendPath = "./static"
 main :: IO ()
 main = do
   time <- getCurrentTime
-  putStrLn $ "---- Restart: " <> iso8601Show time <> " ----"
+  put $ "---- Restart: " <> iso8601Show time <> " ----"
   offices <- decodeFileThrow "./offices.yaml"
   shiftsFile <- readFile "./shifts.yaml"
   shifts <-
     if all isSpace shiftsFile
       then pure []
       else decodeThrow . encodeUtf8 $ pack shiftsFile
-  putStrLn "initializing database"
+  put "Initializing database"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
   provider <- mkProvider manager
   app <- mkApp MkEnv {offices, shifts, pool, manager, provider}
-  putStrLn $ "Running server on port " <> show port
+  put $ "Running server on port " <> show port
   run port app
 
 mkProvider :: Manager -> IO Provider
@@ -81,3 +82,6 @@ mkProvider m = do
   case result of
     Right (provider, _) -> pure provider
     Left err -> throwIO err
+
+put :: String -> IO ()
+put s = putStrLn s *> hFlush stdout

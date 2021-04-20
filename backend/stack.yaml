@@ -43,7 +43,7 @@ allow-newer: true
 extra-deps:
     - servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686
     - git: https://github.com/jvanbruegge/openid-connect.git
-      commit: bfa2b029cba9b35d94d6f93fb3d50cb46b2cf263
+      commit: 8abba41c5b67429220995ff3127edb8a28e35608
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

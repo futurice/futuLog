@@ -15,7 +15,7 @@ image="futurice/futulog"
 tag="$(git rev-parse --short HEAD)"
 
 if [[ "$1" != "deploy" ]]; then
-    docker build -t "$image:$tag" .
+    DOCKER_BUILDKIT=1 docker build -t "$image:$tag" .
 fi
 
 if [[ "$1" == "build" ]]; then

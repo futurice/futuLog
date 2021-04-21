@@ -48,8 +48,12 @@ dependencies:
     - http-media
     - http-types
     - insert-ordered-containers
+    - jose
     - lens
+    - lens-aeson
     - mtl
+    - network-uri
+    - openid-connect
     - postgresql-simple
     - resource-pool
     - retry

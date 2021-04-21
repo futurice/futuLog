@@ -1,28 +1,30 @@
-module Data.User (User (..), AdminUser (..), ContactUser (MkContactUser), getUserEmail) where
+module Data.User (User (..), AdminUser (..), OpenIdUser (MkOpenIdUser), getUserEmail) where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Swagger (ToSchema)
 import Data.Text (Text)
+import Data.Time (UTCTime)
 import Database.PostgreSQL.Simple (FromRow, ToRow)
 import GHC.Generics (Generic)
 
-data ContactUser
-  = MkContactUser
-      { login :: Text,
-        name :: Text,
+data OpenIdUser
+  = MkOpenIdUser
+      { name :: Text,
         email :: Text,
-        thumb :: Text,
-        image :: Text
+        picture :: Text,
+        expire :: Maybe UTCTime,
+        accessToken :: Maybe Text,
+        refreshToken :: Maybe Text,
+        rawIdToken :: Maybe Text
       }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON)
+  deriving anyclass (ToRow, FromRow)
 
 data User
   = MkUser
       { name :: Text,
         email :: Text,
-        portrait_full_url :: Text,
-        portrait_thumb_url :: Text,
+        portrait :: Text,
         isAdmin :: Bool
       }
   deriving stock (Generic, Show, Eq)
@@ -33,4 +35,4 @@ getUserEmail MkUser {email} = email
 
 newtype AdminUser = MkAdmin User
   deriving stock (Show, Eq)
-  deriving newtype (ToJSON, FromJSON, ToSchema)
+  deriving newtype (ToJSON, ToSchema)

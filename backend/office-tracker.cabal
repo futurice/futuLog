@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8aa4fd9fa19c14a287f9510e9b01ada1ee21e2d7e767836808eb6d236285c8cc
+-- hash: fb2d4445456aa67346e4589e4c7ff96e97e1df5bad5b4e84d80c6d42629bf3dc
 
 name:           office-tracker
 version:        0.1.0.0
@@ -30,8 +30,10 @@ executable office-tracker
       Data.Workmode
       Database
       Logic
+      OpenID
       Orphans
       Server
+      Types
       Paths_office_tracker
   hs-source-dirs:
       src
@@ -51,8 +53,12 @@ executable office-tracker
     , http-media
     , http-types
     , insert-ordered-containers
+    , jose
     , lens
+    , lens-aeson
     , mtl
+    , network-uri
+    , openid-connect
     , postgresql-simple
     , resource-pool
     , retry

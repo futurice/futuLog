@@ -153,7 +153,7 @@ export const OfficeController = ({ userOffice, officeBookings, onSelectOffice }:
                   return (
                     <ListItem className={list_holderClass.listItem}>
                       <ListItemAvatar>
-                        <AvatarIcon src={user.portrait_thumb_url} />
+                        <AvatarIcon src={user.picture} />
                       </ListItemAvatar>
                       <ListItemText primary={user.name} />
                     </ListItem>

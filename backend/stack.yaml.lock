@@ -11,9 +11,20 @@ packages:
       sha256: 23a27b82ce22bb337d9e1b12f587f1f24f14cac88668904db0194d58488b70a5
   original:
     hackage: servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686
+- completed:
+    name: openid-connect
+    version: 0.1.0.0
+    git: https://github.com/jvanbruegge/openid-connect.git
+    pantry-tree:
+      size: 2765
+      sha256: c6b15fb229a39e8e5c4a6c56de5983d3e2b8cc94d19378a49afbdc2d45857df8
+    commit: 8abba41c5b67429220995ff3127edb8a28e35608
+  original:
+    git: https://github.com/jvanbruegge/openid-connect.git
+    commit: 8abba41c5b67429220995ff3127edb8a28e35608
 snapshots:
 - completed:
-    size: 563100
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/0.yaml
-    sha256: e93a85871577ea3423d5f3454b2b6bd37c2c2123c79faf511dfb64f5b49a9f8b
-  original: lts-17.0
+    size: 565720
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/8.yaml
+    sha256: 76bf8992ff8dfe6eda9c02f81866138c2369344d5011ab39ae403457c4448b03
+  original: lts-17.8

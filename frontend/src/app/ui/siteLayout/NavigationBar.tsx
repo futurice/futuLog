@@ -151,7 +151,7 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
             </LinkButton>
           </ToolbarButtonContainer>
           <AvatarContainer>
-            <AvatarIcon src={user.portrait_thumb_url} />
+            <AvatarIcon src={user.picture} />
             <UserCredentials>{user.name}</UserCredentials>
           </AvatarContainer>
         </>

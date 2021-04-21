@@ -19,8 +19,8 @@ registerWorkmode user@(MkUser {email}) mode@(MkRegisterWorkmode {workmode, site 
   if date < today
     then pure $ Left "You can not change workmodes in the past, please ask an admin"
     else
-      if (not $ isOffice workmode)
-        then Right <$> saveWorkmode user mode
+      if not (isOffice workmode)
+        then Right <$> saveWorkmode email mode
         else do
           officeShifts <- getOfficeShifts office
           if null officeShifts
@@ -42,12 +42,12 @@ checkShift user mode@(MkRegisterWorkmode {site = office, date}) (MkShiftAssignme
     _ -> pure $ Left "The date you tried to register for is not part of your shift"
 
 checkOfficeCapacity :: (MonadIO m, MonadReader Env m) => User -> RegisterWorkmode -> m (Either String ())
-checkOfficeCapacity user mode@(MkRegisterWorkmode {date, site = office}) = do
+checkOfficeCapacity (MkUser {email}) mode@(MkRegisterWorkmode {date, site = office}) = do
   occupancy <- getOfficeBooked office date date
   maxCapacity <- maxPeople . head . filter ((==) office . officeSite) . offices <$> ask
   case occupancy of
-    [x] | length (people x) < maxCapacity -> Right <$> saveWorkmode user mode
-    [] -> Right <$> saveWorkmode user mode
+    [x] | length (people x) < maxCapacity -> Right <$> saveWorkmode email mode
+    [] -> Right <$> saveWorkmode email mode
     _ -> pure $ Left "Office already full on chosen day"
 
 getOfficeShifts :: MonadReader Env m => Text -> m [Shift]

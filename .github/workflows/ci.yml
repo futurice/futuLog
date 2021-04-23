@@ -23,10 +23,13 @@ jobs:
                   restore-keys: |
                       docker-cache-
 
-            - name: Install playswarm CLI
-              run: |
-                  sudo curl https://s3.eu-central-1.amazonaws.com/com.futurice.futuswarm.play.files/cli -o /usr/local/bin/playswarm
-                  sudo chmod +rx /usr/local/bin/playswarm
+            - name: Cache buildkit cache
+              uses: actions/cache@v1
+              with:
+                path: /var/lib/docker/buildkit
+                key: buildkit-cache-${{ hashFiles('backend/stack.yaml.lock') }}
+                restore-keys: |
+                    buildkit-cache-
 
             - name: Build container
               run: |
@@ -35,6 +38,12 @@ jobs:
                     --cache-to "type=local,dest=/tmp/docker-cache,mode=max" \
                     --output "type=docker" \
                     --tag futurice/futulog:$(git rev-parse --short HEAD) .
+
+            - name: Install playswarm CLI
+              if: github.ref == 'refs/heads/master'
+              run: |
+                  sudo curl https://s3.eu-central-1.amazonaws.com/com.futurice.futuswarm.play.files/cli -o /usr/local/bin/playswarm
+                  sudo chmod +rx /usr/local/bin/playswarm
 
             - name: Save SSH key
               if: github.ref == 'refs/heads/master'

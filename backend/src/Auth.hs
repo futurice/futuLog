@@ -47,8 +47,7 @@ login key req = either throw401 pure (maybeToEither "No user data received from 
 
 authMiddleware :: V.Key User -> Env -> Middleware
 authMiddleware key env app req respond = case pathInfo req of
-  ["login"] -> app req respond
-  ["return"] -> app req respond
+  path | path `elem` publicUrls -> app req respond
   path -> runReaderT (runExceptT (verifyLogin req)) env >>= \case
     Left e -> case path of
       "api" : _ -> respond $ responseLBS status401 [] $ pack e
@@ -58,6 +57,7 @@ authMiddleware key env app req respond = case pathInfo req of
        in app req' (\res -> let res' = maybe res (\c -> mapResponseHeaders (("Set-Cookie", c) :) res) tokenCookie in respond res')
   where
     cookie path = encodeUtf8 $ "prevUrl=/" <> intercalate "/" path <> ";HttpOnly;Secure;Path=/return"
+    publicUrls = [["login"], ["return"], ["site.webmanifest"], ["manifest.json"]]
 
 verifyLogin :: (MonadReader Env m, MonadIO m) => Request -> ExceptT String m (User, Maybe ByteString)
 verifyLogin req = getCookie req >>= DB.checkUser >>= \case

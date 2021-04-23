@@ -20,7 +20,7 @@ import Network.URI (parseURI)
 import Network.Wai (Application, Middleware, requestHeaders, responseFile)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (CorsResourcePolicy (..), cors, simpleCorsResourcePolicy)
-import OpenID (https, openidHandler)
+import OpenID (httpsDebug, openidHandler)
 import OpenID.Connect.Client.Provider (Provider, discoveryAndKeys)
 import Servant.API ((:<|>) (..))
 import Servant.Server (hoistServerWithContext, serveWithContext)
@@ -78,7 +78,7 @@ main = do
 mkProvider :: Manager -> IO Provider
 mkProvider m = do
   Just configUri <- parseURI <$> getEnv "OPENID_CONFIG_URI"
-  result <- retry "identity provider" $ discoveryAndKeys (https m) configUri
+  result <- retry "identity provider" $ discoveryAndKeys (httpsDebug m) configUri
   case result of
     Right (provider, _) -> pure provider
     Left err -> throwIO err

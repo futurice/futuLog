@@ -13,7 +13,7 @@ jobs:
               uses: actions/checkout@v2
 
             - name: Setup buildx
-              uses: crazy-max/ghaction-docker-buildx@v3
+              uses: docker/setup-buildx-action@v1
 
             - name: Cache docker layers
               uses: actions/cache@v1
@@ -26,10 +26,13 @@ jobs:
             - name: Cache buildkit cache
               uses: actions/cache@v1
               with:
-                path: /var/lib/docker/buildkit
+                path: /tmp/buildkit-cache
                 key: buildkit-cache-${{ hashFiles('backend/stack.yaml.lock') }}
                 restore-keys: |
                     buildkit-cache-
+
+            - name: Move buildkit cache to correct location
+              run: '[ -e /tmp/buildkit-cache ] && sudo mv /tmp/buildkit-cache /var/lib/docker/buildkit || true'
 
             - name: Build container
               run: |
@@ -38,6 +41,9 @@ jobs:
                     --cache-to "type=local,dest=/tmp/docker-cache,mode=max" \
                     --output "type=docker" \
                     --tag futurice/futulog:$(git rev-parse --short HEAD) .
+
+            - name: Move buildkit cache to tmp
+              run: sudo mv /var/lib/docker/buildkit /tmp/buildkit-cache && sudo chmod -R +r /tmp/buildkit-cache
 
             - name: Install playswarm CLI
               if: github.ref == 'refs/heads/master'

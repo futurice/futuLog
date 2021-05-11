@@ -233,9 +233,8 @@ httpsWith logger m req = do
   Just configUri <- parseURI <$> getEnv "OPENID_CONFIG_URI"
   let req' = req {secure = uriScheme configUri == "https:"}
   res <- req' `httpLbs` m
-  if statusIsSuccessful (responseStatus res)
-    then pure res
-    else logger req' res $> res
+  logger req' res
+  pure res
 
 instance FromHttpApiData SessionCookie where
   parseUrlPiece = parseHeader . encodeUtf8

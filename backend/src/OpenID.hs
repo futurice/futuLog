@@ -31,7 +31,7 @@ import OpenID.Connect.Client.Flow.AuthorizationCode (ClientSecret (AssignedSecre
 import OpenID.Connect.Client.Provider (URI (..))
 import OpenID.Connect.TokenResponse
 import Servant.API hiding (URI)
-import Servant.Server (err302, err400, err403, errBody, errHeaders)
+import Servant.Server (err302, err400, errBody, errHeaders)
 import System.Environment (getEnv)
 import System.IO (hFlush, stdout)
 import Types (Server)
@@ -122,7 +122,7 @@ login = do
   let req = defaultAuthenticationRequest (openid <> email <> profile) creds
   r <- liftIO $ authenticationRedirect (providerDiscovery provider) req
   case r of
-    Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
+    Left e -> throwError (err302 {errBody = LChar8.pack (show e), errHeaders = [(hLocation, "/")]})
     Right (RedirectTo redirectUri cookie) ->
       throwError
         ( err302
@@ -191,9 +191,9 @@ success (Just code) (Just state) (Just MkSessionCookie {session, prevUrl}) = do
         pure (idToken rawToken, token)
     )
     >>= \case
-      Left e -> throwError (err403 {errBody = LChar8.pack (show e)})
+      Left e -> throwError (err302 {errBody = LChar8.pack (show e), errHeaders = [(hLocation, "/")]})
       Right (rawIdToken, token) -> saveUser now token rawIdToken >>= \case
-        Left err -> throwError err403 {errBody = err}
+        Left err -> throwError err302 {errBody = err, errHeaders = [(hLocation, "/")]}
         Right () ->
           throwError
             err302
@@ -206,7 +206,12 @@ success (Just code) (Just state) (Just MkSessionCookie {session, prevUrl}) = do
 success _ _ _ = failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure
-failed err _ _ = throwError $ err400 {errBody = maybe "authentication failure" (LChar8.fromStrict . encodeUtf8) err}
+failed err _ _ =
+  throwError $
+    err302
+      { errBody = maybe "authentication failure" (LChar8.fromStrict . encodeUtf8) err,
+        errHeaders = [(hLocation, "/")]
+      }
 
 https :: Manager -> HTTPS IO
 https = httpsWith (\_ _ -> pure ())

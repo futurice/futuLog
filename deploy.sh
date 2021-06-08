@@ -2,40 +2,35 @@
 
 set -eo pipefail
 
-# Be sure to set SSH_USER to the FUM username or you will get errors
-eval $(ssh-agent)
-
-name="futulog-staging"
-
-if [[ "$1" == "production" ]]; then
-    name="futulog"
+if [ -z "$AWS_PROFILE" ]; then
+    echo 'Please set AWS_PROFILE for credentials and run `aws sso login`'
+    exit 1
 fi
 
-image="futurice/futulog"
+name="play/futulog"
 tag="$(git rev-parse --short HEAD)"
+repo=$(aws ecr describe-repositories --repository-names $name --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
 
-if [[ "$1" != "deploy" ]]; then
-    DOCKER_BUILDKIT=1 docker build -t "$image:$tag" .
-fi
+DOCKER_BUILDKIT=1 docker build -t "$name:$tag" .
+docker tag "$name:$tag" "$repo:$tag"
 
 if [[ "$1" == "build" ]]; then
     exit 0
 fi
 
-playswarm image:push -i "$image" -t "$tag"
+aws ecr get-login-password --region eu-central-1 | \
+    docker login --username AWS --password-stdin $repo
 
-if [[ "$(playswarm config:get DB_URL -n "$name" | tail -n +2)" == "Error! The specified key does not exist." ]]; then
-    playswarm db:create:postgres -n "$name"
-else
-    echo "Database already exists, not creating a new one"
-fi
+docker push $repo:$tag
+echo "Pushing image: $repo:$tag"
 
 confirm="yes"
-if [[ "$1" != "deploy" ]]; then
+if [[ "$1" != "cd" ]]; then
     read -p "Are you sure you want to deploy to playswarm (yes/no)" confirm
 fi
 if [[ "$confirm" == "yes" ]]; then
-    playswarm app:deploy --open=true -i "$image" -t "$tag" -n "$name"
+    sed -i -e "s/image: 794457758780\.dkr\.ecr\.eu-central-1\.amazonaws.com\/play\/futulog:.*/image: 794457758780.dkr.ecr.eu-central-1.amazonaws.com\/play\/futulog:$tag/" deployment.yaml
+    kubectl apply -f deployment.yaml
 else
     echo "aborting..."
 fi

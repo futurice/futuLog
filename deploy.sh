@@ -11,7 +11,9 @@ export NAME="futulog-staging"
 export TAG="$(git rev-parse --short HEAD)"
 repo=$(aws ecr describe-repositories --repository-names play/futulog --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
 
-DOCKER_BUILDKIT=1 docker build -t "play/futulog:$TAG" .
+if [[ "$1" != "cd" ]]; then
+    DOCKER_BUILDKIT=1 docker build -t "play/futulog:$TAG" .
+fi
 docker tag "play/futulog:$TAG" "$repo:$TAG"
 
 if [[ "$1" == "build" ]]; then

@@ -40,15 +40,15 @@ jobs:
                     --cache-from "type=local,src=/tmp/docker-cache" \
                     --cache-to "type=local,dest=/tmp/docker-cache,mode=max" \
                     --output "type=docker" \
-                    --tag futurice/futulog:$(git rev-parse --short HEAD) .
+                    --tag play/futulog:$(git rev-parse --short HEAD) .
 
             - name: Move buildkit cache to tmp
               run: sudo mv /var/lib/docker/buildkit /tmp/buildkit-cache && sudo chmod -R +r /tmp/buildkit-cache
 
             - name: Deploy to futuEKS
-              run: ./deploy.sh cd
+              run: mkdir -p $HOME/.kube && echo "$KUBE_YAML" > $HOME/.kube/config && ./deploy.sh cd
               if: github.ref == 'refs/heads/master'
               env:
                   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                  KUBECONFIG: ${{ secrets.KUBECONFIG }}
+                  KUBE_YAML: ${{ secrets.KUBE_YAML }}

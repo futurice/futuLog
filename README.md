@@ -8,7 +8,6 @@ There are two config files:
 
 -   [`offices.yaml`](./offices.yaml): This defines the maximum number of people per site
 -   [`shifts.yaml`](./shifts.yaml): This defines which shifts exist for a given site and on which days of the week a shift is
--   [`admins.yaml`](./admins.yaml): A list of email addresses that should have access to the admin API
 
 ## Build this
 
@@ -20,6 +19,13 @@ After that however the dependencies are cached and the rebuilds are fast.
 
 `docker-compose up`. This will make the server available at port 8000
 
-## Do admin stuff
+## Deploy this
 
-Refer to the instructions in [ADMIN.md](./ADMIN.md)
+To deploy this within Futurice, use the [`deploy.sh`](./deploy.sh) script. First configure a AWS profile as described [here](https://welcome.play.futurice.com/). Then set the environment variable `AWS_PROFILE` to that profile name. The script takes the following arguments:
+
+```
+$ export AWS_PROFILE=<name>
+$ ./deploy.sh [staging|production|cd] [--dry-run]
+```
+
+`cd` is the same as staging, but it skips the explicit confirmation step and is intended to use for continous delivery to staging. `--dry-run` will only build the docker container, but neither push it to the registry nor deploy it. It will print the kubernetes yaml it would apply to stdout.

@@ -45,23 +45,10 @@ jobs:
             - name: Move buildkit cache to tmp
               run: sudo mv /var/lib/docker/buildkit /tmp/buildkit-cache && sudo chmod -R +r /tmp/buildkit-cache
 
-            - name: Install playswarm CLI
-              if: github.ref == 'refs/heads/master'
-              run: |
-                  sudo curl https://s3.eu-central-1.amazonaws.com/com.futurice.futuswarm.play.files/cli -o /usr/local/bin/playswarm
-                  sudo chmod +rx /usr/local/bin/playswarm
-
-            - name: Save SSH key
-              if: github.ref == 'refs/heads/master'
-              run: |
-                  mkdir -p ~/.ssh
-                  echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
-                  chmod 600 ~/.ssh/id_rsa
-              env:
-                  DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-
-            - name: Deploy to Playswarm
-              run: eval "$(ssh-agent -s)" && ./deploy.sh deploy
+            - name: Deploy to futuEKS
+              run: ./deploy.sh cd
               if: github.ref == 'refs/heads/master'
               env:
-                  SSH_USER: jvan
+                  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  KUBECONFIG: ${{ secrets.KUBECONFIG }}

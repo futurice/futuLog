@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-if [ -z "$AWS_PROFILE" ]; then
+if [ -z "$AWS_PROFILE" ] && [[ "$1" != "cd" ]]; then
     echo 'Please set AWS_PROFILE for credentials and run `aws sso login`'
     exit 1
 fi

@@ -28,4 +28,4 @@ $ export AWS_PROFILE=<name>
 $ ./deploy.sh [staging|production|cd] [--dry-run]
 ```
 
-`cd` is the same as staging, but it skips the explicit confirmation step and is intended to use for continous delivery to staging. `--dry-run` will only build the docker container, but neither push it to the registry nor deploy it. It will print the kubernetes yaml it would apply to stdout.
+`cd` is intended to use for continous delivery to staging only. `--dry-run` will only build the docker container, but neither push it to the registry nor deploy it. It will print the kubernetes yaml it would apply to stdout.

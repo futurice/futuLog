@@ -19,17 +19,17 @@ jobs:
               uses: actions/cache@v1
               with:
                   path: /tmp/docker-cache
-                  key: docker-cache-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}-1
+                  key: docker-1-cache-${{ hashFiles('backend/stack.yaml.lock') }}-${{ hashFiles('backend/office-tracker.cabal') }}-${{ hashFiles('frontend/package-lock.json') }}
                   restore-keys: |
-                      docker-cache-
+                      docker-1-cache-
 
             - name: Cache buildkit cache
               uses: actions/cache@v1
               with:
                 path: /tmp/buildkit-cache
-                key: buildkit-cache-${{ hashFiles('backend/stack.yaml.lock') }}
+                key: buildkit-1-cache-${{ hashFiles('backend/stack.yaml.lock') }}
                 restore-keys: |
-                    buildkit-cache-
+                    buildkit-1-cache-
 
             - name: Move buildkit cache to correct location
               run: '[ -e /tmp/buildkit-cache ] && sudo mv /tmp/buildkit-cache /var/lib/docker/buildkit || true'

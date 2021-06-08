@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: futulog
+    name: ${NAME}
     namespace: play
 spec:
     ports:
@@ -10,7 +10,7 @@ spec:
           protocol: TCP
     type: NodePort
     selector:
-        app: futulog
+        app: ${NAME}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -58,27 +58,27 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: futulog
+    name: ${NAME}
     namespace: play
 spec:
     selector:
         matchLabels:
-            app: futulog
+            app: ${NAME}
     replicas: 1
     template:
         metadata:
             labels:
-                app: futulog
+                app: ${NAME}
         spec:
             containers:
-                - image: 794457758780.dkr.ecr.eu-central-1.amazonaws.com/play/futulog:2c6ee44
+                - image: 794457758780.dkr.ecr.eu-central-1.amazonaws.com/play/futulog:${TAG}
                   imagePullPolicy: Always
-                  name: futulog
+                  name: ${NAME}
                   ports:
                       - containerPort: 80
                   envFrom:
                       - secretRef:
-                            name: futulog
+                            name: ${NAME}
                   volumeMounts:
                       - name: config
                         mountPath: "/config"

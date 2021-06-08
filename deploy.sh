@@ -7,30 +7,40 @@ if [ -z "$AWS_PROFILE" ]; then
     exit 1
 fi
 
-name="play/futulog"
-tag="$(git rev-parse --short HEAD)"
-repo=$(aws ecr describe-repositories --repository-names $name --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
+export NAME="futulog-staging"
+export TAG="$(git rev-parse --short HEAD)"
+repo=$(aws ecr describe-repositories --repository-names play/futulog --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
 
-DOCKER_BUILDKIT=1 docker build -t "$name:$tag" .
-docker tag "$name:$tag" "$repo:$tag"
+DOCKER_BUILDKIT=1 docker build -t "play/futulog:$TAG" .
+docker tag "play/futulog:$TAG" "$repo:$TAG"
 
 if [[ "$1" == "build" ]]; then
     exit 0
 fi
 
-aws ecr get-login-password --region eu-central-1 | \
-    docker login --username AWS --password-stdin $repo
+if [[ "$1" == "production" ]]; then
+    export NAME="futulog"
+fi
 
-docker push $repo:$tag
-echo "Pushing image: $repo:$tag"
+if [[ "$2" != "--dry-run" ]]; then
+    aws ecr get-login-password --region eu-central-1 | \
+        docker login --username AWS --password-stdin $repo
+
+    docker push $repo:$TAG
+    echo "Pushing image: $repo:$TAG"
+fi
 
 confirm="yes"
-if [[ "$1" != "cd" ]]; then
-    read -p "Are you sure you want to deploy to playswarm (yes/no)" confirm
+if [[ "$1" != "cd" ]] && [[ "$2" != "--dry-run" ]]; then
+    read -p "Are you sure you want to deploy to futuEKS (yes/no)" confirm
 fi
 if [[ "$confirm" == "yes" ]]; then
-    sed -i -e "s/image: 794457758780\.dkr\.ecr\.eu-central-1\.amazonaws.com\/play\/futulog:.*/image: 794457758780.dkr.ecr.eu-central-1.amazonaws.com\/play\/futulog:$tag/" deployment.yaml
-    kubectl apply -f deployment.yaml
+    if [[ "$2" == "--dry-run" ]]; then
+        envsubst <deployment.tmpl
+    else
+        envsubst <deployment.tmpl | \
+            kubectl apply -f -
+    fi
 else
     echo "aborting..."
 fi

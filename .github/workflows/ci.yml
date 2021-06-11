@@ -46,9 +46,18 @@ jobs:
               run: sudo mv /var/lib/docker/buildkit /tmp/buildkit-cache && sudo chmod -R +r /tmp/buildkit-cache
 
             - name: Deploy to futuEKS
-              run: mkdir -p $HOME/.kube && echo "$KUBE_YAML" > $HOME/.kube/config && ./deploy.sh cd
+              run: |
+                  echo "$KUBE_YAML" > kubeconfig
+                  R=$(aws sts assume-role --role-arn "$AWS_ROLE_TO_ASSUME" --role-session-name AWSCLI-Session)
+                  export AWS_ACCESS_KEY_ID=$(echo "$R"|jq -r '.Credentials.AccessKeyId')
+                  export AWS_SECRET_ACCESS_KEY=$(echo "$R"|jq -r '.Credentials.SecretAccessKey')
+                  export AWS_SESSION_TOKEN=$(echo "$R"|jq -r '.Credentials.SessionToken')
+                  ./deploy.sh cd
               if: github.ref == 'refs/heads/master'
               env:
                   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
                   KUBE_YAML: ${{ secrets.KUBE_YAML }}
+                  AWS_DEFAULT_REGION: eu-central-1
+                  KUBECONFIG: kubeconfig

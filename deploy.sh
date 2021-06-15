@@ -9,12 +9,14 @@ fi
 
 export NAME="futulog-staging"
 export TAG="$(git rev-parse --short HEAD)"
-repo=$(aws ecr describe-repositories --repository-names play/futulog --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
+if [ -z "$REPO" ]; then
+    REPO=$(aws ecr describe-repositories --repository-names play/futulog --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
+fi
 
 if [[ "$1" != "cd" ]]; then
     DOCKER_BUILDKIT=1 docker build -t "play/futulog:$TAG" .
 fi
-docker tag "play/futulog:$TAG" "$repo:$TAG"
+docker tag "play/futulog:$TAG" "$REPO:$TAG"
 
 if [[ "$1" == "build" ]]; then
     exit 0
@@ -26,10 +28,10 @@ fi
 
 if [[ "$2" != "--dry-run" ]]; then
     aws ecr get-login-password --region eu-central-1 | \
-        docker login --username AWS --password-stdin $repo
+        docker login --username AWS --password-stdin $REPO
 
-    docker push $repo:$TAG
-    echo "Pushing image: $repo:$TAG"
+    docker push $REPO:$TAG
+    echo "Pushing image: $REPO:$TAG"
 fi
 
 confirm="yes"

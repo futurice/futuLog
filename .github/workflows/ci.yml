@@ -50,6 +50,8 @@ jobs:
                   echo "$KUBE_YAML" > kubeconfig
                   REPO=$(aws ecr describe-repositories --repository-names play/futulog --region=eu-central-1 --query "repositories[0].repositoryUri" --output text)
                   export REPO
+                  ECR_PASSWORD=$(aws ecr get-login-password --region eu-central-1)
+                  export ECR_PASSWORD
                   R=$(aws sts assume-role --role-arn "$AWS_ROLE_TO_ASSUME" --role-session-name AWSCLI-Session)
                   export AWS_ACCESS_KEY_ID=$(echo "$R"|jq -r '.Credentials.AccessKeyId')
                   export AWS_SECRET_ACCESS_KEY=$(echo "$R"|jq -r '.Credentials.SecretAccessKey')

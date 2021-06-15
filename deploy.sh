@@ -27,7 +27,10 @@ if [[ "$1" == "production" ]]; then
 fi
 
 if [[ "$2" != "--dry-run" ]]; then
-    aws ecr get-login-password --region eu-central-1 | \
+    if [ -z "$ECR_PASSWORD" ]; then
+        ECR_PASSWORD=$(aws ecr get-login-password --region eu-central-1)
+    fi
+    echo "$ECR_PASSWORD" | \
         docker login --username AWS --password-stdin $REPO
 
     docker push $REPO:$TAG
@@ -43,7 +46,7 @@ if [[ "$confirm" == "yes" ]]; then
         envsubst <deployment.tmpl
     else
         envsubst <deployment.tmpl | \
-            kubectl apply -f -
+            kubectl apply -n play -f -
     fi
 else
     echo "aborting..."

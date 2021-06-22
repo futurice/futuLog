@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7a339f66141fdc2ffeefaf7e5ad1ffcc8347c7564210d9008c773e4a5a05f9c0
+-- hash: 3998162162afa7fa62fedb76ac4e7e5d8c1c6890819d1973f6ed1f1353a1ce1f
 
 name:           office-tracker
 version:        0.1.0.0
@@ -26,6 +26,7 @@ executable office-tracker
       Data.Config
       Data.CSV
       Data.Env
+      Data.Errors
       Data.User
       Data.Workmode
       Database
@@ -48,13 +49,16 @@ executable office-tracker
       GeneralizedNewtypeDeriving
       LambdaCase
       NamedFieldPuns
+      OverloadedLabels
       OverloadedStrings
       ScopedTypeVariables
+      TypeApplications
       TypeFamilies
       TypeOperators
   ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Werror
   build-depends:
       aeson
+    , aeson-optics
     , base >=4.7 && <5
     , base64
     , binary
@@ -72,7 +76,9 @@ executable office-tracker
     , lens-aeson
     , mtl
     , network-uri
+    , openapi3
     , openid-connect
+    , optics
     , postgresql-simple
     , resource-pool
     , retry

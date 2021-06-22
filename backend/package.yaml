@@ -18,8 +18,10 @@ default-extensions:
     - GeneralizedNewtypeDeriving
     - LambdaCase
     - NamedFieldPuns
+    - OverloadedLabels
     - OverloadedStrings
     - ScopedTypeVariables
+    - TypeApplications
     - TypeFamilies
     - TypeOperators
 
@@ -37,6 +39,7 @@ ghc-options:
 dependencies:
     - base >= 4.7 && < 5
     - aeson
+    - aeson-optics
     - base64
     - binary
     - bytestring
@@ -53,7 +56,9 @@ dependencies:
     - lens-aeson
     - mtl
     - network-uri
+    - openapi3
     - openid-connect
+    - optics
     - postgresql-simple
     - resource-pool
     - retry

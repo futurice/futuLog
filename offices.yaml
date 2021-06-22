@@ -1,8 +1,8 @@
 - site: Munich
-  maxPeople: 8
+  maxPeople: 20
 
 - site: Berlin
-  maxPeople: 12
+  maxPeople: 30
 
 - site: Stuttgart
   maxPeople: 8

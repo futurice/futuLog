@@ -21,8 +21,7 @@ import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.Time (UTCTime, addUTCTime, getCurrentTime)
-import Data.User (OpenIdUser (..), User)
-import qualified Data.User as User
+import Data.User (OpenIdUser (..), User, getUserEmail)
 import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), RequestBody (..), Response (responseBody, responseStatus), httpLbs, method, requestBody, requestFromURI, requestHeaders)
 import Network.HTTP.Types (hAuthorization, hContentType, hLocation, statusIsSuccessful)
@@ -136,7 +135,7 @@ login = do
 logout :: Server Logout
 logout user = do
   endSessionUri <- asks $ endSessionEndpoint . providerDiscovery . provider
-  rawIdToken <- DB.logoutUser $ User.email user
+  rawIdToken <- DB.logoutUser $ getUserEmail user
   publicUri <- liftIO $ getEnv "PUBLIC_URI"
   let args = maybe "" (\t -> "?id_token_hint=" <> t <> "&post_logout_redirect_uri=" <> pack publicUri <> "/") rawIdToken
   case endSessionUri of

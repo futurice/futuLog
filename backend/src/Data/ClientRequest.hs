@@ -3,8 +3,7 @@
 module Data.ClientRequest where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Csv ((.=), DefaultOrdered (..), ToNamedRecord (..), namedRecord)
-import Data.Swagger (ToSchema)
+import Data.Swagger (ToParamSchema, ToSchema)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.Time.Format.ISO8601 (iso8601Show)
@@ -14,16 +13,8 @@ import Database.PostgreSQL.Simple.FromRow (FromRow (..), RowParser, field)
 import Database.PostgreSQL.Simple.Types (Null)
 import GHC.Generics (Generic)
 
-data SetShift
-  = MkSetShift
-      { shiftName :: Text,
-        site :: Text
-      }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON, ToSchema)
-
-data RegisterWorkmode
-  = MkRegisterWorkmode
+data Registration
+  = MkRegistration
       { site :: Text,
         date :: Day,
         workmode :: Workmode
@@ -31,8 +22,8 @@ data RegisterWorkmode
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data AdminWorkmode
-  = MkAdminWorkmode
+data AdminRegistration
+  = MkAdminRegistration
       { site :: Text,
         date :: Day,
         email :: Text,
@@ -41,20 +32,10 @@ data AdminWorkmode
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data WorkmodeId
-  = MkWorkmodeId
+data RegistrationId
+  = MkRegistrationId
       { date :: Day,
         email :: Text
-      }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (FromJSON, ToJSON, ToSchema)
-
-data UserWorkmode
-  = MkUserWorkmode
-      { userEmail :: Text,
-        site :: Text,
-        date :: Day,
-        workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
@@ -76,13 +57,14 @@ data Contact
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-workmodeSite :: RegisterWorkmode -> Text
-workmodeSite = site
-
-workmodeDate :: RegisterWorkmode -> Day
-workmodeDate = date
-
-instance FromRow UserWorkmode where
+data Office
+  = MkOffice
+      { name :: Text,
+        capacity :: Int
+      }
+  deriving stock (Generic, Show, Eq)
+  deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow)
+{-instance FromRow UserWorkmode where
   fromRow = do
     common <- MkUserWorkmode <$> field <*> field <*> field
     mode <- field
@@ -104,4 +86,4 @@ instance ToNamedRecord UserWorkmode where
       [ "Email" .= userEmail,
         "Date" .= iso8601Show date,
         "Office" .= site
-      ]
+      ] -}

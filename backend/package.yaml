@@ -43,7 +43,6 @@ dependencies:
     - base64
     - binary
     - bytestring
-    - cassava
     - cookie
     - exceptions
     - http-client
@@ -56,20 +55,17 @@ dependencies:
     - lens-aeson
     - mtl
     - network-uri
-    - openapi3
     - openid-connect
     - optics
     - postgresql-simple
     - resource-pool
     - retry
     - servant
-    - servant-cassava
-    - servant-multipart
     - servant-server
     - servant-swagger
     - servant-swagger-ui
-    - swagger2
     - text
+    - swagger2
     - time
     - vault
     - wai

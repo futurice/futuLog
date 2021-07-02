@@ -1,22 +1,9 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
-
 module Orphans where
 
-import Control.Lens ((&), (?~))
-import Data.Proxy (Proxy (..))
-import Data.Swagger.Lens (required)
-import Network.HTTP.Media.MediaType ((//))
-import Servant.API ((:>))
-import Servant.Multipart (MultipartData, MultipartForm)
-import Servant.Swagger (HasSwagger (..))
-import Servant.Swagger.Internal (addConsumes, addParam)
+import Data.Swagger (ToSchema(..))
+import Servant.API (WithStatus)
+import Data.Proxy (Proxy(..))
 
-instance HasSwagger sub => HasSwagger ((MultipartForm a (MultipartData b)) :> sub) where
-  toSwagger _ =
-    toSwagger (Proxy :: Proxy sub)
-      & addConsumes ["multipart" // "form-data"]
-      & addParam param
-    where
-      param =
-        mempty
-          & required ?~ True
+instance ToSchema a => ToSchema (WithStatus s a) where
+    declareNamedSchema _ = declareNamedSchema (Proxy @a)

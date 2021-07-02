@@ -1,5 +1,6 @@
-module Logic (registerWorkmode) where
+module Logic {- (registerWorkmode) -} where
 
+{-
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Data.ClientRequest (Capacity (people), RegisterWorkmode (..))
@@ -52,3 +53,4 @@ checkOfficeCapacity (MkUser {email}) mode@(MkRegisterWorkmode {date, site = offi
 
 getOfficeShifts :: MonadReader Env m => Text -> m [Shift]
 getOfficeShifts office = filter ((==) office . shiftSite) . shifts <$> ask
+-}

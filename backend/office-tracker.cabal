@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3998162162afa7fa62fedb76ac4e7e5d8c1c6890819d1973f6ed1f1353a1ce1f
+-- hash: 9491d42601e830aff9c9fe197e60d91c4084f14ab03e6251c9e26f2b23984727
 
 name:           office-tracker
 version:        0.1.0.0
@@ -21,10 +21,8 @@ executable office-tracker
   other-modules:
       API
       Auth
-      CSV
       Data.ClientRequest
       Data.Config
-      Data.CSV
       Data.Env
       Data.Errors
       Data.User
@@ -32,7 +30,6 @@ executable office-tracker
       Database
       Logic
       OpenID
-      Orphans
       Server
       Types
       Paths_office_tracker
@@ -63,7 +60,6 @@ executable office-tracker
     , base64
     , binary
     , bytestring
-    , cassava
     , cookie
     , exceptions
     , http-client
@@ -76,15 +72,12 @@ executable office-tracker
     , lens-aeson
     , mtl
     , network-uri
-    , openapi3
     , openid-connect
     , optics
     , postgresql-simple
     , resource-pool
     , retry
     , servant
-    , servant-cassava
-    , servant-multipart
     , servant-server
     , servant-swagger
     , servant-swagger-ui

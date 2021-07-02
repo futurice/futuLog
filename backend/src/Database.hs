@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ask)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (AdminWorkmode (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), UserWorkmode (..), WorkmodeId (..))
+import Data.ClientRequest --(AdminRegistration (..), Capacity (..), Contact (..), RegisterWorkmode (..), SetShift (..), Registration (..), WorkmodeId (..))
 import Data.Env (Env (..), ShiftAssignment (..), shiftAssignmentName, shiftAssignmentSite)
 import Data.Functor ((<&>))
 import Data.Maybe (listToMaybe)
@@ -21,16 +21,16 @@ import Data.Workmode (Workmode (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
 import System.Environment (lookupEnv)
 
-getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
+{-getAllWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Registration]
 getAllWorkmodes office start end =
   query'
     "SELECT * FROM workmodes WHERE workmode = 'Office' AND site = ? AND date >= ? AND date <= ? ORDER BY date ASC"
     (office, start, end)
 
-queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe UserWorkmode)
+queryWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Day -> m (Maybe Registration)
 queryWorkmode email day = listToMaybe <$> query' "SELECT * FROM workmodes WHERE user_email = ? AND date = ?" (email, day)
 
-queryWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [UserWorkmode]
+queryWorkmodes :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Registration]
 queryWorkmodes email start end = query' "SELECT * FROM workmodes WHERE user_email = ? AND date >= ? AND date <= ?" (email, start, end)
 
 queryContacts :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Contact]
@@ -49,11 +49,11 @@ queryContacts email start end =
               t
       )
 
-updateWorkmodes :: (MonadIO m, MonadReader Env m) => [AdminWorkmode] -> m ()
-updateWorkmodes = mapM_ $ \(MkAdminWorkmode {email, site, date, workmode}) -> do
+updateWorkmodes :: (MonadIO m, MonadReader Env m) => [AdminRegistration] -> m ()
+updateWorkmodes = mapM_ $ \(MkAdminRegistration {email, site, date, workmode}) -> do
   users <- query' "SELECT user_email FROM users WHERE user_email = ?" (Only email)
   case users of
-    [Only user] -> saveWorkmode user $ MkRegisterWorkmode site date workmode
+    [Only user] -> saveWorkmode user $ MkRegistration site date workmode
     _ -> pure ()
 
 deleteWorkmodes :: (MonadIO m, MonadReader Env m) => [WorkmodeId] -> m ()
@@ -103,24 +103,10 @@ getOfficeBooked office start end =
               (Only $ In emails)
       )
 
-saveShift :: (MonadIO m, MonadReader Env m) => Text -> SetShift -> m ()
-saveShift email MkSetShift {shiftName = name, site = office} = do
-  lastShift <- query' shiftQuery (Only email)
-  today <- liftIO $ utctDay <$> getCurrentTime
-  case lastShift of
-    [s]
-      | shiftAssignmentName s == name && shiftAssignmentSite s == office -> pure ()
-      | assignmentDate s == today ->
-        exec
-          "UPDATE shift_assignments SET user_email = ?, site = ?, shift_name = ? WHERE assignment_date = current_date"
-          (email, office, name)
-    _ ->
-      exec
-        "INSERT INTO shift_assignments (user_email, assignment_date, site, shift_name) VALUES (?, current_date, ?, ?)"
-        (email, office, name)
+-}
 
-saveWorkmode :: (MonadIO m, MonadReader Env m) => Text -> RegisterWorkmode -> m ()
-saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
+saveWorkmode :: (MonadIO m, MonadReader Env m) => Text -> Registration -> m ()
+saveWorkmode email MkRegistration {site, date, workmode} = do
   exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
   case workmode of
     Home -> mkSimpleQuery "Home"
@@ -139,6 +125,9 @@ saveWorkmode email MkRegisterWorkmode {site, date, workmode} = do
         "INSERT INTO workmodes (user_email, site, date, workmode) VALUES (?, ?, ?, ?)"
         (email, site, date, s :: String)
 
+getOffices :: (MonadIO m, MonadReader Env m) => m [Office]
+getOffices = query'_ "SELECT * FROM offices"
+
 saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
 saveUser =
   exec $
@@ -146,6 +135,25 @@ saveUser =
       <> "ON CONFLICT (user_email) DO UPDATE "
       <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, expire_date = EXCLUDED.expire_date, "
       <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token, id_token = EXCLUDED.id_token"
+
+setDefaultOffice :: (MonadIO m, MonadReader Env m) => User -> Text -> m (Maybe User)
+setDefaultOffice MkUser {email} office =
+  listToMaybe
+    <$> query'
+      ( "UPDATE users SET default_office = sub.office_name"
+          <> "FROM ("
+          <> sub
+          <> ") sub"
+          <> "WHERE users.user_email = ? AND sub.user_email = users.user_email"
+          <> "RETURNING users.name, users.user_email, users.default_office, sub.is_admin"
+      )
+      (office, email)
+  where
+    sub =
+      "SELECT u.user_email, offices.name AS office_name, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin"
+        <> "FROM users AS u "
+        <> "LEFT JOIN admins ON u.user_email = admins.user_email "
+        <> "INNER JOIN offices ON offices.name = ?"
 
 updateAccessToken :: (MonadIO m, MonadReader Env m) => Text -> Text -> UTCTime -> Maybe Text -> Maybe Text -> m (Maybe User)
 updateAccessToken oldRefreshToken accessToken expireDate idToken = fmap listToMaybe . \case
@@ -160,7 +168,7 @@ updateAccessToken oldRefreshToken accessToken expireDate idToken = fmap listToMa
 logoutUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe Text)
 logoutUser userEmail =
   query'
-    "UPDATE users SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ? RETURNING id_token"
+    "UPDATE users LEFT JOIN admins ON users.user_email = admins.user_email SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ? RETURNING id_token"
     (Only userEmail)
     <&> \case
       [Only token] -> token
@@ -200,12 +208,9 @@ initDatabase connectionString = do
   _ <- liftIO . withResource pool $ \conn ->
     execute_
       conn
-      ( "CREATE TABLE IF NOT EXISTS shift_assignments ("
-          <> "user_email text not null, "
-          <> "assignment_date date not null, "
-          <> "site text not null, "
-          <> "shift_name text not null"
-          <> ")"
+      ( "CREATE TABLE IF NOT EXISTS offices ("
+          <> "name text PRIMARY KEY, "
+          <> "capacity integer not null"
       )
   _ <- liftIO . withResource pool $ \conn ->
     execute_
@@ -214,6 +219,7 @@ initDatabase connectionString = do
           <> "name text not null, "
           <> "user_email text PRIMARY KEY, "
           <> "picture text not null, "
+          <> "default_office text, "
           <> "expire_date timestamptz, "
           <> "access_token text, "
           <> "refresh_token text, "

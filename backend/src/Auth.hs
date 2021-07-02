@@ -37,7 +37,7 @@ authHandler key = mkAuthHandler $ login key
 adminAuthHandler :: V.Key User -> AuthHandler Request AdminUser
 adminAuthHandler key = mkAuthHandler $
   login key >=> \case
-    user@MkUser {isAdmin} | isAdmin -> pure $ MkAdmin user
+    user@MkUser {isAdmin} | isAdmin -> pure $ MkAdminUser user
     _ -> throwError $ err401 {errBody = "User is not an admin"}
 
 login :: V.Key User -> Request -> Handler User

@@ -5,13 +5,6 @@
 
 packages:
 - completed:
-    hackage: servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686
-    pantry-tree:
-      size: 282
-      sha256: 23a27b82ce22bb337d9e1b12f587f1f24f14cac88668904db0194d58488b70a5
-  original:
-    hackage: servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686
-- completed:
     name: openid-connect
     version: 0.1.0.0
     git: https://github.com/jvanbruegge/openid-connect.git
@@ -22,9 +15,34 @@ packages:
   original:
     git: https://github.com/jvanbruegge/openid-connect.git
     commit: 8abba41c5b67429220995ff3127edb8a28e35608
+- completed:
+    name: servant-swagger
+    version: 1.1.11
+    git: https://github.com/jvanbruegge/servant-swagger.git
+    pantry-tree:
+      size: 1896
+      sha256: 78324593e54086f0a231371cdab913bb2b90b2317fd9bdc11deef036e5a6ea3f
+    commit: 433e55cf8362d7dc93d2fa7aeb2021d224c73744
+  original:
+    git: https://github.com/jvanbruegge/servant-swagger.git
+    commit: 433e55cf8362d7dc93d2fa7aeb2021d224c73744
+- completed:
+    hackage: servant-0.18.3@sha256:0fbf8f9274bdfda6a778d6d7ec714c9f0abd17102af9bc002a93fe3ed284e8ca,5309
+    pantry-tree:
+      size: 2662
+      sha256: 206f6289793fc25e4708e454ebb3e478710e8634017a47f05cff41a20b50a08b
+  original:
+    hackage: servant-0.18.3
+- completed:
+    hackage: servant-server-0.18.3@sha256:8040e38682d936a2c87ad2a787cc65b3bad18c87e9f773cf7bcfc12ce76af96e,5508
+    pantry-tree:
+      size: 2614
+      sha256: 972459941ab4e8f83a44fce6172b61e9126727cb5bdad5d4d21c28907128917a
+  original:
+    hackage: servant-server-0.18.3
 snapshots:
 - completed:
-    size: 565720
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/17/8.yaml
-    sha256: 76bf8992ff8dfe6eda9c02f81866138c2369344d5011ab39ae403457c4448b03
-  original: lts-17.8
+    size: 585393
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/0.yaml
+    sha256: c632012da648385b9fa3c29f4e0afd56ead299f1c5528ee789058be410e883c0
+  original: lts-18.0

@@ -62,16 +62,11 @@ main = do
   time <- getCurrentTime
   put $ "---- Restart: " <> iso8601Show time <> " ----"
   offices <- decodeFileThrow "./offices.yaml"
-  shiftsFile <- readFile "./shifts.yaml"
-  shifts <-
-    if all isSpace shiftsFile
-      then pure []
-      else decodeThrow . encodeUtf8 $ pack shiftsFile
   put "Initializing database"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
   provider <- mkProvider manager
-  app <- mkApp MkEnv {offices, shifts, pool, manager, provider}
+  app <- mkApp MkEnv {offices, pool, manager, provider}
   put $ "Running server on port " <> show port
   run port app
 

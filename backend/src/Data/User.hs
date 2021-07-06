@@ -12,6 +12,7 @@ data OpenIdUser
       { name :: Text,
         email :: Text,
         picture :: Text,
+        defaultOffice :: Maybe Text,
         expire :: Maybe UTCTime,
         accessToken :: Maybe Text,
         refreshToken :: Maybe Text,
@@ -25,6 +26,7 @@ data User
       { name :: Text,
         email :: Text,
         portrait :: Text,
+        defaultOffice :: Maybe Text,
         isAdmin :: Bool
       }
   deriving stock (Generic, Show, Eq)

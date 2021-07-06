@@ -34,12 +34,12 @@ ghc-options:
     - -Wincomplete-uni-patterns
     - -Wpartial-fields
     - -Wredundant-constraints
-    - -Werror
+#    - -Werror
 
 dependencies:
-    - base >= 4.7 && < 5
     - aeson
     - aeson-optics
+    - base >= 4.7 && < 5
     - base64
     - binary
     - bytestring
@@ -64,8 +64,8 @@ dependencies:
     - servant-server
     - servant-swagger
     - servant-swagger-ui
-    - text
     - swagger2
+    - text
     - time
     - vault
     - wai

@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9491d42601e830aff9c9fe197e60d91c4084f14ab03e6251c9e26f2b23984727
+-- hash: 51e84b0a8c517e0785dadc3f5427d940c2db28eef7496a332b0ecefad2be6129
 
 name:           office-tracker
 version:        0.1.0.0
@@ -30,6 +30,7 @@ executable office-tracker
       Database
       Logic
       OpenID
+      Orphans
       Server
       Types
       Paths_office_tracker
@@ -52,7 +53,7 @@ executable office-tracker
       TypeApplications
       TypeFamilies
       TypeOperators
-  ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -Werror
+  ghc-options: -O2 -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
     , aeson-optics

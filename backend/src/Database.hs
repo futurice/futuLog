@@ -131,9 +131,9 @@ getOffices = query'_ "SELECT * FROM offices"
 saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
 saveUser =
   exec $
-    "INSERT INTO users (name, user_email, picture, expire_date, access_token, refresh_token, id_token) VALUES (?,?,?,?,?,?,?) "
+    "INSERT INTO users (name, user_email, picture, default_office, expire_date, access_token, refresh_token, id_token) VALUES (?,?,?,?,?,?,?,?) "
       <> "ON CONFLICT (user_email) DO UPDATE "
-      <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, expire_date = EXCLUDED.expire_date, "
+      <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, default_office = EXCLUDED.default_office, expire_date = EXCLUDED.expire_date, "
       <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token, id_token = EXCLUDED.id_token"
 
 setDefaultOffice :: (MonadIO m, MonadReader Env m) => User -> Text -> m (Maybe User)
@@ -163,7 +163,7 @@ updateAccessToken oldRefreshToken accessToken expireDate idToken = fmap listToMa
     q x =
       "UPDATE users SET access_token = ?, expire_date = ?, id_token = ?"
         <> x
-        <> " WHERE refresh_token = ? RETURNING name, user_email, picture, false"
+        <> " WHERE refresh_token = ? RETURNING name, user_email, picture, default_office, false"
 
 logoutUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe Text)
 logoutUser userEmail =
@@ -176,10 +176,10 @@ logoutUser userEmail =
 
 checkUser :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe (Either Text User))
 checkUser token = query' q (Only token) >>= \case
-  [(userName, userEmail, picture, expire, _ :: Text, refreshToken, _ :: Maybe Text, admin)] -> liftIO getCurrentTime <&> \now ->
+  [(userName, userEmail, picture, office, expire, _ :: Text, refreshToken, _ :: Maybe Text, admin)] -> liftIO getCurrentTime <&> \now ->
     if now > expire
       then Left <$> refreshToken
-      else Just . Right $ MkUser userName userEmail picture admin
+      else Just . Right $ MkUser userName userEmail picture office admin
   _ -> pure Nothing
   where
     q =
@@ -211,6 +211,7 @@ initDatabase connectionString = do
       ( "CREATE TABLE IF NOT EXISTS offices ("
           <> "name text PRIMARY KEY, "
           <> "capacity integer not null"
+          <> ")"
       )
   _ <- liftIO . withResource pool $ \conn ->
     execute_

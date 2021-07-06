@@ -1,17 +1,17 @@
-- site: Munich
-  maxPeople: 20
+- name: Munich
+  capacity: 20
 
-- site: Berlin
-  maxPeople: 30
+- name: Berlin
+  capacity: 30
 
-- site: Stuttgart
-  maxPeople: 10
+- name: Stuttgart
+  capacity: 10
 
-- site: Stockholm
-  maxPeople: 15
+- name: Stockholm
+  capacity: 15
 
-- site: Helsinki
-  maxPeople: 60
+- name: Helsinki
+  capacity: 60
 
-- site: Tampere
-  maxPeople: 90
+- name: Tampere
+  capacity: 90

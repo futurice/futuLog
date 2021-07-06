@@ -39,6 +39,9 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
+nix:
+  packages: [lzma, postgresql, zlib]
+
 allow-newer: true
 extra-deps:
     - servant-cassava-0.10@sha256:9edd9b59aa5013c829cc25b67d25dc3c3a7185926f2c59006a38a9ae405d9658,1686

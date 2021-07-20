@@ -1,4 +1,14 @@
-module Logic {- (registerWorkmode) -} where
+module Logic (register) where
+
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.Reader (MonadReader)
+import Data.ClientRequest (Registration)
+import Data.Env (Env)
+import Data.Errors (RegistrationError)
+import Data.User (User)
+
+register :: (MonadIO m, MonadReader Env m) => User -> [Registration] -> m (Either RegistrationError ())
+register = undefined
 
 {-
 import Control.Monad.IO.Class (MonadIO, liftIO)

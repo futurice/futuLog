@@ -3,14 +3,10 @@ module Main where
 import API (api, rootAPI)
 import Control.Exception (throwIO)
 import Control.Monad.Reader (runReaderT)
-import Data.Char (isSpace)
 import Data.Env (Env (..))
 import Data.String (fromString)
-import Data.Text (pack)
-import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
-import Data.Yaml (decodeFileThrow, decodeThrow)
 import Database (initDatabase, retry)
 import Network.HTTP.Client (Manager)
 import Network.HTTP.Client.TLS (newTlsManager)
@@ -39,14 +35,16 @@ applyCors = cors $ \req -> case map snd (filter ((==) hOrigin . fst) (requestHea
 mkApp :: Env -> IO Application
 mkApp env = do
   (context, middleware) <- mkAuthServerContext env
-  pure $ applyCors $ middleware $
-    serveWithContext
-      rootAPI
-      context
-      ( swaggerHandler
-          :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (openidHandler :<|> apiHandler)
-          :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
-      )
+  pure $
+    applyCors $
+      middleware $
+        serveWithContext
+          rootAPI
+          context
+          ( swaggerHandler
+              :<|> hoistServerWithContext api contextProxy (flip runReaderT env) (openidHandler :<|> apiHandler)
+              :<|> serveDirectoryWith ((defaultWebAppSettings frontendPath) {ss404Handler = Just serveIndex})
+          )
 
 serveIndex :: Application
 serveIndex _ respond = respond $ responseFile status200 [(hContentType, "text/html")] (frontendPath <> "/index.html") Nothing
@@ -61,12 +59,11 @@ main :: IO ()
 main = do
   time <- getCurrentTime
   put $ "---- Restart: " <> iso8601Show time <> " ----"
-  offices <- decodeFileThrow "./offices.yaml"
   put "Initializing database"
   pool <- initDatabase . fromString =<< getEnv "DB_URL"
   manager <- newTlsManager
   provider <- mkProvider manager
-  app <- mkApp MkEnv {offices, pool, manager, provider}
+  app <- mkApp MkEnv {offices = [], pool, manager, provider}
   put $ "Running server on port " <> show port
   run port app
 

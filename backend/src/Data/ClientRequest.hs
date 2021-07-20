@@ -1,21 +1,21 @@
-{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Data.ClientRequest where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Swagger (ToParamSchema, ToSchema)
+import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
-import Data.Time.Format.ISO8601 (iso8601Show)
-import Data.User (User)
+import Data.User (User, Email)
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple.FromRow (FromRow (..), RowParser, field)
+import Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
 import Database.PostgreSQL.Simple.Types (Null)
 import GHC.Generics (Generic)
+import Control.Monad (void)
 
 data Registration
   = MkRegistration
-      { site :: Text,
+      { office :: Text,
         date :: Day,
         workmode :: Workmode
       }
@@ -24,13 +24,16 @@ data Registration
 
 data AdminRegistration
   = MkAdminRegistration
-      { site :: Text,
+      { office :: Text,
         date :: Day,
-        email :: Text,
+        email :: Email,
         workmode :: Workmode
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
+
+toRegistration :: AdminRegistration -> (Email, Registration)
+toRegistration MkAdminRegistration {..} = (email, MkRegistration {..})
 
 data RegistrationId
   = MkRegistrationId
@@ -64,9 +67,11 @@ data Office
       }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow)
-{-instance FromRow UserWorkmode where
+
+instance FromRow Registration where
   fromRow = do
-    common <- MkUserWorkmode <$> field <*> field <*> field
+    void $ field @Text
+    common <- MkRegistration <$> field <*> field
     mode <- field
     common <$> case mode of
       "Office" -> Office <$> field <* nullField
@@ -74,16 +79,4 @@ data Office
       "Leave" -> Leave <$ nullField <* nullField
       "Home" -> Home <$ nullField <* nullField
       _ -> error $ "Could not deserialize working mode type: " <> mode
-    where
-      nullField = field :: RowParser Null
-
-instance DefaultOrdered UserWorkmode where
-  headerOrder _ = ["Email", "Date", "Office"]
-
-instance ToNamedRecord UserWorkmode where
-  toNamedRecord (MkUserWorkmode {userEmail, site, date}) =
-    namedRecord
-      [ "Email" .= userEmail,
-        "Date" .= iso8601Show date,
-        "Office" .= site
-      ] -}
+    where nullField = field @Null

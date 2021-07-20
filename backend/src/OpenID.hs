@@ -21,7 +21,7 @@ import Data.Text (Text, pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Text.Encoding.Base64 (encodeBase64)
 import Data.Time (UTCTime, addUTCTime, getCurrentTime)
-import Data.User (OpenIdUser (..), User, getUserEmail)
+import Data.User (Email (..), OpenIdUser (..), User, getUserEmail)
 import qualified Database as DB
 import Network.HTTP.Client (Manager, Request (secure), RequestBody (..), Response (responseBody, responseStatus), httpLbs, method, requestBody, requestFromURI, requestHeaders)
 import Network.HTTP.Types (hAuthorization, hContentType, hLocation, statusIsSuccessful)
@@ -57,11 +57,10 @@ type Failure =
 
 type Logout = AuthProtect "openid-connect" :> "logout" :> Get '[JSON] NoContent
 
-data SessionCookie
-  = MkSessionCookie
-      { session :: ByteString,
-        prevUrl :: Maybe ByteString
-      }
+data SessionCookie = MkSessionCookie
+  { session :: ByteString,
+    prevUrl :: Maybe ByteString
+  }
 
 openidHandler :: Server OpenIDAPI
 openidHandler = login :<|> success :<|> failed :<|> logout
@@ -79,40 +78,41 @@ mkCredentials = do
   pure $ Credentials clientID (AssignedSecretText secretText) (fromJust $ preview uri (fromString $ redirectUri <> "/return"))
 
 refreshAccessToken :: (MonadReader Env m, MonadIO m) => Text -> ExceptT String m (User, ByteString)
-refreshAccessToken token = asks (tokenEndpoint . providerDiscovery . provider) >>= \case
-  Nothing -> throwError "Provider does not specify a token endpoint"
-  Just (URI url) -> do
-    m <- asks manager
-    request <- liftIO $ requestFromURI url
-    (clientID, secret) <- liftIO getClientSecret
-    let body =
-          "grant_type=refresh_token&refresh_token="
-            <> encodeUtf8 token
-            <> "&client_id="
-            <> encodeUtf8 clientID
-            <> "&client_secret="
-            <> encodeUtf8 secret
-        auth = "Basic " <> encodeBase64 (clientID <> ":" <> secret)
-        req' =
-          request
-            { method = "POST",
-              requestBody = RequestBodyBS body,
-              requestHeaders =
-                [ (hAuthorization, encodeUtf8 auth),
-                  (hContentType, "application/x-www-form-urlencoded")
-                ]
-            }
-    response <- liftIO $ httpLbs req' m
-    if not (statusIsSuccessful $ responseStatus response)
-      then throwError . show $ responseBody response
-      else case eitherDecode (responseBody response) of
-        Left err -> throwError err
-        Right (newToken :: TokenResponse (Maybe Text)) -> do
-          now <- liftIO getCurrentTime
-          let expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn newToken) now
-          DB.updateAccessToken token (accessToken newToken) expireDate (refreshToken newToken) (idToken newToken) >>= \case
-            Nothing -> throwError "token not found in database"
-            Just u -> pure (u, getCookie $ accessToken newToken)
+refreshAccessToken token =
+  asks (tokenEndpoint . providerDiscovery . provider) >>= \case
+    Nothing -> throwError "Provider does not specify a token endpoint"
+    Just (URI url) -> do
+      m <- asks manager
+      request <- liftIO $ requestFromURI url
+      (clientID, secret) <- liftIO getClientSecret
+      let body =
+            "grant_type=refresh_token&refresh_token="
+              <> encodeUtf8 token
+              <> "&client_id="
+              <> encodeUtf8 clientID
+              <> "&client_secret="
+              <> encodeUtf8 secret
+          auth = "Basic " <> encodeBase64 (clientID <> ":" <> secret)
+          req' =
+            request
+              { method = "POST",
+                requestBody = RequestBodyBS body,
+                requestHeaders =
+                  [ (hAuthorization, encodeUtf8 auth),
+                    (hContentType, "application/x-www-form-urlencoded")
+                  ]
+              }
+      response <- liftIO $ httpLbs req' m
+      if not (statusIsSuccessful $ responseStatus response)
+        then throwError . show $ responseBody response
+        else case eitherDecode (responseBody response) of
+          Left err -> throwError err
+          Right (newToken :: TokenResponse (Maybe Text)) -> do
+            now <- liftIO getCurrentTime
+            let expireDate = addUTCTime (fromIntegral . fromMaybe 0 $ expiresIn newToken) now
+            DB.updateAccessToken token (accessToken newToken) expireDate (refreshToken newToken) (idToken newToken) >>= \case
+              Nothing -> throwError "token not found in database"
+              Just u -> pure (u, getCookie $ accessToken newToken)
 
 login :: Server Login
 login = do
@@ -155,7 +155,7 @@ saveUser now token rawIdToken = do
   case (get "name", get "email") of
     (Just n, Just e) -> do
       let pic = fromMaybe "/static/default_picture.png" $ get "picture"
-          user = MkOpenIdUser n e pic (get "defaultOffice") (Just expireDate) (Just $ accessToken token) (refreshToken token) (Just rawIdToken)
+          user = MkOpenIdUser n (MkEmail e) pic (get "defaultOffice") (Just expireDate) (Just $ accessToken token) (refreshToken token) (Just rawIdToken)
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 
@@ -191,17 +191,18 @@ success (Just code) (Just state) (Just MkSessionCookie {session, prevUrl}) = do
     )
     >>= \case
       Left e -> throwError (err302 {errBody = LChar8.pack (show e), errHeaders = [(hLocation, "/")]})
-      Right (rawIdToken, token) -> saveUser now token rawIdToken >>= \case
-        Left err -> throwError err302 {errBody = err, errHeaders = [(hLocation, "/")]}
-        Right () ->
-          throwError
-            err302
-              { errHeaders =
-                  [ ("Set-Cookie", getCookie (accessToken token)),
-                    ("Set-Cookie", "prevUrl=\"\"; Path=/return; Secure; HttpOnly; Expires=Thu Jan 01 1970 00:00:00 GMT"),
-                    (hLocation, fromMaybe "/" prevUrl)
-                  ]
-              }
+      Right (rawIdToken, token) ->
+        saveUser now token rawIdToken >>= \case
+          Left err -> throwError err302 {errBody = err, errHeaders = [(hLocation, "/")]}
+          Right () ->
+            throwError
+              err302
+                { errHeaders =
+                    [ ("Set-Cookie", getCookie (accessToken token)),
+                      ("Set-Cookie", "prevUrl=\"\"; Path=/return; Secure; HttpOnly; Expires=Thu Jan 01 1970 00:00:00 GMT"),
+                      (hLocation, fromMaybe "/" prevUrl)
+                    ]
+                }
 success _ _ _ = failed (Just "missing params") Nothing Nothing
 
 failed :: Server Failure

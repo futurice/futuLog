@@ -1,8 +1,9 @@
+{-# LANGUAGE OverloadedLists #-}
+
 module Data.Workmode where
 
 import Control.Lens ((&), (.~), (?~))
 import Data.Aeson ((.:), (.=), FromJSON (..), ToJSON (..), object, withObject)
-import Data.HashMap.Strict.InsOrd (fromList)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (NamedSchema (..), SwaggerType (..), ToSchema (..), declareSchemaRef, properties, required, type_)
 import Data.Text (Text)
@@ -34,8 +35,7 @@ instance ToSchema Workmode where
       mempty
         & type_ ?~ SwaggerObject
         & properties
-          .~ fromList
-            [ ("type", stringSchema),
+          .~ [ ("type", stringSchema),
               ("confirmed", boolSchema),
               ("name", stringSchema)
             ]

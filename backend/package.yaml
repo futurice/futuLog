@@ -34,7 +34,7 @@ ghc-options:
     - -Wincomplete-uni-patterns
     - -Wpartial-fields
     - -Wredundant-constraints
-#    - -Werror
+    - -Werror
 
 dependencies:
     - aeson
@@ -49,7 +49,6 @@ dependencies:
     - http-client-tls
     - http-media
     - http-types
-    - insert-ordered-containers
     - jose
     - lens
     - lens-aeson
@@ -72,7 +71,6 @@ dependencies:
     - wai-app-static
     - wai-cors
     - warp
-    - yaml
 
 executables:
     office-tracker:

@@ -5,7 +5,7 @@ import Data.Errors (GenericError, RegistrationError)
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
-import Data.User (Admin, User)
+import Data.User (Admin, Email, User)
 import OpenID (OpenIDAPI)
 import Servant.API
 import Servant.Swagger.UI (SwaggerSchemaUI)
@@ -35,18 +35,36 @@ type UserAPI =
   Get '[JSON] User
     :<|> ( Summary "Set the default office for the user"
              :> ReqBody '[JSON] Text
-             :> UVerb 'PUT '[JSON]
+             :> UVerb
+                  'PUT
+                  '[JSON]
                   '[ WithStatus 200 User,
                      WithStatus 400 (GenericError "No office with this name exists")
                    ]
          )
 
-type OfficesAPI = Get '[JSON] [Office]
+type OfficesAPI =
+  ( Summary "Get all defined offices with their capacity"
+      :> Get '[JSON] [Office]
+  )
+    :<|> Capture "office" Text
+      :> ( "booked"
+             :> Summary "Get the people that booked for a certain date (default to the current date)"
+             :> QueryParam "date" Day
+             :> UVerb
+                  'GET
+                  '[JSON]
+                  '[ WithStatus 200 [User],
+                     WithStatus 400 (GenericError "Date may not be in the past")
+                   ]
+         )
 
 type RegistrationAPI =
   ( Summary "Set where you work for a given day"
       :> ReqBody '[JSON] [Registration]
-      :> UVerb 'PUT '[JSON]
+      :> UVerb
+           'PUT
+           '[JSON]
            '[ WithStatus 200 NoContent,
               WithStatus 400 RegistrationError
             ]
@@ -57,14 +75,19 @@ type RegistrationAPI =
              :> QueryParam "endDate" Day
              :> Get '[JSON] [Registration]
          )
-    :<|> ReqBody '[JSON] RegistrationId
-      :> ( "confirm"
-             :> Summary "Set the confirmation flag for the given registration"
-             :> UVerb 'PUT '[JSON]
-                  [ WithStatus 200 NoContent,
-                    WithStatus 400 (GenericError "No registration with this id exists")
-                  ]
+    :<|> ( "confirm"
+             :> ConfirmationAPI
          )
+
+type ConfirmationAPI =
+  Summary "Set the confirmation flag for the given registration"
+    :> ReqBody '[JSON] RegistrationId
+    :> UVerb
+         'PUT
+         '[JSON]
+         [ WithStatus 200 NoContent,
+           WithStatus 400 (GenericError "No registration with this id exists")
+         ]
 
 type AdminAPI =
   "admins" :> AdminsAPI
@@ -76,14 +99,16 @@ type AdminsAPI =
       :> QueryParam "office" Text
       :> Get '[JSON] [Admin]
   )
-    :<|> ( Summary "Add a new admin or change their office"
-             :> ReqBody '[JSON] Admin
-             :> Put '[JSON] Admin --NoContent
+    :<|> ( Summary "Add a new admin"
+             :> ReqBody '[JSON] Email
+             :> Put '[JSON] NoContent
          )
-    :<|> Capture "email" Text
-      :> ( Summary "Remove an admin"
-             :> UVerb 'DELETE '[JSON]
-                  [ WithStatus 200 Admin,
+    :<|> ( Summary "Remove an admin"
+             :> ReqBody '[JSON] Email
+             :> UVerb
+                  'DELETE
+                  '[JSON]
+                  [ WithStatus 200 Email,
                     WithStatus 400 (GenericError "No admin with that email exists")
                   ]
          )
@@ -91,34 +116,29 @@ type AdminsAPI =
 type AdminRegistrationAPI =
   ( Summary "Delete a given list of registrations"
       :> ReqBody '[JSON] [RegistrationId]
-      :> UVerb 'DELETE '[JSON]
+      :> UVerb
+           'DELETE
+           '[JSON]
            [ WithStatus 200 NoContent,
              WithStatus 400 [RegistrationId]
            ]
   )
-    :<|> ( Summary "Edit a set of registrations"
+    :<|> ( Summary "Edit or set registrations"
              :> ReqBody '[JSON] [AdminRegistration]
-             :> UVerb 'PUT '[JSON]
-                  [ WithStatus 200 NoContent,
-                    WithStatus 400 [RegistrationId]
-                  ]
+             :> Put '[JSON] NoContent
          )
-    :<|> Capture "user" Text
-      :> ( ( Summary "Get all the registrations of the user in a given timeframe"
-               :> QueryParam "startDate" Day
-               :> QueryParam "endDate" Day
-               :> UVerb 'GET '[JSON]
-                    [ WithStatus 200 [Registration],
-                      WithStatus 400 (GenericError "No user with that email exists")
-                    ]
-           )
-             :<|> ( "contacts"
-                      :> Summary "Get all users that were in contact with the user in a given timeframe"
-                      :> QueryParam "startDate" Day
-                      :> QueryParam "endDate" Day
-                      :> UVerb 'GET '[JSON]
-                           [ WithStatus 200 [Contact],
-                             WithStatus 400 (GenericError "No user with that email exists")
-                           ]
-                  )
+    :<|> Capture "user" Email
+      :> AdminUserAPI
+
+type AdminUserAPI =
+  ( Summary "Get all the registrations of the user in a given timeframe"
+      :> QueryParam "startDate" Day
+      :> QueryParam "endDate" Day
+      :> Get '[JSON] [Registration]
+  )
+    :<|> ( "contacts"
+             :> Summary "Get all users that were in contact with the user in a given timeframe"
+             :> QueryParam "startDate" Day
+             :> QueryParam "endDate" Day
+             :> Get '[JSON] [Contact]
          )

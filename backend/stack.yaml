@@ -46,8 +46,8 @@ allow-newer: true
 extra-deps:
     - git: https://github.com/jvanbruegge/openid-connect.git
       commit: 8abba41c5b67429220995ff3127edb8a28e35608
-    - git: https://github.com/jvanbruegge/servant-swagger.git
-      commit: 433e55cf8362d7dc93d2fa7aeb2021d224c73744
+    - git: https://github.com/haskell-servant/servant-swagger.git
+      commit: bb0a84faa073fa9530f60337610d7da3d5b9393c
     - servant-0.18.3
     - servant-server-0.18.3
 # Override default flag values for local packages and extra-deps

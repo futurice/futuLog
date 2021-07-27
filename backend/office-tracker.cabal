@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8f4a3af9cbf488c86425d0b2935ffc5af28063d959d65e5c107b8fc45f08d3fb
+-- hash: 7a332c4b0c9ae8257060979bf499ba7356b2693fda2b32b82c4e779612042ec5
 
 name:           office-tracker
 version:        0.1.0.0
@@ -28,7 +28,6 @@ executable office-tracker
       Data.User
       Data.Workmode
       Database
-      Logic
       OpenID
       Server
       Types

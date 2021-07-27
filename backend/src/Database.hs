@@ -1,3 +1,4 @@
+{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE TupleSections #-}
 
 module Database where
@@ -8,10 +9,12 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Contact (..), Office, Registration (..), RegistrationId (..))
+import Data.ClientRequest (Contact (..), Office, Registration (..), RegistrationId (..), UserRegistration (..), registrationDate)
 import Data.Env (Env (..))
-import Data.Functor ((<&>))
-import Data.Maybe (listToMaybe)
+import Data.Functor (($>), (<&>))
+import Data.List (groupBy, sortOn)
+import Data.List.NonEmpty (NonEmpty ((:|)), nonEmpty, toList)
+import Data.Maybe (listToMaybe, mapMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -19,7 +22,8 @@ import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime)
 import Data.User (Admin, Email, OpenIdUser, User (..))
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, execute_, query, query_)
+import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, executeMany, execute_, query, query_, withTransaction)
+import Database.PostgreSQL.Simple.Types (In (In))
 import System.Environment (lookupEnv)
 
 queryRegistrations :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Registration]
@@ -49,6 +53,26 @@ queryContacts email start end =
               )
               t
       )
+
+tryRegistrations :: (MonadIO m, MonadReader Env m) => User -> [Registration] -> m (Maybe [Day])
+tryRegistrations user xs = do
+  conns <- asks pool
+  withTransaction' do
+    days <- mapM (queryOffice conns) $ groupRegistrations xs
+    case concat days of
+      [] -> executeManyIO conns "INSERT INTO registrations VALUES (?, ?, ?, ?, ?, ?)" (fmap (MkUserRegistration user) xs) $> Nothing
+      ys -> pure $ Just ys
+  where
+    groupRegistrations = mapMaybe nonEmpty . groupBy (\a b -> office a == office b) . sortOn office
+    queryOffice conns ys@(MkRegistration {office} :| _) =
+      fmap fromOnly
+        <$> queryIO
+          conns
+          ("SELECT date FROM (" <> subquery <> ") AS res WHERE res.capacity <= res.x OR res.date < current_date")
+          (office, In (toList $ fmap registrationDate ys))
+    subquery =
+      "SELECT r.date, o.capacity, count(*) AS x FROM registrations AS r LEFT JOIN offices AS o ON r.office = o.name "
+        <> "WHERE r.workmode = 'Office' AND r.office = ? AND r.date IN ? GROUP BY r.date, o.capacity"
 
 confirmRegistration :: (MonadIO m, MonadReader Env m) => RegistrationId -> m Bool
 confirmRegistration MkRegistrationId {date, email} =
@@ -228,6 +252,9 @@ exec q r = do
   _ <- liftIO . withResource conns $ \conn -> execute conn q r
   pure ()
 
+executeManyIO :: (ToRow r) => Pool Connection -> Query -> [r] -> IO ()
+executeManyIO conns q rs = withResource conns $ \conn -> executeMany conn q rs $> ()
+
 query'_ :: (MonadIO m, MonadReader Env m, FromRow r) => Query -> m [r]
 query'_ q = do
   conns <- asks pool
@@ -237,6 +264,14 @@ query' :: (MonadIO m, MonadReader Env m, ToRow x, FromRow r) => Query -> x -> m 
 query' q x = do
   conns <- asks pool
   liftIO . withResource conns $ \conn -> query conn q x
+
+queryIO :: (ToRow x, FromRow r) => Pool Connection -> Query -> x -> IO [r]
+queryIO conns q x = withResource conns $ \conn -> query conn q x
+
+withTransaction' :: (MonadIO m, MonadReader Env m) => IO a -> m a
+withTransaction' x = do
+  conns <- asks pool
+  liftIO . withResource conns $ \conn -> withTransaction conn x
 
 retry :: (MonadIO m, MonadMask m) => String -> m a -> m a
 retry msg x = recoverAll (exponentialBackoff 100) $ \RetryStatus {rsIterNumber} ->

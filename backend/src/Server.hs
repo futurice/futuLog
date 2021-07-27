@@ -6,7 +6,7 @@ import Control.Lens ((&), (.~), (?~))
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.ClientRequest (toRegistration)
-import Data.Errors (GenericError (..))
+import Data.Errors (GenericError (..), RegistrationError (..))
 import Data.Functor (($>))
 import Data.Maybe (catMaybes, fromMaybe)
 import Data.Proxy (Proxy (..))
@@ -61,9 +61,12 @@ officesHandler = DB.getOffices :<|> bookedHandler
         else DB.queryBooked office d >>= respond . WithStatus @200
 
 registrationsHandler :: User -> Server RegistrationAPI
-registrationsHandler MkUser {email} = register :<|> getRegistrations :<|> confirmRegistration
+registrationsHandler user@MkUser {email} = register :<|> getRegistrations :<|> confirmRegistration
   where
-    register = undefined
+    register =
+      DB.tryRegistrations user >=> pure . fmap MkRegistrationError >=> \case
+        Nothing -> respond $ WithStatus @200 NoContent
+        Just err -> respond $ WithStatus @400 err
     getRegistrations = withDefaultDays . DB.queryRegistrations $ email
     confirmRegistration :: Server ConfirmationAPI
     confirmRegistration =

@@ -15,4 +15,4 @@ else
     echo "No certificates found, proceeding"
 fi
 
-./office-tracker
+./futuLog

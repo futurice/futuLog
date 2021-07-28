@@ -1,10 +1,10 @@
-name: office-tracker
+name: futuLog
 version: 0.1.0.0
-homepage: https://github.com/futurice/office-tracker#readme
+homepage: https://github.com/futurice/futuLog#readme
 license: MIT
 author: Jan van Brügge
 maintainer: jan.van.brugge@futurice.com
-copyright: 2020 Jan van Brügge
+copyright: 2021 Jan van Brügge
 category: Web
 
 default-extensions:
@@ -73,6 +73,6 @@ dependencies:
     - warp
 
 executables:
-    office-tracker:
+    futuLog:
         source-dirs: src
         main: Main.hs

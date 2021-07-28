@@ -3,20 +3,18 @@ cabal-version: 1.12
 -- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 7a332c4b0c9ae8257060979bf499ba7356b2693fda2b32b82c4e779612042ec5
 
-name:           office-tracker
+name:           futuLog
 version:        0.1.0.0
 category:       Web
-homepage:       https://github.com/futurice/office-tracker#readme
+homepage:       https://github.com/futurice/futuLog#readme
 author:         Jan van Brügge
 maintainer:     jan.van.brugge@futurice.com
-copyright:      2020 Jan van Brügge
+copyright:      2021 Jan van Brügge
 license:        MIT
 build-type:     Simple
 
-executable office-tracker
+executable futuLog
   main-is: Main.hs
   other-modules:
       API
@@ -31,7 +29,7 @@ executable office-tracker
       OpenID
       Server
       Types
-      Paths_office_tracker
+      Paths_futuLog
   hs-source-dirs:
       src
   default-extensions:

@@ -1,4 +1,4 @@
-module OpenID (openidHandler, https, httpsDebug, refreshAccessToken, OpenIDAPI) where
+module OpenID (openidHandler, https, refreshAccessToken, OpenIDAPI) where
 
 import Control.Lens (firstOf, preview)
 import Control.Lens.At (at)
@@ -32,7 +32,6 @@ import OpenID.Connect.TokenResponse
 import Servant.API hiding (URI)
 import Servant.Server (err302, err400, errBody, errHeaders)
 import System.Environment (getEnv)
-import System.IO (hFlush, stdout)
 import Types (Server)
 import Web.Cookie (defaultSetCookie, parseCookies, renderSetCookie, sameSiteStrict, setCookieHttpOnly, setCookieName, setCookiePath, setCookieSameSite, setCookieSecure, setCookieValue)
 
@@ -185,7 +184,7 @@ success (Just code) (Just state) (Just MkSessionCookie {session, prevUrl}) = do
   creds <- liftIO mkCredentials
   liftIO
     ( runExceptT $ do
-        rawToken <- ExceptT $ authenticationSuccess' (httpsDebug m) now provider creds browser
+        rawToken <- ExceptT $ authenticationSuccess' (https m) now provider creds browser
         token <- ExceptT $ decodeTokenResponse rawToken now provider creds browser
         pure (idToken rawToken, token)
     )
@@ -214,32 +213,9 @@ failed err _ _ =
       }
 
 https :: Manager -> HTTPS IO
-https = httpsWith (\_ _ -> pure ())
-
-httpsDebug :: Manager -> HTTPS IO
-httpsDebug = httpsWith putRequestResponse
-
-putRequestResponse :: Request -> Response LChar8.ByteString -> IO ()
-putRequestResponse req res = do
-  put "Request returned non-success code:"
-  put $ show req
-  put $ case requestBody req of
-    RequestBodyBS x -> show x
-    RequestBodyLBS x -> show x
-    _ -> "could not print request body"
-  put "Response was:"
-  put $ show res
-  put . show $ responseBody res
-  where
-    put x = putStrLn x *> hFlush stdout
-
-httpsWith :: (Request -> Response LChar8.ByteString -> IO ()) -> Manager -> HTTPS IO
-httpsWith logger m req = do
+https m req = do
   Just configUri <- parseURI <$> getEnv "OPENID_CONFIG_URI"
-  let req' = req {secure = uriScheme configUri == "https:"}
-  res <- req' `httpLbs` m
-  logger req' res
-  pure res
+  req {secure = uriScheme configUri == "https:"} `httpLbs` m
 
 instance FromHttpApiData SessionCookie where
   parseUrlPiece = parseHeader . encodeUtf8

@@ -8,7 +8,7 @@ RUN mkdir -p src
 RUN --mount=type=cache,target=/root/.stack stack setup --install-ghc && stack build --only-dependencies
 
 COPY backend/src/ src/
-RUN --mount=type=cache,target=/root/.stack stack build && cp "$(stack path --dist-dir)/build/office-tracker/office-tracker" .
+RUN --mount=type=cache,target=/root/.stack stack build && cp "$(stack path --dist-dir)/build/futuLog/futuLog" .
 
 FROM node:14.4-buster AS frontend
 
@@ -27,8 +27,7 @@ RUN apt-get update && apt-get install -y libpq5 ca-certificates
 COPY ./startup.sh ./
 
 # Add backend
-COPY --from=0 office-tracker .
-COPY offices.yaml shifts.yaml ./
+COPY --from=0 futuLog .
 EXPOSE 8000
 
 # Add frontend

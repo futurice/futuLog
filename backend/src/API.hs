@@ -1,6 +1,6 @@
 module API where
 
-import Data.ClientRequest (AdminRegistration, Contact, Office, Registration, RegistrationId)
+import Data.ClientRequest (AdminRegistration, Contacts, Office, Registration, RegistrationId)
 import Data.Errors (GenericError, RegistrationError)
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
@@ -140,5 +140,5 @@ type AdminUserAPI =
              :> Summary "Get all users that were in contact with the user in a given timeframe"
              :> QueryParam "startDate" Day
              :> QueryParam "endDate" Day
-             :> Get '[JSON] [Contact]
+             :> Get '[JSON] [Contacts]
          )

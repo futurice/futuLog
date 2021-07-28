@@ -9,7 +9,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Contact (..), Office, Registration (..), RegistrationId (..), UserRegistration (..), registrationDate)
+import Data.ClientRequest (Contacts (..), Office, Registration (..), RegistrationId (..), UserRegistration (..), registrationDate, registrationOffice)
 import Data.Env (Env (..))
 import Data.Functor (($>), (<&>))
 import Data.List (groupBy, sortOn)
@@ -38,17 +38,17 @@ queryBooked office date =
     (userFields <> " RIGHT JOIN registrations AS r ON u.user_email = r.user_email WHERE r.office = ? AND r.date = ?")
     (office, date)
 
-queryContacts :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Contact]
+queryContacts :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Contacts]
 queryContacts email start end =
   query'
     "SELECT office, date FROM registrations WHERE workmode = 'Office' AND user_email = ? AND date >= ? AND date <= ? ORDER BY date DESC"
     (email, start, end)
     >>= mapM
-      ( \t@(site, date) ->
-          MkContact date site
+      ( \t@(office, date) ->
+          MkContacts date office
             <$> query'
               ( userFields <> " WHERE user_email IN ("
-                  <> "SELECT user_email FROM registrations WHERE workmode = 'Office' AND site = ? AND date = ?"
+                  <> "SELECT user_email FROM registrations WHERE workmode = 'Office' AND office = ? AND date = ?"
                   <> ")"
               )
               t
@@ -63,7 +63,8 @@ tryRegistrations user xs = do
       [] -> executeManyIO conns "INSERT INTO registrations VALUES (?, ?, ?, ?, ?, ?)" (fmap (MkUserRegistration user) xs) $> Nothing
       ys -> pure $ Just ys
   where
-    groupRegistrations = mapMaybe nonEmpty . groupBy (\a b -> office a == office b) . sortOn office
+    groupRegistrations :: [Registration] -> [NonEmpty Registration]
+    groupRegistrations = mapMaybe nonEmpty . groupBy (\a b -> registrationOffice a == registrationOffice b) . sortOn registrationOffice
     queryOffice conns ys@(MkRegistration {office} :| _) =
       fmap fromOnly
         <$> queryIO

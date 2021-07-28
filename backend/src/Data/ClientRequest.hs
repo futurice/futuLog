@@ -26,6 +26,9 @@ data Registration = MkRegistration
 registrationDate :: Registration -> Day
 registrationDate = date
 
+registrationOffice :: Registration -> Text
+registrationOffice = office
+
 data AdminRegistration = MkAdminRegistration
   { office :: Text,
     date :: Day,
@@ -45,16 +48,9 @@ data RegistrationId = MkRegistrationId
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data Capacity = MkCapacity
+data Contacts = MkContacts
   { date :: Day,
-    people :: [User]
-  }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (FromJSON, ToJSON, ToSchema)
-
-data Contact = MkContact
-  { date :: Day,
-    site :: Text,
+    office :: Text,
     people :: [User]
   }
   deriving stock (Generic, Show, Eq)

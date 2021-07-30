@@ -100,7 +100,7 @@ export function createAPIClientService(baseUrl: string) {
 
     setDefaultOffice: (office: string) => fetchJSON<void>(`${baseUrl}/api/me`, {
       method: "PUT",
-      body: office
+      body: `"${office}"`
     }),
 
     getRegistrations: (startDate?: string, endDate?: string) =>
@@ -117,7 +117,7 @@ export function createAPIClientService(baseUrl: string) {
     confirmWorkmode: (date: string) =>
       fetchJSON<void>(`${baseUrl}/api/registrations/confirm`, {
         method: "PUT",
-        body: date,
+        body: `"${date}"`,
       }),
 
     getOffices: () => fetchJSON<IOfficeDto[]>(`${baseUrl}/api/offices`),

@@ -2,7 +2,7 @@ import React from "react";
 import { Select } from "../ux/select";
 import { MenuItem } from "@material-ui/core";
 import { Button } from "../ux/buttons";
-import { IOfficeSpaceDto } from "app/services/apiClientService";
+import { IOfficeDto } from "app/services/apiClientService";
 import { officesQueryKey } from "app/utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import { Stack } from "../ux/containers";
@@ -17,8 +17,8 @@ interface ISiteSelector {
 
 export const SiteSelector: React.FC<ISiteSelector> = (props) => {
   const { queryCache } = useServices();
-  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
-  const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
+  const offices = queryCache.getQueryData<IOfficeDto[]>(officesQueryKey());
+  const officesOptions = (offices || []).map(({ name }) => ({ value: name, label: name }));
 
   return (
     <>

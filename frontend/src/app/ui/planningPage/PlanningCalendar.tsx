@@ -16,8 +16,8 @@ import { Theme } from "app/ui/ux/theme";
 import { H3 } from "app/ui/ux/text";
 import { PlanningCalendarDay } from "app/ui/planningPage/PlanningCalendarDay";
 import { useQuery, useMutation } from "react-query";
-import { userWorkmodesQueryKey } from "app/utils/reactQueryUtils";
-import { IUserWorkmodeDto, Workmode, IRegisterWorkmodeDto } from "app/services/apiClientService";
+import { registrationsQueryKey } from "app/utils/reactQueryUtils";
+import { IRegistrationDto, Workmode } from "app/services/apiClientService";
 import { IconHome, IconOffice, IconClient, IconLeave } from "app/ui/ux/icons";
 import { monthlyDateRanges, weeklyDateRanges, isWeekend } from "app/utils/dateUtils";
 
@@ -38,14 +38,14 @@ const getStickyHeaderOffset = (rootEl: HTMLElement) => {
   return offset;
 };
 
-const getUserWorkmode = (dateStr: string, userWorkmodes: IUserWorkmodeDto[]) => {
-  const userWorkmode = userWorkmodes.find((workmode) => workmode.date === dateStr);
-  return userWorkmode && userWorkmode.workmode.type;
+const getRegistration = (dateStr: string, registrations: IRegistrationDto[]) => {
+  const registration = registrations.find((workmode) => workmode.date === dateStr);
+  return registration && registration.workmode.type;
 };
 
-const getUserSite = (dateStr: string, userWorkmodes: IUserWorkmodeDto[]) => {
-  const userWorkmode = userWorkmodes.find((workmode) => workmode.date === dateStr);
-  return userWorkmode && userWorkmode.site;
+const getUserSite = (dateStr: string, registrations: IRegistrationDto[]) => {
+  const registration = registrations.find((workmode) => workmode.date === dateStr);
+  return registration && registration.office;
 };
 
 // NOTE: This function assumes the hex color string looks like #rrggbb
@@ -179,13 +179,13 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 
-  const userWorkmodesRes = useQuery(userWorkmodesQueryKey(startDateStr, endDateStr), () =>
-    apiClient.getUserWorkmodes(startDateStr, endDateStr)
+  const registrationsRes = useQuery(registrationsQueryKey(startDateStr, endDateStr), () =>
+    apiClient.getRegistrations(startDateStr, endDateStr)
   );
-  const [mutateUserWorkmodes, mutateUserWorkmodesRes] = useMutation(
-    (requests: IRegisterWorkmodeDto[]) => apiClient.registerUserWorkmode(requests),
+  const [mutateRegistrations, mutateRegistrationsRes] = useMutation(
+    (requests: IRegistrationDto[]) => apiClient.setRegistrations(requests),
     {
-      onSuccess: () => queryCache.refetchQueries(userWorkmodesQueryKey(startDateStr, endDateStr)),
+      onSuccess: () => queryCache.refetchQueries(registrationsQueryKey(startDateStr, endDateStr)),
     }
   );
 
@@ -245,8 +245,8 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
   //
   // Events
 
-  const onSelectWorkmodes = (workmodes: IUserWorkmodeDto[]) => {
-    mutateUserWorkmodes(workmodes);
+  const onSelectWorkmodes = (workmodes: IRegistrationDto[]) => {
+    mutateRegistrations(workmodes);
   };
 
   //
@@ -277,14 +277,14 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                 {dates.map((date) => {
                   const dateStr = date.format("YYYY-MM-DD");
                   const workmode =
-                    getUserWorkmode(
+                    getRegistration(
                       dateStr,
-                      userWorkmodesRes.status === "success" ? userWorkmodesRes.data : []
+                      registrationsRes.status === "success" ? registrationsRes.data : []
                     ) || Workmode.Home;
                   const WorkmodeIcon = workmodeIcons[workmode];
                   const office = getUserSite(
                     dateStr,
-                    userWorkmodesRes.status === "success" ? userWorkmodesRes.data : []
+                    registrationsRes.status === "success" ? registrationsRes.data : []
                   );
 
                   return (
@@ -315,8 +315,8 @@ export const PlanningCalendar: React.FC<IPlanningCalendar> = ({ onChangeVisibleM
                           date={date}
                           workmode={workmode}
                           isLoading={
-                            userWorkmodesRes.status === "loading" ||
-                            mutateUserWorkmodesRes.status === "loading"
+                            registrationsRes.status === "loading" ||
+                            mutateRegistrationsRes.status === "loading"
                           }
                           isExpanded={!!expandedDate && expandedDate === dateStr}
                           onSelectWorkmodes={onSelectWorkmodes}

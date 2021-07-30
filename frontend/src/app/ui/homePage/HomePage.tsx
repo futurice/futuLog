@@ -5,18 +5,18 @@ import { useServices } from "app/services/services";
 import {
   Workmode,
   IWorkmodeDto,
-  IShiftAssignmentDto,
-  IOfficeSpaceDto,
-  IRegisterWorkmodeDto,
-  ICapacityDto
+  IOfficeDto,
+  IUserDto,
+  IRegistrationDto,
+  IContactsDto,
 } from "app/services/apiClientService";
 import {
   RenderQuery,
   combineQueries,
   officeBookingsQueryKey,
-  userWorkmodeQueryKey,
-  userShiftQueryKey,
   officesQueryKey,
+  userQueryKey,
+  registrationQueryKey,
 } from "app/utils/reactQueryUtils";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { Button, LinkButton } from "app/ui/ux/buttons";
@@ -36,12 +36,12 @@ const InlineIconButton = styled(IconButton)({
 });
 
 const getOfficeCapacity = (
-  office: IOfficeSpaceDto,
+  office: IOfficeDto,
   date: string,
-  officeBookings: ICapacityDto[]
+  officeBookings: IContactsDto[]
 ) => {
   const booking = officeBookings.find((booking) => booking.date === date);
-  return booking ? office.maxPeople - booking.people.length : office.maxPeople;
+  return booking ? office.capacity - booking.people.length : office.capacity;
 };
 
 export const HomePage: React.FC = () => {
@@ -53,39 +53,35 @@ export const HomePage: React.FC = () => {
   // Remote data
 
   // These are pre-loaded in AppRoutes
-  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
-  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
+  const user = queryCache.getQueryData<IUserDto>(userQueryKey());
+  const offices = queryCache.getQueryData<IOfficeDto[]>(officesQueryKey());
 
-  const userWorkmodeRes = useQuery(userWorkmodeQueryKey(date), () =>
-    apiClient.getUserWorkmode(date).catch(() => null)
+  const registrationRes = useQuery(registrationQueryKey(date), () =>
+    apiClient.getRegistrations(date).catch(() => null)
   );
   const officeBookingsRes = useQuery(
-    userShift && officeBookingsQueryKey(userShift.site, date, date),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
+    Boolean(user) && Boolean(user!.defaultOffice) && officeBookingsQueryKey(user!.defaultOffice, date, date),
+    () => apiClient.getOfficeBookings({ office: user!.defaultOffice, startDate: date, endDate: date })
   );
 
-
-
-  const [registerWorkmode] = useMutation(
-    (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode([request]),
+  const [register] = useMutation(
+    (request: IRegistrationDto) => apiClient.setRegistrations([request]),
     {
-      onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
+      onSuccess: () => queryCache.refetchQueries(registrationQueryKey(date)),
     }
   );
-  const [confirmWorkmode] = useMutation(() => apiClient.confirmUserWorkmode(true), {
-    onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
+  const [confirmWorkmode] = useMutation(() => apiClient.confirmWorkmode(date), {
+    onSuccess: () => queryCache.refetchQueries(registrationQueryKey(date)),
   });
 
-  const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
+  const userOffice = (offices || []).find((office) => user && office.name === user.defaultOffice);
 
   //
   // Actions
 
   const onSelectWorkmode = (workmode: IWorkmodeDto) => {
-    if (userShift) {
-      const site = userShift.site;
-      registerWorkmode({ date, site, workmode });
+    if (user && user.defaultOffice) {
+      register({ date, office: user.defaultOffice, workmode });
     }
   };
 
@@ -109,14 +105,14 @@ export const HomePage: React.FC = () => {
     >
       <RenderQuery
         query={combineQueries({
-          userWorkmode: userWorkmodeRes,
+          registration: registrationRes,
           officeBookings: officeBookingsRes,
         })}
         // TODO: Improve the UX for loading state, don't let the initial state flash
         onLoading={(data, children) => children(data || ({} as any), true)}
         onError={(error, children) => children({} as any, false, error)}
       >
-        {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) => (
+        {({ registration, officeBookings }, isLoading: boolean, error?: Error) => (
           <Card spacing="2rem" textAlign="center">
             <Stack spacing="2rem" maxWidth="26rem" mx="auto">
               <H2>Where are you working today?</H2>
@@ -127,7 +123,7 @@ export const HomePage: React.FC = () => {
                   officeCapacity={
                     userOffice ? getOfficeCapacity(userOffice, date, officeBookings || []) : 0
                   }
-                  workmode={userWorkmode ? userWorkmode.workmode : { type: Workmode.Home }}
+                  workmode={registration ? registration[0].workmode : { type: Workmode.Home }}
                   onSelectWorkmode={onSelectWorkmode}
                 />
               </Box>
@@ -135,10 +131,10 @@ export const HomePage: React.FC = () => {
             </Stack>
 
             {/* Office check-in status */}
-            {userWorkmode && userWorkmode.workmode.type === Workmode.Office && (
+            {registration && registration[0].workmode.type === Workmode.Office && (
               <>
                 <HR />
-                {!userWorkmode.workmode.confirmed ? (
+                {!registration[0].workmode.confirmed ? (
                   //
                   // Not checked in yet
                   <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">

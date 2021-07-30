@@ -8,7 +8,7 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.ClientRequest (Contacts, RegistrationId (..), toRegistration)
 import Data.Errors (GenericError (..), RegistrationError (..))
 import Data.Functor (($>))
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, fromMaybe)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
@@ -106,5 +106,5 @@ defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure
 withDefaultDays :: MonadIO m => (Day -> Day -> m a) -> Maybe Day -> Maybe Day -> m a
 withDefaultDays f startDate endDate = do
   start <- defaultDay startDate
-  end <- defaultDay endDate
+  let end = fromMaybe start endDate
   f start end

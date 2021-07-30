@@ -12,15 +12,13 @@ import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
 import {
   Workmode,
   IWorkmodeDto,
-  IShiftAssignmentDto,
-  IOfficeSpaceDto,
-  ICapacityDto,
-  IUserWorkmodeDto,
+  IOfficeDto,
+  IRegistrationDto,
   IUserDto,
+  IContactsDto,
 } from "app/services/apiClientService";
 import { useServices } from "app/services/services";
 import {
-  userShiftQueryKey,
   officesQueryKey,
   officeBookingsQueryKey,
   RenderQuery,
@@ -36,7 +34,7 @@ interface IPlanningCalendarDay {
   isLoading?: boolean;
   isExpanded?: boolean;
   office?: string;
-  onSelectWorkmodes: (workmodes: IUserWorkmodeDto[]) => void;
+  onSelectWorkmodes: (workmodes: IRegistrationDto[]) => void;
   onClose: () => void;
 }
 
@@ -88,16 +86,16 @@ const ConfirmButtonContainer = styled("div")<Theme>(({ theme }) => ({
   },
 }));
 
-function getOfficeCapacity(office: IOfficeSpaceDto, bookings: ICapacityDto[]) {
+function getOfficeCapacity(office: IOfficeDto, bookings: IContactsDto[]) {
   if (!bookings.length) {
-    return office.maxPeople;
+    return office.capacity;
   }
-  const capacities = bookings.map((booking) => office.maxPeople - booking.people.length);
+  const capacities = bookings.map((booking) => office.capacity - booking.people.length);
   return Math.min(...capacities);
 }
 
-function hasUserBookedOffice(user: IUserDto, bookings: ICapacityDto[], office?: IOfficeSpaceDto) {
-  const officeBookings = office && bookings.find(b => b.site === office.site);
+function hasUserBookedOffice(user: IUserDto, bookings: IContactsDto[], office?: IOfficeDto) {
+  const officeBookings = office && bookings.find(b => b.office === office.name);
   if (officeBookings) {
     return officeBookings.people.findIndex(p => p.email === user.email) !== -1;
   } else {
@@ -127,20 +125,18 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const user = queryCache.getQueryData<IUserDto>(userQueryKey())!;
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey())!;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey())!;
-  const initialOffice = office ? office : (userShift ? userShift.site : undefined);
+  const offices = queryCache.getQueryData<IOfficeDto[]>(officesQueryKey())!;
+  const initialOffice = office ? office : user.defaultOffice;
   const [currentOfficeState, setCurrentOfficeState] = useState(initialOffice);
 
-  const userOffice = (offices || []).find((office) => currentOfficeState && office.site === currentOfficeState);
+  const userOffice = (offices || []).find((office) => currentOfficeState && office.name === currentOfficeState);
 
   const officeBookingsRes = useQuery(
-    userOffice && officeBookingsQueryKey(userOffice.site, startDateStr, endDateStr),
+    userOffice && officeBookingsQueryKey(userOffice.name, startDateStr, endDateStr),
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     () =>
       apiClient.getOfficeBookings({
-        site: userOffice!.site,
+        office: userOffice!.name,
         startDate: startDateStr,
         endDate: endDateStr,
       })
@@ -172,12 +168,12 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
         (date) =>
           ({
             userEmail: user.email,
-            site: currentOfficeState,
+            office: currentOfficeState,
             date: date.format("YYYY-MM-DD"),
             workmode: localWorkmode,
-          } as IUserWorkmodeDto)
+          } as IRegistrationDto)
       );
-    await onSelectWorkmodes(workmodes);
+    onSelectWorkmodes(workmodes);
     setIsChanged(false);
   };
 
@@ -246,12 +242,12 @@ export const PlanningCalendarDay: React.FC<IPlanningCalendarDay> = ({
                 </Box>
                 <OfficeInfoContainer>
                   <Box padding={"0 2rem"}>
-                    Current office: {userOffice?.site || "N/A"}
+                    Current office: {userOffice?.name || "N/A"}
                     <br />
                     {userOffice ? (
                       startDate.isSame(endDate) ? (
                         <>
-                          {officeCapacity}/{userOffice.maxPeople} spots available
+                          {officeCapacity}/{userOffice.capacity} spots available
                         </>
                       ) : officeCapacity <= 0 ? (
                         "No spots available"

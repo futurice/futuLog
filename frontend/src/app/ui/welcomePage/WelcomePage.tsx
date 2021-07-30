@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { PageMargins, Stack, HR } from "app/ui/ux/containers";
 import { H2, P } from "app/ui/ux/text";
-import { ISetShiftDto, IShiftAssignmentDto } from "app/services/apiClientService";
-import { userShiftQueryKey } from "app/utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import { useMutation } from "react-query";
 import { SiteSelector } from "../siteSelector/SiteSector";
+import { userQueryKey, setDefaultOfficeQueryKey } from "app/utils/reactQueryUtils";
+import { IUserDto } from "app/services/apiClientService";
 
 interface IWelcomePage {
   onMount: () => void;
@@ -19,15 +19,15 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
   // Remote data
 
   // These are pre-loaded in AppRoutes
-  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
+  const user = queryCache.getQueryData<IUserDto>(userQueryKey())!;
 
-  const [currentSite, setCurrentSite] = useState((userShift && userShift.site) || "");
+  const [currentOffice, setCurrentOffice] = useState(user.defaultOffice || "");
 
-  const [registerSiteShift] = useMutation(
-    (request: ISetShiftDto) => apiClient.registerSiteShift(request),
+  const [setDefaultOffice] = useMutation(
+    (request: string) => apiClient.setDefaultOffice(request),
     {
       onSuccess: () => {
-        queryCache.refetchQueries(userShiftQueryKey());
+        queryCache.refetchQueries(setDefaultOfficeQueryKey());
         window.location.href = '/';
       },
     }
@@ -35,11 +35,11 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
 
 
   const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    setCurrentSite(event.target.value as string);
+    setCurrentOffice(event.target.value as string);
   }
 
-  const registerUserSite = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    registerSiteShift({ shiftName: "default", site: currentSite })
+  const registerUserSite = (_event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setDefaultOffice(currentOffice)
   }
 
 
@@ -60,7 +60,7 @@ export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
         <SiteSelector
           handleSiteChange={handleSiteChange}
           registerUserSite={registerUserSite}
-          currentSite={currentSite}
+          currentSite={currentOffice}
           buttonText="Start" />
       </Stack>
     </PageMargins>

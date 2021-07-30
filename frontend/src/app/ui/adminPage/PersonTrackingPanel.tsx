@@ -6,14 +6,14 @@ import CollapsibleTable from "./CollapsibleTable";
 import { userContactsQueryKey } from "../../utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import {
-  ICapacityDto,
-  IOfficeSpaceDto,
+  IOfficeDto,
   IUserDataRequestDto,
   IUserDto,
   IWorkmodeDto,
   Workmode,
-  IDeleteUserWorkmodeDto,
-  IAdminUserWorkmodeDto,
+  IContactsDto,
+  IAdminRegistrationDto,
+  IRegistrationIdDto,
 } from "../../services/apiClientService";
 import { ICollapsibleTableHead, ITableDataDto, IUserDtoMapped } from "./types";
 import { DAYS_RANGE_OPTIONS, TrackingToolbar } from "./TrackingToolbar";
@@ -24,7 +24,7 @@ import { ModalContext } from "app/providers/ModalProvider";
 
 interface IPersonTrackingPanel {
   users: IUserDto[];
-  offices?: IOfficeSpaceDto[];
+  offices?: IOfficeDto[];
 }
 
 const childTableHead = (isEditing: boolean): ICollapsibleTableHead[] => {
@@ -88,24 +88,24 @@ const mapBookingsForUI = ({
   user,
   offices,
 }: {
-  bookings: ICapacityDto;
+  bookings: IContactsDto;
   user: string;
-  offices: IOfficeSpaceDto[];
+  offices: IOfficeDto[];
 }): ITableDataDto => {
-  const { people, date, site } = bookings;
+  const { people, date, office } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
     name: person.name,
     email: person.email,
     checked: false,
   }));
-  const { maxPeople } = offices.filter((office) => office.site === site)[0];
+  const { capacity } = offices.filter((o) => o.name === office)[0];
 
   return {
     date: dayjs(date).format("D MMM YYYY") || "",
-    site: site || "",
+    office: office || "",
     person: user,
     visitors: mappedPeople,
-    utilisation: `${mappedPeople.length} people (max ${maxPeople})`,
+    utilisation: `${mappedPeople.length} people (max ${capacity})`,
   };
 };
 
@@ -135,7 +135,7 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
     });
   };
 
-  const handleUserChange = (event: React.ChangeEvent<{}>, value: any | null) => {
+  const handleUserChange = (_event: React.ChangeEvent<{}>, value: any | null) => {
     setCurrentUser(value.value);
   };
 
@@ -150,14 +150,14 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
 
   const [mutateUserContacts, mutateUserContactsRes] = useMutation(
     ({ user, startDate, endDate }: IUserDataRequestDto) =>
-      apiClient.getUserContacts({ user, startDate, endDate }),
+      apiClient.admin.getUserContacts({ user, startDate, endDate }),
     {
       onSuccess: (data) => {
         const user = users.find(({ email }) => currentUser === email);
         if (user) {
           const mappedBookings: ITableDataDto[] | undefined =
             data &&
-            data.map((item: ICapacityDto) => {
+            data.map((item: IContactsDto) => {
               return mapBookingsForUI({
                 bookings: item,
                 user: user?.name,
@@ -182,8 +182,8 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
   const startDateStr = startDate.format("YYYY-MM-DD");
   const endDateStr = endDate.format("YYYY-MM-DD");
 
-  const [updateUserWorkmode] = useMutation(
-    (request: IAdminUserWorkmodeDto[]) => apiClient.updateUserWorkmode(request),
+  const [updateRegistrations] = useMutation(
+    (request: IAdminRegistrationDto[]) => apiClient.admin.setRegistrations(request),
     {
       onSuccess: async () => {
         await mutateUserContacts({
@@ -195,8 +195,8 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
       },
     }
   );
-  const [deleteUserWorkmode] = useMutation(
-    (request: IDeleteUserWorkmodeDto[]) => apiClient.deleteUserWorkmode(request),
+  const [deleteRegistration] = useMutation(
+    (request: IRegistrationIdDto[]) => apiClient.admin.deleteRegistrations(request),
     {
       onSuccess: async () => {
         await mutateUserContacts({
@@ -209,26 +209,26 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
     }
   );
 
-  const onAddEmployee = (email: string, formatedDate: string, site: string) => {
+  const onAddEmployee = (email: string, formatedDate: string, office: string) => {
     const date = dayjs(formatedDate).format("YYYY-MM-DD");
     const workmode: IWorkmodeDto = {
       type: Workmode.Office,
       confirmed: true,
       name: Workmode.Office,
     };
-    updateUserWorkmode([{ date, site, workmode, email }]);
+    updateRegistrations([{ date, office, workmode, email }]);
   };
 
   const onDeleteEmployee = (date: string) => {
     const formattedDate = dayjs(date).format("YYYY-MM-DD");
     const visitors = rows.find((row) => row.date === date)?.visitors.filter((v) => v.checked);
 
-    const selectedUsers: IDeleteUserWorkmodeDto[] = visitors
+    const selectedUsers: IRegistrationIdDto[] = visitors
       ? visitors.map((v) => {
         return { email: v.email, date: formattedDate };
       })
       : [];
-    deleteUserWorkmode(selectedUsers);
+    deleteRegistration(selectedUsers);
   };
 
   const onToggleAllRows = useCallback(

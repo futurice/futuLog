@@ -6,6 +6,7 @@ import { QueryResult, AnyQueryKey } from "react-query";
 // IUserDto
 export const userQueryKey = () => "user";
 // IRegistrationDto
+export const setDefaultOfficeQueryKey = () => "setDefaultOffice";
 export const registrationQueryKey = (date: string): AnyQueryKey => ["registration", date];
 // IRegistrationDto[]
 export const registrationsQueryKey = (startDate: string, endDate: string): AnyQueryKey => [

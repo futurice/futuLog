@@ -55,7 +55,7 @@ export const QrOffice: React.FC = () => {
   const officeBookingsRes = useQuery(
     officeBookingsQueryKey(office, date, date),
 
-    () => apiClient.getOfficeBooking({ office })
+    () => apiClient.getOfficeBookings({ office })
   );
 
   if (!userConfirmed) {

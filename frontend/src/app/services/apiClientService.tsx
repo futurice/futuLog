@@ -71,7 +71,7 @@ export interface IContactsDto {
 }
 
 export interface IAdminRegistrationDto {
-  userEmail: string;
+  email: string;
   office: string;
   date: string;
   workmode: IWorkmodeDto;
@@ -82,7 +82,7 @@ export interface IRegistrationIdDto {
   date: string;
 }
 
-export interface IOfficeBookingRequestDto {
+export interface IOfficeBookingsRequestDto {
   office: string;
   startDate?: string;
   endDate?: string;
@@ -122,9 +122,9 @@ export function createAPIClientService(baseUrl: string) {
 
     getOffices: () => fetchJSON<IOfficeDto[]>(`${baseUrl}/api/offices`),
 
-    getOfficeBooking: ({ office, startDate, endDate }: IOfficeBookingRequestDto) =>
-      fetchJSON<IUserDto[]>(
-        `${baseUrl}/api/offices/${e(office)}/booked?${qsStringify({ startDate, endDate })}`
+    getOfficeBookings: ({ office, startDate, endDate }: IOfficeBookingsRequestDto) =>
+      fetchJSON<IContactsDto[]>(
+        `${baseUrl}/api/offices/${e(office)}/bookings?${qsStringify({ startDate, endDate })}`
       ),
 
     admin: {
@@ -133,6 +133,13 @@ export function createAPIClientService(baseUrl: string) {
           method: "DELETE",
           body: requests,
         }),
+
+      setRegistrations: (requests: IAdminRegistrationDto[]) =>
+        fetchJSON<void>(`${baseUrl}/api/admin/registrations`, {
+          method: "PUT",
+          body: requests,
+        }),
+
       getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
 
       getUserContacts: ({ user, startDate, endDate }: IUserDataRequestDto) =>

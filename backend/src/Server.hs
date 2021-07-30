@@ -74,7 +74,7 @@ registrationsHandler user@MkUser {email} = register :<|> getRegistrations :<|> c
         False -> respond . WithStatus @400 $ MkGenericError @"No registration for this day exists"
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = adminsHandler :<|> adminRegistrationsHandler :<|> DB.getUsers
+adminHandler _ = adminsHandler :<|> adminRegistrationsHandler :<|> DB.getUsers :<|> adminOfficesHandler
 
 adminsHandler :: Server AdminsAPI
 adminsHandler = DB.getAdmins :<|> putAdmin :<|> removeAdmin
@@ -99,6 +99,15 @@ adminUserHandler email = userRegistrationsHandler :<|> contactsHandler
   where
     userRegistrationsHandler = withDefaultDays (DB.queryRegistrations email)
     contactsHandler = withDefaultDays (DB.queryContacts email)
+
+adminOfficesHandler :: Server AdminOfficesAPI
+adminOfficesHandler = setOfficeHandler :<|> deleteOfficeHandler
+  where
+    setOfficeHandler = DB.setOffice >$> NoContent
+    deleteOfficeHandler =
+      DB.deleteOffice >=> \case
+        Nothing -> respond . WithStatus @400 $ MkGenericError @"No office with that name exists"
+        Just o -> respond $ WithStatus @200 o
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

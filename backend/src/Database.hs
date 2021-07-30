@@ -3,7 +3,7 @@
 
 module Database where
 
-import Control.Monad (when)
+import Control.Monad (when, (<=<))
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
@@ -123,6 +123,15 @@ saveRegistration email MkRegistration {office, date, workmode} = do
 
 getOffices :: (MonadIO m, MonadReader Env m) => m [Office]
 getOffices = query'_ "SELECT * FROM offices"
+
+setOffice :: (MonadIO m, MonadReader Env m) => Office -> m ()
+setOffice =
+  exec $
+    "INSERT INTO offices (name, capacity) VALUES (?, ?)"
+      <> " ON CONFLICT (name) DO UPDATE SET capacity = EXCLUDED.capacity"
+
+deleteOffice :: (MonadIO m, MonadReader Env m) => Text -> m (Maybe Office)
+deleteOffice = pure . listToMaybe <=< query' "DELETE FROM offices WHERE name = ? RETURNING *" . Only
 
 saveUser :: (MonadIO m, MonadReader Env m) => OpenIdUser -> m ()
 saveUser =

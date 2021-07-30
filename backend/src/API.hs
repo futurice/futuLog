@@ -94,6 +94,7 @@ type AdminAPI =
   "admins" :> AdminsAPI
     :<|> "registrations" :> AdminRegistrationAPI
     :<|> "people" :> Get '[JSON] [User]
+    :<|> "offices" :> AdminOfficesAPI
 
 type AdminsAPI =
   ( Summary "Get the list of all admins or the admins of an office"
@@ -112,6 +113,21 @@ type AdminsAPI =
                   [ WithStatus 200 Email,
                     WithStatus 400 (GenericError "No admin with that email exists")
                   ]
+         )
+
+type AdminOfficesAPI =
+  ( Summary "Add a new office or update an existing office"
+      :> ReqBody '[JSON] Office
+      :> Put '[JSON] NoContent
+  )
+    :<|> ( Summary "Delete an office"
+             :> ReqBody '[JSON] Text
+             :> UVerb
+                  'DELETE
+                  '[JSON]
+                  '[ WithStatus 200 Office,
+                     WithStatus 400 (GenericError "No office with that name exists")
+                   ]
          )
 
 type AdminRegistrationAPI =

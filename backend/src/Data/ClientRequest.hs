@@ -61,7 +61,7 @@ data Office = MkOffice
     capacity :: Int
   }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow)
+  deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow, ToRow)
 
 data UserRegistration = MkUserRegistration User Registration
 

@@ -5,7 +5,7 @@ import Auth (contextProxy, mkAuthServerContext)
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.ClientRequest (toRegistration)
+import Data.ClientRequest (RegistrationId (..), toRegistration)
 import Data.Errors (GenericError (..), RegistrationError (..))
 import Data.Functor (($>))
 import Data.Maybe (catMaybes, fromMaybe)
@@ -70,9 +70,9 @@ registrationsHandler user@MkUser {email} = register :<|> getRegistrations :<|> c
     getRegistrations = withDefaultDays . DB.queryRegistrations $ email
     confirmRegistration :: Server ConfirmationAPI
     confirmRegistration =
-      DB.confirmRegistration >=> \case
+      DB.confirmRegistration . MkRegistrationId email >=> \case
         True -> respond $ WithStatus @200 NoContent
-        False -> respond . WithStatus @400 $ MkGenericError @"No registration with this id exists"
+        False -> respond . WithStatus @400 $ MkGenericError @"No registration for this day exists"
 
 adminHandler :: AdminUser -> Server AdminAPI
 adminHandler _ = adminsHandler :<|> adminRegistrationsHandler :<|> DB.getUsers

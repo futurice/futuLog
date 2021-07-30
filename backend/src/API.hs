@@ -81,12 +81,12 @@ type RegistrationAPI =
 
 type ConfirmationAPI =
   Summary "Set the confirmation flag for the given registration"
-    :> ReqBody '[JSON] RegistrationId
+    :> ReqBody '[JSON] Day
     :> UVerb
          'PUT
          '[JSON]
          [ WithStatus 200 NoContent,
-           WithStatus 400 (GenericError "No registration with this id exists")
+           WithStatus 400 (GenericError "No registration for this day exists")
          ]
 
 type AdminAPI =

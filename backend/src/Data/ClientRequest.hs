@@ -42,8 +42,8 @@ toRegistration :: AdminRegistration -> (Email, Registration)
 toRegistration MkAdminRegistration {..} = (email, MkRegistration {..})
 
 data RegistrationId = MkRegistrationId
-  { date :: Day,
-    email :: Text
+  { email :: Email,
+    date :: Day
   }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)

@@ -11,7 +11,7 @@ export interface ICollapsibleTableHead extends MuiTableCellProps {
 
 export interface ITableDataDto {
   date: string;
-  site: string;
+  office: string;
   person?: string;
   visitors: IUserDtoMapped[];
   utilisation: string;
@@ -34,7 +34,7 @@ export interface IToolbar {
 
 export interface ICSVDataItem {
   date: string,
-  site: string,
+  office: string,
   name: string,
   email: string
 }

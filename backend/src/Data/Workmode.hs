@@ -1,8 +1,9 @@
+{-# LANGUAGE OverloadedLists #-}
+
 module Data.Workmode where
 
 import Control.Lens ((&), (.~), (?~))
-import Data.Aeson ((.:), (.=), FromJSON (..), ToJSON (..), object, withObject)
-import Data.HashMap.Strict.InsOrd (fromList)
+import Data.Aeson (FromJSON (..), ToJSON (..), object, withObject, (.:), (.=))
 import Data.Proxy (Proxy (..))
 import Data.Swagger (NamedSchema (..), SwaggerType (..), ToSchema (..), declareSchemaRef, properties, required, type_)
 import Data.Text (Text)
@@ -30,13 +31,13 @@ instance ToSchema Workmode where
   declareNamedSchema _ = do
     stringSchema <- declareSchemaRef (Proxy :: Proxy Text)
     boolSchema <- declareSchemaRef (Proxy :: Proxy (Maybe Bool))
-    pure $ NamedSchema (Just "Workmode") $
-      mempty
-        & type_ ?~ SwaggerObject
-        & properties
-          .~ fromList
-            [ ("type", stringSchema),
-              ("confirmed", boolSchema),
-              ("name", stringSchema)
-            ]
-        & required .~ ["type"]
+    pure $
+      NamedSchema (Just "Workmode") $
+        mempty
+          & type_ ?~ SwaggerObject
+          & properties
+            .~ [ ("type", stringSchema),
+                 ("confirmed", boolSchema),
+                 ("name", stringSchema)
+               ]
+          & required .~ ["type"]

@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import { RoutePaths } from "app/ui/app/AppRoutes";
+import { useParams } from "react-router-dom";
 import { Box } from "@material-ui/core";
 import { useQuery, useMutation } from "react-query";
 import { useServices } from "app/services/services";
 import {
   Workmode,
-  IShiftAssignmentDto,
-  ISetShiftDto,
 } from "app/services/apiClientService";
 import {
   RenderQuery,
   combineQueries,
   officeBookingsQueryKey,
-  userWorkmodeQueryKey,
-  userShiftQueryKey,
+  registrationQueryKey,
 } from "app/utils/reactQueryUtils";
 import { LinkButton } from "app/ui/ux/buttons";
 import { H2, H3, P } from "app/ui/ux/text";
@@ -22,62 +20,47 @@ import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButton } from "app/ui/homePage/WorkmodeButtons";
 import { Card } from "app/ui/ux/Card";
 
-
-export const QrStuttgart: React.FC = () => {
+export const QrOffice: React.FC = () => {
+  const { office } = useParams();
   const { apiClient, queryCache } = useServices();
   const date = new Date().toISOString().slice(0, 10);
   const [ userConfirmed, setUserConfirmed ] = useState(
     false
   );
 
-
-  const [registerSiteShift] = useMutation(
-    (request: ISetShiftDto) => apiClient.registerSiteShift(request),
-    {
-      onSuccess: () => {
-        queryCache.refetchQueries(userShiftQueryKey());
-      },
-    }
-  );
-
   const [registerUserWorkmode] = useMutation(
-    () => apiClient.registerUserWorkmode([{ site: "Stuttgart", date: date,
-           workmode:{ type: Workmode.Office, confirmed:true} }]),
+    () => apiClient.setRegistrations([{ office, date, workmode: { type: Workmode.Office, confirmed:true } }]),
     {
-      onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
+      onSuccess: () => queryCache.refetchQueries(registrationQueryKey(date)),
     }
   );
 
   const [confirmUserWork] = useMutation(
-    () => apiClient.confirmUserWorkmode(true),
+    () => apiClient.confirmWorkmode(date),
     {
-      onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
+      onSuccess: () => queryCache.refetchQueries(registrationQueryKey(date)),
     }
   );
 
 
   const confirmUserOffice = () => {
-    registerSiteShift({ shiftName: "default", site: "Stuttgart" })
     registerUserWorkmode()
     confirmUserWork()
     setUserConfirmed(true)
   }
 
-  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
-
-  const userWorkmodeRes = useQuery(userWorkmodeQueryKey(date), () =>
-    apiClient.getUserWorkmode(date).catch(() => null)
+  const userWorkmodeRes = useQuery(registrationQueryKey(date), () =>
+    apiClient.getRegistrations(date).catch(() => null)
   );
   const officeBookingsRes = useQuery(
-    userShift && officeBookingsQueryKey(userShift.site, date, date),
+    officeBookingsQueryKey(office, date, date),
 
-    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
+    () => apiClient.getOfficeBookings({ office })
   );
 
   if (!userConfirmed) {
     confirmUserOffice()
   }
-
 
   return(
     <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
@@ -91,7 +74,7 @@ export const QrStuttgart: React.FC = () => {
       onError={(error, children) => children({} as any, false, error)}
     >
 
-      {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) =>
+      {({ userWorkmode, officeBookings }, _isLoading: boolean, _error?: Error) =>
       <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
         <Card spacing="2rem" textAlign="center">
 
@@ -143,9 +126,9 @@ export const QrStuttgart: React.FC = () => {
 
     }
 
-    </RenderQuery>
+  </RenderQuery>
 
-    </Stack>
+  </Stack>
 
 )
 

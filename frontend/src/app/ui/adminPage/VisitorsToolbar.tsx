@@ -8,7 +8,7 @@ import { Flex } from "../ux/containers";
 import { Button } from "../ux/buttons";
 import { ICSVDataItem, IUserDtoMapped, IToolbar, ITableDataDto } from "./types";
 import { CSVButton } from "./CSVButton";
-import { IOfficeSpaceDto } from "../../services/apiClientService";
+import { IOfficeDto } from "../../services/apiClientService";
 import { Theme } from "../ux/theme";
 import { Toolbar, ToolbarItem } from "./styled";
 import { FormControl } from "../ux/formcontrol";
@@ -16,7 +16,7 @@ import { Select } from "../ux/select";
 
 
 interface IVisitorsToolbar extends IToolbar {
-  offices?: IOfficeSpaceDto[];
+  offices?: IOfficeDto[];
 
   endDate: dayjs.Dayjs;
   currentSite?: string;
@@ -36,10 +36,10 @@ const DatePickerContainer = styled("div")({
 });
 
 const visitorsTableDataToCSV = (tableData: ITableDataDto[]) => {
-  return tableData.reduce((acc: ICSVDataItem[], { date, site, visitors }: ITableDataDto) => {
+  return tableData.reduce((acc: ICSVDataItem[], { date, office, visitors }: ITableDataDto) => {
     const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IUserDtoMapped) => ({
       date: date || "",
-      site: site || "",
+      office: office || "",
       name: name || "",
       email: email || ""
     }));
@@ -59,7 +59,7 @@ export function VisitorsToolbar({
   onDateChange,
   onSearch
 }: IVisitorsToolbar) {
-  const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
+  const officesOptions = (offices || []).map(({ name }) => ({ value: name, label: name }));
   const csvData: ICSVDataItem[] = visitorsTableDataToCSV(tableData);
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
   const startDateStr = startDate.format("YYYY-MM-DD");

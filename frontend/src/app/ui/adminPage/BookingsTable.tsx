@@ -117,7 +117,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                       <AddEmployeeModalContent
                         users={users}
                         onAddEmployee={onAddEmployee}
-                        site={row.site}
+                        site={row.office}
                         date={row.date}
                       />
                     );

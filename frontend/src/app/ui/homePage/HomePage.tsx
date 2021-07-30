@@ -5,18 +5,18 @@ import { useServices } from "app/services/services";
 import {
   Workmode,
   IWorkmodeDto,
-  IShiftAssignmentDto,
-  IOfficeSpaceDto,
-  IRegisterWorkmodeDto,
-  ICapacityDto
+  IOfficeDto,
+  IUserDto,
+  IRegistrationDto,
+  IContactsDto,
 } from "app/services/apiClientService";
 import {
   RenderQuery,
   combineQueries,
   officeBookingsQueryKey,
-  userWorkmodeQueryKey,
-  userShiftQueryKey,
   officesQueryKey,
+  userQueryKey,
+  registrationQueryKey,
 } from "app/utils/reactQueryUtils";
 import { RoutePaths } from "app/ui/app/AppRoutes";
 import { Button, LinkButton } from "app/ui/ux/buttons";
@@ -36,12 +36,12 @@ const InlineIconButton = styled(IconButton)({
 });
 
 const getOfficeCapacity = (
-  office: IOfficeSpaceDto,
+  office: IOfficeDto,
   date: string,
-  officeBookings: ICapacityDto[]
+  officeBookings: IContactsDto[]
 ) => {
   const booking = officeBookings.find((booking) => booking.date === date);
-  return booking ? office.maxPeople - booking.people.length : office.maxPeople;
+  return booking ? office.capacity - booking.people.length : office.capacity;
 };
 
 export const HomePage: React.FC = () => {
@@ -53,39 +53,35 @@ export const HomePage: React.FC = () => {
   // Remote data
 
   // These are pre-loaded in AppRoutes
-  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
-  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
+  const user = queryCache.getQueryData<IUserDto>(userQueryKey());
+  const offices = queryCache.getQueryData<IOfficeDto[]>(officesQueryKey());
 
-  const userWorkmodeRes = useQuery(userWorkmodeQueryKey(date), () =>
-    apiClient.getUserWorkmode(date).catch(() => null)
+  const registrationRes = useQuery(registrationQueryKey(date), () =>
+    apiClient.getRegistrations(date).catch(() => null)
   );
   const officeBookingsRes = useQuery(
-    userShift && officeBookingsQueryKey(userShift.site, date, date),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    () => apiClient.getOfficeBookings({ site: userShift!.site, startDate: date, endDate: date })
+    Boolean(user) && Boolean(user!.defaultOffice) && officeBookingsQueryKey(user!.defaultOffice, date, date),
+    () => apiClient.getOfficeBookings({ office: user!.defaultOffice, startDate: date, endDate: date })
   );
 
-
-
-  const [registerWorkmode] = useMutation(
-    (request: IRegisterWorkmodeDto) => apiClient.registerUserWorkmode([request]),
+  const [register] = useMutation(
+    (request: IRegistrationDto) => apiClient.setRegistrations([request]),
     {
-      onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
+      onSuccess: () => queryCache.refetchQueries(registrationQueryKey(date)),
     }
   );
-  const [confirmWorkmode] = useMutation(() => apiClient.confirmUserWorkmode(true), {
-    onSuccess: () => queryCache.refetchQueries(userWorkmodeQueryKey(date)),
+  const [confirmWorkmode] = useMutation(() => apiClient.confirmWorkmode(date), {
+    onSuccess: () => queryCache.refetchQueries(registrationQueryKey(date)),
   });
 
-  const userOffice = (offices || []).find((office) => userShift && office.site === userShift.site);
+  const userOffice = (offices || []).find((office) => user && office.name === user.defaultOffice);
 
   //
   // Actions
 
   const onSelectWorkmode = (workmode: IWorkmodeDto) => {
-    if (userShift) {
-      const site = userShift.site;
-      registerWorkmode({ date, site, workmode });
+    if (user && user.defaultOffice) {
+      register({ date, office: user.defaultOffice, workmode });
     }
   };
 
@@ -109,95 +105,99 @@ export const HomePage: React.FC = () => {
     >
       <RenderQuery
         query={combineQueries({
-          userWorkmode: userWorkmodeRes,
+          registrations: registrationRes,
           officeBookings: officeBookingsRes,
         })}
         // TODO: Improve the UX for loading state, don't let the initial state flash
         onLoading={(data, children) => children(data || ({} as any), true)}
         onError={(error, children) => children({} as any, false, error)}
       >
-        {({ userWorkmode, officeBookings }, isLoading: boolean, error?: Error) => (
-          <Card spacing="2rem" textAlign="center">
-            <Stack spacing="2rem" maxWidth="26rem" mx="auto">
-              <H2>Where are you working today?</H2>
+        {({ registrations, officeBookings }, isLoading: boolean, error?: Error) => {
+          const registration = registrations && registrations[0];
+          return (
+            <Card spacing="2rem" textAlign="center">
+              <Stack spacing="2rem" maxWidth="26rem" mx="auto">
+                <H2>Where are you working today?</H2>
 
-              <Box maxWidth="24rem" mx="auto">
-                <WorkmodeButtons
-                  disabled={isLoading}
-                  officeCapacity={
-                    userOffice ? getOfficeCapacity(userOffice, date, officeBookings || []) : 0
-                  }
-                  workmode={userWorkmode ? userWorkmode.workmode : { type: Workmode.Home }}
-                  onSelectWorkmode={onSelectWorkmode}
-                />
-              </Box>
-              {error && <Box component="p">{error.message}</Box>}
-            </Stack>
+                <Box maxWidth="24rem" mx="auto">
+                  <WorkmodeButtons
+                    disabled={isLoading}
+                    officeCapacity={
+                      userOffice ? getOfficeCapacity(userOffice, date, officeBookings || []) : 0
+                    }
+                    workmode={registration ? registration.workmode : { type: Workmode.Home }}
+                    onSelectWorkmode={onSelectWorkmode}
+                  />
+                </Box>
+                {error && <Box component="p">{error.message}</Box>}
+              </Stack>
 
-            {/* Office check-in status */}
-            {userWorkmode && userWorkmode.workmode.type === Workmode.Office && (
-              <>
-                <HR />
-                {!userWorkmode.workmode.confirmed ? (
-                  //
-                  // Not checked in yet
-                  <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-                    <H3>Check in!</H3>
+              {/* Office check-in status */}
+              {registration && registration.workmode.type === Workmode.Office && (
+                <>
+                  <HR />
+                  {!registration.workmode.confirmed ? (
+                    //
+                    // Not checked in yet
+                    <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
+                      <H3>Check in!</H3>
 
-                    <P>
-                      You have booked a spot to work from the office today. Please confirm that you
-                      are there or that you are going and that you feel healthy.
-                      <InlineIconButton
-                        aria-label="More information"
-                        aria-expanded={isWhyExpanded}
-                        disableRipple
-                        onClick={() => setIsWhyExpanded(!isWhyExpanded)}
-                      >
-                        <IconInfo />
-                      </InlineIconButton>
-                    </P>
+                      <P>
+                        You have booked a spot to work from the office today. Please confirm that you
+                        are there or that you are going and that you feel healthy.
+                        <InlineIconButton
+                          aria-label="More information"
+                          aria-expanded={isWhyExpanded}
+                          disableRipple
+                          onClick={() => setIsWhyExpanded(!isWhyExpanded)}
+                        >
+                          <IconInfo />
+                        </InlineIconButton>
+                      </P>
 
-                    {isWhyExpanded && (
+                      {isWhyExpanded && (
+                        <>
+                          <P>
+                            Since Futurice needs to track who went to the office, we need to be sure
+                            who went there and we need to be sure about you feeling healthy and do not
+                            have any of these symptoms: dry cough, sore throat, fever or general
+                            feeling of sickness.
+                          </P>
+                        </>
+                      )}
+
+                      <Button variant="contained" color="primary" onClick={onConfirmOffice}>
+                        I'm in the office
+                      </Button>
+                    </Stack>
+                  ) : (
+                      //
+                      // Checked in
                       <>
-                        <P>
-                          Since Futurice needs to track who went to the office, we need to be sure
-                          who went there and we need to be sure about you feeling healthy and do not
-                          have any of these symptoms: dry cough, sore throat, fever or general
-                          feeling of sickness.
-                        </P>
+                        <Box
+                          component={P}
+                          maxWidth="26rem"
+                          mx="auto"
+                          fontSize="1.5rem"
+                          fontWeight="bold"
+                          fontFamily="Futurice"
+                          lineHeight="1.75"
+                          marginBottom="0"
+                        >
+                        <IconCheck />
+                          <br />
+                        You are checked in!
+                        <br />
+                        Thank you.
+                      </Box>
                       </>
                     )}
-
-                    <Button variant="contained" color="primary" onClick={onConfirmOffice}>
-                      I'm in the office
-                    </Button>
-                  </Stack>
-                ) : (
-                    //
-                    // Checked in
-                    <>
-                      <Box
-                        component={P}
-                        maxWidth="26rem"
-                        mx="auto"
-                        fontSize="1.5rem"
-                        fontWeight="bold"
-                        fontFamily="Futurice"
-                        lineHeight="1.75"
-                        marginBottom="0"
-                      >
-                      <IconCheck />
-                        <br />
-                      You are checked in!
-                      <br />
-                      Thank you.
-                    </Box>
-                    </>
-                  )}
-              </>
-            )}
-          </Card>
-        )}
+                </>
+              )}
+            </Card>
+            );
+        }
+      }
       </RenderQuery>
 
       <Card spacing="2rem" textAlign="center">

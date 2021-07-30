@@ -1,5 +1,5 @@
 import React from "react";
-import { IOfficeSpaceDto, ICapacityDto } from "app/services/apiClientService";
+import { IOfficeDto, IContactsDto } from "app/services/apiClientService";
 import { ButtonDiscrete, ButtonDiscreteWithEndIcon } from "app/ui/ux/buttons";
 import { IconArrowDown, IconArrowUp } from "app/ui/ux/icons";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -65,7 +65,7 @@ const active = makeStyles({
 
 interface OfficeControllerProps {
   userOffice: string | undefined;
-  officeBookings: ICapacityDto[];
+  officeBookings: IContactsDto[];
   onSelectOffice: (office: string) => void,
 }
 
@@ -105,7 +105,7 @@ export const OfficeController = ({ userOffice, officeBookings, onSelectOffice }:
 
   const { queryCache } = useServices();
 
-  const offices = queryCache.getQueryData<IOfficeSpaceDto[]>(officesQueryKey());
+  const offices = queryCache.getQueryData<IOfficeDto[]>(officesQueryKey());
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
   const officeClass = officeState ? activeClass.border : "";
@@ -113,7 +113,7 @@ export const OfficeController = ({ userOffice, officeBookings, onSelectOffice }:
   const bookedArrow = whoBookedState ? <IconArrowUp /> : <IconArrowDown />;
   const users = (officeBookings && officeBookings.length > 0) ? officeBookings[0].people : [];
   const list_holderClass = list_holder();
-  const officesOptions = (offices || []).map(({ site }) => ({ value: site, label: site }));
+  const officesOptions = (offices || []).map(({ name }) => ({ value: name, label: name }));
 
   return (
     <Box>
@@ -153,7 +153,7 @@ export const OfficeController = ({ userOffice, officeBookings, onSelectOffice }:
                   return (
                     <ListItem className={list_holderClass.listItem}>
                       <ListItemAvatar>
-                        <AvatarIcon src={user.picture} />
+                        <AvatarIcon src={user.portrait} />
                       </ListItemAvatar>
                       <ListItemText primary={user.name} />
                     </ListItem>

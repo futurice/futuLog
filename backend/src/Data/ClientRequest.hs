@@ -1,89 +1,82 @@
-{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Data.ClientRequest where
 
+import Control.Monad (void)
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Csv ((.=), DefaultOrdered (..), ToNamedRecord (..), namedRecord)
 import Data.Swagger (ToSchema)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
-import Data.Time.Format.ISO8601 (iso8601Show)
-import Data.User (User)
+import Data.User (Email, User (..))
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple.FromRow (FromRow (..), RowParser, field)
-import Database.PostgreSQL.Simple.Types (Null)
+import Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
+import Database.PostgreSQL.Simple.ToField (ToField (toField))
+import Database.PostgreSQL.Simple.ToRow (ToRow (..))
+import Database.PostgreSQL.Simple.Types (Null (Null))
 import GHC.Generics (Generic)
 
-data SetShift
-  = MkSetShift
-      {shiftName :: Text,
-      site :: Text}
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON, ToSchema)
-
-data RegisterWorkmode
-  = MkRegisterWorkmode
-      { site :: Text,
-        date :: Day,
-        workmode :: Workmode
-      }
+data Registration = MkRegistration
+  { office :: Text,
+    date :: Day,
+    workmode :: Workmode
+  }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data AdminWorkmode
-  = MkAdminWorkmode
-      { site :: Text,
-        date :: Day,
-        email :: Text,
-        workmode :: Workmode
-      }
+registrationDate :: Registration -> Day
+registrationDate = date
+
+registrationOffice :: Registration -> Text
+registrationOffice = office
+
+data AdminRegistration = MkAdminRegistration
+  { office :: Text,
+    date :: Day,
+    email :: Email,
+    workmode :: Workmode
+  }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data WorkmodeId
-    = MkWorkmodeId
-        { date :: Day,
-          email :: Text
-        }
+toRegistration :: AdminRegistration -> (Email, Registration)
+toRegistration MkAdminRegistration {..} = (email, MkRegistration {..})
+
+data RegistrationId = MkRegistrationId
+  { email :: Email,
+    date :: Day
+  }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data UserWorkmode
-  = MkUserWorkmode
-      { userEmail :: Text,
-        site :: Text,
-        date :: Day,
-        workmode :: Workmode
-      }
+data Contacts = MkContacts
+  { date :: Day,
+    office :: Text,
+    people :: [User]
+  }
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-data Capacity
-  = MkCapacity
-      { date :: Day,
-        people :: [User]
-      }
+data Office = MkOffice
+  { name :: Text,
+    capacity :: Int
+  }
   deriving stock (Generic, Show, Eq)
-  deriving anyclass (FromJSON, ToJSON, ToSchema)
+  deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow, ToRow)
 
-data Contact
-    = MkContact
-        { date :: Day
-        , site :: Text
-        , people :: [User]
-        }
-    deriving stock (Generic, Show, Eq)
-    deriving anyclass (FromJSON, ToJSON, ToSchema)
+data UserRegistration = MkUserRegistration User Registration
 
-workmodeSite :: RegisterWorkmode -> Text
-workmodeSite = site
+instance ToRow UserRegistration where
+  toRow (MkUserRegistration MkUser {email} MkRegistration {office, date, workmode}) =
+    [toField email, toField office, toField date] <> case workmode of
+      Office b -> [toField ("Office" :: Text), toField b, toField Null]
+      Client x -> [toField ("Client" :: Text), toField Null, toField x]
+      Leave -> [toField ("Leave" :: Text), toField Null, toField Null]
+      Home -> [toField ("Home" :: Text), toField Null, toField Null]
 
-workmodeDate :: RegisterWorkmode -> Day
-workmodeDate = date
-
-instance FromRow UserWorkmode where
+instance FromRow Registration where
   fromRow = do
-    common <- MkUserWorkmode <$> field <*> field <*> field
+    void $ field @Text
+    common <- MkRegistration <$> field <*> field
     mode <- field
     common <$> case mode of
       "Office" -> Office <$> field <* nullField
@@ -92,15 +85,4 @@ instance FromRow UserWorkmode where
       "Home" -> Home <$ nullField <* nullField
       _ -> error $ "Could not deserialize working mode type: " <> mode
     where
-      nullField = field :: RowParser Null
-
-instance DefaultOrdered UserWorkmode where
-  headerOrder _ = ["Email", "Date", "Office"]
-
-instance ToNamedRecord UserWorkmode where
-  toNamedRecord (MkUserWorkmode {userEmail, site, date}) =
-    namedRecord
-      [ "Email" .= userEmail,
-        "Date" .= iso8601Show date,
-        "Office" .= site
-      ]
+      nullField = field @Null

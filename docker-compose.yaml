@@ -1,11 +1,11 @@
 version: "3.8"
 services:
-    office-tracker:
+    futuLog:
         build: .
-        image: futurice/office-tracker:latest
+        image: futurice/futulog:latest
         tty: true
         environment:
-            DB_URL: postgresql://postgres:example_password@localhost:5432/office
+            DB_URL: postgresql://postgres:example_password@localhost:5432/futuLog
             INITIAL_ADMIN: testuser1@example.org
             PUBLIC_URI: http://localhost:8000
             OPENID_CLIENT_ID: futulog
@@ -20,7 +20,7 @@ services:
         ports:
             - "5432:5432"
         environment:
-            POSTGRES_DB: office
+            POSTGRES_DB: futuLog
             POSTGRES_PASSWORD: example_password
 
     keycloak:

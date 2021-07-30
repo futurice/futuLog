@@ -34,27 +34,10 @@ const e = encodeURIComponent;
 
 export interface IUserDto {
   email: string;
+  defaultOffice: string;
   name: string;
-  picture: string;
+  portrait: string;
   isAdmin: boolean;
-}
-
-export interface IShiftAssignmentDto {
-  userEmail: string;
-  assignmentDate: string;
-  site: string;
-  shiftName: string;
-}
-
-export interface IShiftDto {
-  days: number;
-  name: string;
-  site: string;
-}
-
-export interface ISetShiftDto {
-  shiftName: string;
-  site: string;
 }
 
 export enum Workmode {
@@ -70,120 +53,105 @@ export interface IWorkmodeDto {
   name?: string;
 }
 
-export interface IUserWorkmodeDto {
-  userEmail: string;
-  site: string;
+export interface IRegistrationDto {
+  office: string;
   date: string;
   workmode: IWorkmodeDto;
 }
 
-export interface IRegisterWorkmodeDto {
-  site: string;
-  date: string;
-  workmode: IWorkmodeDto;
+export interface IOfficeDto {
+  name: string;
+  capacity: number;
 }
 
-export interface IOfficeSpaceDto {
-  site: string;
-  maxPeople: number;
-}
-
-export interface ICapacityDto {
-  site?: string;
+export interface IContactsDto {
+  office: string;
   date: string;
   people: IUserDto[];
 }
 
-export interface IUserBookingsDto {
-  userEmail: string;
-  site: string;
+export interface IAdminRegistrationDto {
+  email: string;
+  office: string;
   date: string;
   workmode: IWorkmodeDto;
 }
 
-export interface IAdminUserWorkmodeDto {
+export interface IRegistrationIdDto {
   email: string;
-  site: string;
   date: string;
-  workmode: IWorkmodeDto;
 }
 
 export interface IOfficeBookingsRequestDto {
-  site: string;
-  startDate: string;
-  endDate: string;
+  office: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface IUserDataRequestDto {
   user: string;
-  startDate: string;
-  endDate: string;
-}
-
-export interface IDeleteUserWorkmodeDto {
-  date: string;
-  email: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export function createAPIClientService(baseUrl: string) {
   const apiClient = {
     getUser: () => fetchJSON<IUserDto>(`${baseUrl}/api/me`),
 
-    getUserShift: () => fetchJSON<IShiftAssignmentDto>(`${baseUrl}/api/shift/get`),
+    setDefaultOffice: (office: string) => fetchJSON<void>(`${baseUrl}/api/me`, {
+      method: "PUT",
+      body: `"${office}"`
+    }),
 
-    getSiteShifts: (site: string) => fetchJSON<IShiftDto[]>(`${baseUrl}/api/shift/${e(site)}/all`),
-
-    registerSiteShift: (request: ISetShiftDto) =>
-      fetchJSON<void>(`${baseUrl}/api/shift/set`, {
-        method: "POST",
-        body: request,
-      }),
-
-    getUserWorkmode: (date: string) =>
-      fetchJSON<IUserWorkmodeDto>(`${baseUrl}/api/workmode/get/${e(date)}`),
-
-    getUserWorkmodes: (startDate: string, endDate: string) =>
-      fetchJSON<IUserWorkmodeDto[]>(
-        `${baseUrl}/api/workmode/batch?${qsStringify({ startDate, endDate })}`
+    getRegistrations: (startDate?: string, endDate?: string) =>
+      fetchJSON<IRegistrationDto[]>(
+        `${baseUrl}/api/registrations?${qsStringify({ startDate, endDate })}`
       ),
 
-    registerUserWorkmode: (requests: IRegisterWorkmodeDto[]) =>
-      fetchJSON<void>(`${baseUrl}/api/workmode/register`, {
-        method: "POST",
+    setRegistrations: (requests: IRegistrationDto[]) =>
+      fetchJSON<void>(`${baseUrl}/api/registrations`, {
+        method: "PUT",
         body: requests,
       }),
 
-    confirmUserWorkmode: (confirm: boolean) =>
-      fetchJSON<void>(`${baseUrl}/api/workmode/confirm`, {
-        method: "POST",
-        body: confirm,
-      }),
-
-    updateUserWorkmode: (request: IAdminUserWorkmodeDto[]) =>
-      fetchJSON<void>(`${baseUrl}/api/admin/workmode/update`, {
+    confirmWorkmode: (date: string) =>
+      fetchJSON<void>(`${baseUrl}/api/registrations/confirm`, {
         method: "PUT",
-        body: request,
+        body: `"${date}"`,
       }),
 
-    deleteUserWorkmode: (request: IDeleteUserWorkmodeDto[]) =>
-      fetchJSON<void>(`${baseUrl}/api/admin/workmode/remove`, {
-        method: "DELETE",
-        body: request,
-      }),
+    getOffices: () => fetchJSON<IOfficeDto[]>(`${baseUrl}/api/offices`),
 
-    getOffices: () => fetchJSON<IOfficeSpaceDto[]>(`${baseUrl}/api/office/all`),
-
-    getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
-
-    getOfficeBookings: ({ site, startDate, endDate }: IOfficeBookingsRequestDto) =>
-      fetchJSON<ICapacityDto[]>(
-        `${baseUrl}/api/office/${e(site)}/booked?${qsStringify({ startDate, endDate })}`
+    getOfficeBookings: ({ office, startDate, endDate }: IOfficeBookingsRequestDto) =>
+      fetchJSON<IContactsDto[]>(
+        `${baseUrl}/api/offices/${e(office)}/bookings?${qsStringify({ startDate, endDate })}`
       ),
 
-    getUserContacts: ({ user, startDate, endDate }: IUserDataRequestDto) =>
-      fetchJSON<ICapacityDto[]>(
-        `${baseUrl}/api/admin/contacts/${e(user)}?${qsStringify({ startDate, endDate })}`
-      ),
+    admin: {
+      deleteRegistrations: (requests: IRegistrationIdDto[]) =>
+        fetchJSON<void>(`${baseUrl}/api/admin/registrations`, {
+          method: "DELETE",
+          body: requests,
+        }),
+
+      setRegistrations: (requests: IAdminRegistrationDto[]) =>
+        fetchJSON<void>(`${baseUrl}/api/admin/registrations`, {
+          method: "PUT",
+          body: requests,
+        }),
+
+      getUsers: () => fetchJSON<IUserDto[]>(`${baseUrl}/api/admin/people`),
+
+      getUserContacts: ({ user, startDate, endDate }: IUserDataRequestDto) =>
+        fetchJSON<IContactsDto[]>(
+          `${baseUrl}/api/admin/registrations/${e(user)}/contacts?${qsStringify({ startDate, endDate })}`
+        ),
+
+      getOfficeBookings: ({ office, startDate, endDate }: IOfficeBookingsRequestDto) =>
+        fetchJSON<IContactsDto[]>(
+          `${baseUrl}/api/admin/offices/${e(office)}/bookings?${qsStringify({ startDate, endDate })}`
+        ),
+    },
   };
 
   return apiClient;

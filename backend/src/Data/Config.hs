@@ -16,14 +16,3 @@ data Shift
 
 shiftSite :: Shift -> Text
 shiftSite = site
-
-data OfficeSpace
-  = MkOfficeSpace
-      { site :: Text,
-        maxPeople :: Int
-      }
-  deriving stock (Generic, Show, Eq)
-  deriving anyclass (ToJSON, FromJSON, ToSchema)
-
-officeSite :: OfficeSpace -> Text
-officeSite = site

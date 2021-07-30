@@ -1,7 +1,7 @@
 module Data.Env where
 
 import Data.Aeson (FromJSON, ToJSON)
-import Data.Config (OfficeSpace, Shift)
+import Data.ClientRequest (Office)
 import Data.Pool (Pool)
 import Data.Swagger (ToSchema)
 import Data.Text (Text)
@@ -14,8 +14,7 @@ import OpenID.Connect.Client.Provider (Provider)
 
 data Env
   = MkEnv
-      { offices :: [OfficeSpace],
-        shifts :: [Shift],
+      { offices :: [Office],
         pool :: Pool Connection,
         manager :: Manager,
         provider :: Provider

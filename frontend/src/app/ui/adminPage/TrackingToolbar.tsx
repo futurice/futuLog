@@ -29,10 +29,10 @@ interface ITrackingToolbar extends IToolbar {
 }
 
 const trackingTableDataToCSV = (tableData: ITableDataDto[]) => {
-  return tableData.reduce((acc: ICSVDataItem[], { date, site, visitors }: ITableDataDto) => {
+  return tableData.reduce((acc: ICSVDataItem[], { date, office, visitors }: ITableDataDto) => {
     const extendedVisitors: ICSVDataItem[] = visitors.map(({ name, email }: IUserDtoMapped) => ({
       date: date || "",
-      site: site || "",
+      office: office || "",
       name: name || "",
       email: email || "",
     }));

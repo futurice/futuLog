@@ -1,7 +1,7 @@
 module Auth (contextProxy, mkAuthServerContext) where
 
 import Control.Monad ((>=>))
-import Control.Monad.Except ((<=<), ExceptT, liftEither, runExceptT, throwError)
+import Control.Monad.Except (ExceptT, liftEither, runExceptT, throwError, (<=<))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, ReaderT (runReaderT))
 import Data.Bifunctor (second)
@@ -28,17 +28,19 @@ contextProxy :: Proxy ContextContent
 contextProxy = Proxy
 
 mkAuthServerContext :: MonadIO m => Env -> m (Context ContextContent, Middleware)
-mkAuthServerContext env = liftIO V.newKey <&> \key ->
-  (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware key env)
+mkAuthServerContext env =
+  liftIO V.newKey <&> \key ->
+    (authHandler key :. adminAuthHandler key :. EmptyContext, authMiddleware key env)
 
 authHandler :: V.Key User -> AuthHandler Request User
 authHandler key = mkAuthHandler $ login key
 
 adminAuthHandler :: V.Key User -> AuthHandler Request AdminUser
-adminAuthHandler key = mkAuthHandler $
-  login key >=> \case
-    user@MkUser {isAdmin} | isAdmin -> pure $ MkAdmin user
-    _ -> throwError $ err401 {errBody = "User is not an admin"}
+adminAuthHandler key =
+  mkAuthHandler $
+    login key >=> \case
+      user@MkUser {isAdmin} | isAdmin -> pure $ MkAdminUser user
+      _ -> throwError $ err401 {errBody = "User is not an admin"}
 
 login :: V.Key User -> Request -> Handler User
 login key req = either throw401 pure (maybeToEither "No user data received from middleware" $ V.lookup key (vault req))
@@ -48,22 +50,24 @@ login key req = either throw401 pure (maybeToEither "No user data received from 
 authMiddleware :: V.Key User -> Env -> Middleware
 authMiddleware key env app req respond = case pathInfo req of
   path | path `elem` publicUrls -> app req respond
-  path -> runReaderT (runExceptT (verifyLogin req)) env >>= \case
-    Left e -> case path of
-      "api" : _ -> respond $ responseLBS status401 [] $ pack e
-      _ -> respond $ responseLBS status302 [(hLocation, "/login"), ("Set-Cookie", cookie path)] $ pack e
-    Right (user, tokenCookie) ->
-      let req' = req {vault = V.insert key user (vault req)}
-       in app req' (\res -> let res' = maybe res (\c -> mapResponseHeaders (("Set-Cookie", c) :) res) tokenCookie in respond res')
+  path ->
+    runReaderT (runExceptT (verifyLogin req)) env >>= \case
+      Left e -> case path of
+        "api" : _ -> respond $ responseLBS status401 [] $ pack e
+        _ -> respond $ responseLBS status302 [(hLocation, "/login"), ("Set-Cookie", cookie path)] $ pack e
+      Right (user, tokenCookie) ->
+        let req' = req {vault = V.insert key user (vault req)}
+         in app req' (\res -> let res' = maybe res (\c -> mapResponseHeaders (("Set-Cookie", c) :) res) tokenCookie in respond res')
   where
     cookie path = encodeUtf8 $ "prevUrl=/" <> intercalate "/" path <> ";HttpOnly;Secure;Path=/return"
     publicUrls = [["login"], ["return"], ["site.webmanifest"], ["manifest.json"]]
 
 verifyLogin :: (MonadReader Env m, MonadIO m) => Request -> ExceptT String m (User, Maybe ByteString)
-verifyLogin req = getCookie req >>= DB.checkUser >>= \case
-  Nothing -> throwError "accessToken not recognized"
-  Just (Left token) -> refreshAccessToken token <&> second Just
-  Just (Right user) -> pure (user, Nothing)
+verifyLogin req =
+  getCookie req >>= DB.checkUser >>= \case
+    Nothing -> throwError "accessToken not recognized"
+    Just (Left token) -> refreshAccessToken token <&> second Just
+    Just (Right user) -> pure (user, Nothing)
 
 getCookie :: Monad m => Request -> ExceptT String m Text
 getCookie =

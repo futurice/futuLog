@@ -3,18 +3,17 @@ import { useMutation } from "react-query";
 import dayjs from "dayjs";
 
 import CollapsibleTable from "./CollapsibleTable";
-import { officeBookingsQueryKey, userShiftQueryKey } from "../../utils/reactQueryUtils";
+import { officeBookingsQueryKey } from "../../utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import {
-  ICapacityDto,
-  IOfficeBookingsRequestDto,
-  IOfficeSpaceDto,
+  IOfficeDto,
   IUserDto,
   Workmode,
-  IAdminUserWorkmodeDto,
+  IAdminRegistrationDto,
   IWorkmodeDto,
-  IDeleteUserWorkmodeDto,
-  IShiftAssignmentDto,
+  IContactsDto,
+  IOfficeBookingsRequestDto,
+  IRegistrationIdDto,
 } from "../../services/apiClientService";
 import { ITableDataDto, ICollapsibleTableHead, IUserDtoMapped } from "./types";
 import { VisitorsToolbar } from "./VisitorsToolbar";
@@ -24,7 +23,7 @@ import { ModalContext } from "app/providers/ModalProvider";
 import { AdminEditContext } from "./AdminEditContext";
 
 interface IOfficeVisitsPanel {
-  offices: IOfficeSpaceDto[];
+  offices: IOfficeDto[];
   users: IUserDto[];
 }
 
@@ -82,12 +81,12 @@ const parentTableHead = (
 
 export function mapBookingsForUI({
   bookings,
-  site,
+  office,
   offices,
 }: {
-  bookings: ICapacityDto;
-  site: string;
-  offices: IOfficeSpaceDto[];
+  bookings: IContactsDto;
+  office: string;
+  offices: IOfficeDto[];
 }): ITableDataDto {
   const { people, date } = bookings;
   const mappedPeople: IUserDtoMapped[] = people.map((person: IUserDto) => ({
@@ -95,13 +94,13 @@ export function mapBookingsForUI({
     email: person.email,
     checked: false,
   }));
-  const { maxPeople } = offices.filter((office) => office.site === site)[0];
+  const { capacity } = offices.filter((o) => o.name === office)[0];
 
   return {
     date: dayjs(date).format("D MMM YYYY") || "",
-    site,
+    office,
     visitors: mappedPeople,
-    utilisation: `${mappedPeople.length} people (max ${maxPeople})`,
+    utilisation: `${mappedPeople.length} people (max ${capacity})`,
   };
 }
 
@@ -112,9 +111,8 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
   const { handleModalClose } = useContext(ModalContext);
 
   const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
-  const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
-  const userShift = queryCache.getQueryData<IShiftAssignmentDto>(userShiftQueryKey());
-  const [currentSite, setCurrentSite] = useState((userShift && userShift.site) || "");
+  const [endDate, setEndDate] = useState(() => today.endOf("week").subtract(1, "day"));
+  const [currentOffice, setCurrentOffice] = useState("");
   const [rows, setRows] = useState<ITableDataDto[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
@@ -128,14 +126,14 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
 
   const handleSearch = async () => {
     await mutateOfficeBookings({
-      site: currentSite,
+      office: currentOffice,
       startDate: startDateStr,
       endDate: endDateStr,
     });
   };
 
-  const handleSiteChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-    setCurrentSite(event.target.value as string);
+  const handleOfficeChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
+    setCurrentOffice(event.target.value as string);
   };
 
   const handleDateChange = (startDate: dayjs.Dayjs, endDate: dayjs.Dayjs) => {
@@ -144,28 +142,28 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
   };
 
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
-    ({ site, startDate, endDate }: IOfficeBookingsRequestDto) =>
-      apiClient.getOfficeBookings({ site, startDate, endDate }),
+    (req: IOfficeBookingsRequestDto) =>
+      apiClient.admin.getOfficeBookings(req),
     {
       onSuccess: (data) => {
         const mappedBookings: ITableDataDto[] | undefined =
           data &&
-          data.map((item: ICapacityDto) =>
-            mapBookingsForUI({ bookings: item, site: currentSite, offices })
+          data.map((item: IContactsDto) =>
+            mapBookingsForUI({ bookings: item, office: currentOffice, offices })
           );
 
         setRows(mappedBookings || []);
-        queryCache.refetchQueries(officeBookingsQueryKey(currentSite, startDateStr, endDateStr));
+        queryCache.refetchQueries(officeBookingsQueryKey(currentOffice, startDateStr, endDateStr));
       },
     }
   );
 
-  const [updateUserWorkmode] = useMutation(
-    (request: IAdminUserWorkmodeDto[]) => apiClient.updateUserWorkmode(request),
+  const [updateRegistrations] = useMutation(
+    (request: IAdminRegistrationDto[]) => apiClient.admin.setRegistrations(request),
     {
       onSuccess: async () => {
         await mutateOfficeBookings({
-          site: currentSite,
+          office: currentOffice,
           startDate: startDateStr,
           endDate: endDateStr,
         });
@@ -173,12 +171,12 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
       },
     }
   );
-  const [deleteUserWorkmode] = useMutation(
-    (request: IDeleteUserWorkmodeDto[]) => apiClient.deleteUserWorkmode(request),
+  const [deleteRegistrations] = useMutation(
+    (request: IRegistrationIdDto[]) => apiClient.admin.deleteRegistrations(request),
     {
       onSuccess: async () => {
         await mutateOfficeBookings({
-          site: currentSite,
+          office: currentOffice,
           startDate: startDateStr,
           endDate: endDateStr,
         });
@@ -187,26 +185,26 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
     }
   );
 
-  const onAddEmployee = (email: string, formatedDate: string, site: string) => {
+  const onAddEmployee = (email: string, formatedDate: string, office: string) => {
     const date = dayjs(formatedDate).format("YYYY-MM-DD");
     const workmode: IWorkmodeDto = {
       type: Workmode.Office,
       confirmed: true,
       name: Workmode.Office,
     };
-    updateUserWorkmode([{ date, site, workmode, email }]);
+    updateRegistrations([{ date, office, workmode, email }]);
   };
 
   const onDeleteEmployee = (date: string) => {
     const formattedDate = dayjs(date).format("YYYY-MM-DD");
     const visitors = rows.find((row) => row.date === date)?.visitors.filter((v) => v.checked);
 
-    const selectedUsers: IDeleteUserWorkmodeDto[] = visitors
+    const selectedUsers: IRegistrationIdDto[] = visitors
       ? visitors.map((v) => {
         return { email: v.email, date: formattedDate };
       })
       : [];
-    deleteUserWorkmode(selectedUsers);
+    deleteRegistrations(selectedUsers);
   };
 
   const onToggleAllRows = useCallback(
@@ -255,9 +253,9 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
         startDate={startDate}
         endDate={endDate}
         offices={offices}
-        currentSite={currentSite}
+        currentSite={currentOffice}
         onDateChange={handleDateChange}
-        onSiteChange={handleSiteChange}
+        onSiteChange={handleOfficeChange}
         onSearch={handleSearch}
       />
       {mutateOfficeBookingsRes.status === "loading" ? (

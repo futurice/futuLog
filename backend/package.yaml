@@ -1,10 +1,10 @@
-name: office-tracker
+name: futuLog
 version: 0.1.0.0
-homepage: https://github.com/futurice/office-tracker#readme
+homepage: https://github.com/futurice/futuLog#readme
 license: MIT
 author: Jan van Brügge
 maintainer: jan.van.brugge@futurice.com
-copyright: 2020 Jan van Brügge
+copyright: 2021 Jan van Brügge
 category: Web
 
 default-extensions:
@@ -18,8 +18,10 @@ default-extensions:
     - GeneralizedNewtypeDeriving
     - LambdaCase
     - NamedFieldPuns
+    - OverloadedLabels
     - OverloadedStrings
     - ScopedTypeVariables
+    - TypeApplications
     - TypeFamilies
     - TypeOperators
 
@@ -35,31 +37,29 @@ ghc-options:
     - -Werror
 
 dependencies:
-    - base >= 4.7 && < 5
     - aeson
+    - aeson-optics
+    - base >= 4.7 && < 5
     - base64
     - binary
     - bytestring
-    - cassava
     - cookie
     - exceptions
     - http-client
     - http-client-tls
     - http-media
     - http-types
-    - insert-ordered-containers
     - jose
     - lens
     - lens-aeson
     - mtl
     - network-uri
     - openid-connect
+    - optics
     - postgresql-simple
     - resource-pool
     - retry
     - servant
-    - servant-cassava
-    - servant-multipart
     - servant-server
     - servant-swagger
     - servant-swagger-ui
@@ -71,9 +71,8 @@ dependencies:
     - wai-app-static
     - wai-cors
     - warp
-    - yaml
 
 executables:
-    office-tracker:
+    futuLog:
         source-dirs: src
         main: Main.hs

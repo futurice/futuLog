@@ -5,7 +5,7 @@ import { H2Center } from "../ux/text";
 import { Stack } from "../ux/containers";
 import { colors } from "../ux/theme";
 import { Tab, Tabs, TabsPanelWrapper, TabsWrapper } from "./styled";
-import { IOfficeSpaceDto } from "../../services/apiClientService";
+import { IOfficeDto } from "../../services/apiClientService";
 import { OfficeVisitsPanel } from "./OfficeVisitsPanel";
 import { PersonTrackingPanel } from "./PersonTrackingPanel";
 import { usersQueryKey } from "../../utils/reactQueryUtils";
@@ -19,7 +19,7 @@ export interface ITabPanelProps {
 }
 
 export interface IAdminPage {
-  offices: IOfficeSpaceDto[];
+  offices: IOfficeDto[];
 }
 
 export function TabPanel(props: ITabPanelProps) {
@@ -47,11 +47,11 @@ function a11yProps(index: any) {
 
 export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
   const { apiClient: apiClientService } = useServices();
-  const { data: users, isFetching } = useQuery(usersQueryKey(), () => apiClientService.getUsers());
+  const { data: users, isFetching } = useQuery(usersQueryKey(), () => apiClientService.admin.getUsers());
 
   const [tab, setTab] = React.useState(0);
 
-  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleTabChange = (_event: React.ChangeEvent<{}>, newValue: number) => {
     setTab(newValue);
   };
 

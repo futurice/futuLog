@@ -113,8 +113,8 @@ export function PersonTrackingPanel({ users, offices }: IPersonTrackingPanel) {
   const { apiClient } = useServices();
   const today = dayjs().utc().startOf("day");
 
-  const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
-  const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [startDate, setStartDate] = useState(() => today.endOf("week"));
+  const [endDate, setEndDate] = useState(() => today.endOf("week"));
   const [currentUser, setCurrentUser] = useState("");
   const [range, setRange] = useState(DAYS_RANGE_OPTIONS[1].value);
   const [rows, setRows] = useState<ITableDataDto[]>([]);

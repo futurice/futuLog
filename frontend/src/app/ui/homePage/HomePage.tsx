@@ -105,95 +105,99 @@ export const HomePage: React.FC = () => {
     >
       <RenderQuery
         query={combineQueries({
-          registration: registrationRes,
+          registrations: registrationRes,
           officeBookings: officeBookingsRes,
         })}
         // TODO: Improve the UX for loading state, don't let the initial state flash
         onLoading={(data, children) => children(data || ({} as any), true)}
         onError={(error, children) => children({} as any, false, error)}
       >
-        {({ registration, officeBookings }, isLoading: boolean, error?: Error) => (
-          <Card spacing="2rem" textAlign="center">
-            <Stack spacing="2rem" maxWidth="26rem" mx="auto">
-              <H2>Where are you working today?</H2>
+        {({ registrations, officeBookings }, isLoading: boolean, error?: Error) => {
+          const registration = registrations && registrations[0];
+          return (
+            <Card spacing="2rem" textAlign="center">
+              <Stack spacing="2rem" maxWidth="26rem" mx="auto">
+                <H2>Where are you working today?</H2>
 
-              <Box maxWidth="24rem" mx="auto">
-                <WorkmodeButtons
-                  disabled={isLoading}
-                  officeCapacity={
-                    userOffice ? getOfficeCapacity(userOffice, date, officeBookings || []) : 0
-                  }
-                  workmode={registration ? registration[0].workmode : { type: Workmode.Home }}
-                  onSelectWorkmode={onSelectWorkmode}
-                />
-              </Box>
-              {error && <Box component="p">{error.message}</Box>}
-            </Stack>
+                <Box maxWidth="24rem" mx="auto">
+                  <WorkmodeButtons
+                    disabled={isLoading}
+                    officeCapacity={
+                      userOffice ? getOfficeCapacity(userOffice, date, officeBookings || []) : 0
+                    }
+                    workmode={registration ? registration.workmode : { type: Workmode.Home }}
+                    onSelectWorkmode={onSelectWorkmode}
+                  />
+                </Box>
+                {error && <Box component="p">{error.message}</Box>}
+              </Stack>
 
-            {/* Office check-in status */}
-            {registration && registration[0].workmode.type === Workmode.Office && (
-              <>
-                <HR />
-                {!registration[0].workmode.confirmed ? (
-                  //
-                  // Not checked in yet
-                  <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
-                    <H3>Check in!</H3>
+              {/* Office check-in status */}
+              {registration && registration.workmode.type === Workmode.Office && (
+                <>
+                  <HR />
+                  {!registration.workmode.confirmed ? (
+                    //
+                    // Not checked in yet
+                    <Stack spacing="1.25rem" maxWidth="26rem" mx="auto">
+                      <H3>Check in!</H3>
 
-                    <P>
-                      You have booked a spot to work from the office today. Please confirm that you
-                      are there or that you are going and that you feel healthy.
-                      <InlineIconButton
-                        aria-label="More information"
-                        aria-expanded={isWhyExpanded}
-                        disableRipple
-                        onClick={() => setIsWhyExpanded(!isWhyExpanded)}
-                      >
-                        <IconInfo />
-                      </InlineIconButton>
-                    </P>
+                      <P>
+                        You have booked a spot to work from the office today. Please confirm that you
+                        are there or that you are going and that you feel healthy.
+                        <InlineIconButton
+                          aria-label="More information"
+                          aria-expanded={isWhyExpanded}
+                          disableRipple
+                          onClick={() => setIsWhyExpanded(!isWhyExpanded)}
+                        >
+                          <IconInfo />
+                        </InlineIconButton>
+                      </P>
 
-                    {isWhyExpanded && (
+                      {isWhyExpanded && (
+                        <>
+                          <P>
+                            Since Futurice needs to track who went to the office, we need to be sure
+                            who went there and we need to be sure about you feeling healthy and do not
+                            have any of these symptoms: dry cough, sore throat, fever or general
+                            feeling of sickness.
+                          </P>
+                        </>
+                      )}
+
+                      <Button variant="contained" color="primary" onClick={onConfirmOffice}>
+                        I'm in the office
+                      </Button>
+                    </Stack>
+                  ) : (
+                      //
+                      // Checked in
                       <>
-                        <P>
-                          Since Futurice needs to track who went to the office, we need to be sure
-                          who went there and we need to be sure about you feeling healthy and do not
-                          have any of these symptoms: dry cough, sore throat, fever or general
-                          feeling of sickness.
-                        </P>
+                        <Box
+                          component={P}
+                          maxWidth="26rem"
+                          mx="auto"
+                          fontSize="1.5rem"
+                          fontWeight="bold"
+                          fontFamily="Futurice"
+                          lineHeight="1.75"
+                          marginBottom="0"
+                        >
+                        <IconCheck />
+                          <br />
+                        You are checked in!
+                        <br />
+                        Thank you.
+                      </Box>
                       </>
                     )}
-
-                    <Button variant="contained" color="primary" onClick={onConfirmOffice}>
-                      I'm in the office
-                    </Button>
-                  </Stack>
-                ) : (
-                    //
-                    // Checked in
-                    <>
-                      <Box
-                        component={P}
-                        maxWidth="26rem"
-                        mx="auto"
-                        fontSize="1.5rem"
-                        fontWeight="bold"
-                        fontFamily="Futurice"
-                        lineHeight="1.75"
-                        marginBottom="0"
-                      >
-                      <IconCheck />
-                        <br />
-                      You are checked in!
-                      <br />
-                      Thank you.
-                    </Box>
-                    </>
-                  )}
-              </>
-            )}
-          </Card>
-        )}
+                </>
+              )}
+            </Card>
+            );
+        }
+      }
       </RenderQuery>
 
       <Card spacing="2rem" textAlign="center">

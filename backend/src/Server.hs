@@ -5,7 +5,7 @@ import Auth (contextProxy, mkAuthServerContext)
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.ClientRequest (Contacts, RegistrationId (..), toRegistration)
+import Data.ClientRequest (Contacts, Office, RegistrationId (..), toRegistration)
 import Data.Errors (GenericError (..), RegistrationError (..))
 import Data.Functor (($>))
 import Data.Maybe (catMaybes, fromMaybe)
@@ -101,13 +101,14 @@ adminUserHandler email = userRegistrationsHandler :<|> contactsHandler
     contactsHandler = withDefaultDays (DB.queryContacts email)
 
 adminOfficesHandler :: Server AdminOfficesAPI
-adminOfficesHandler = setOfficeHandler :<|> deleteOfficeHandler
+adminOfficesHandler = setOfficeHandler :<|> (\office -> deleteOfficeHandler office :<|> getAdminBookingsHandler office)
   where
     setOfficeHandler = DB.setOffice >$> NoContent
     deleteOfficeHandler =
       DB.deleteOffice >=> \case
-        Nothing -> respond . WithStatus @400 $ MkGenericError @"No office with that name exists"
+        Nothing -> respond @_ @'[WithStatus 200 Office, WithStatus 400 (GenericError "No office with that name exists")] . WithStatus @400 $ MkGenericError @"No office with that name exists"
         Just o -> respond $ WithStatus @200 o
+    getAdminBookingsHandler office = withDefaultDays $ DB.queryBooked office
 
 defaultDay :: MonadIO m => Maybe Day -> m Day
 defaultDay = maybe (liftIO $ utctDay <$> getCurrentTime) pure

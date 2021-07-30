@@ -35,7 +35,7 @@ queryRegistrations email start end =
 queryBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Contacts]
 queryBooked office start end =
   query'
-    ( withUserFields "r.date"
+    ( withUserFields "r.date, "
         <> " RIGHT JOIN registrations AS r ON u.user_email = r.user_email WHERE r.office = ? AND r.date >= ? AND r.date <= ?"
         <> " ORDER BY r.date DESC"
     )
@@ -55,8 +55,8 @@ queryContacts email start end =
       ( \t@(office, date) ->
           MkContacts date office
             <$> query'
-              ( userFields <> " WHERE user_email IN ("
-                  <> "SELECT user_email FROM registrations WHERE workmode = 'Office' AND office = ? AND date = ?"
+              ( userFields <> " WHERE u.user_email IN ("
+                  <> "SELECT r.user_email FROM registrations AS r WHERE workmode = 'Office' AND office = ? AND date = ?"
                   <> ")"
               )
               t
@@ -138,7 +138,7 @@ saveUser =
   exec $
     "INSERT INTO users (name, user_email, picture, default_office, expire_date, access_token, refresh_token, id_token) VALUES (?,?,?,?,?,?,?,?) "
       <> "ON CONFLICT (user_email) DO UPDATE "
-      <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, default_office = EXCLUDED.default_office, expire_date = EXCLUDED.expire_date, "
+      <> "SET name = EXCLUDED.name, picture = EXCLUDED.picture, expire_date = EXCLUDED.expire_date, "
       <> "access_token = EXCLUDED.access_token, refresh_token = EXCLUDED.refresh_token, id_token = EXCLUDED.id_token"
 
 getUsers :: (MonadIO m, MonadReader Env m) => m [User]
@@ -146,8 +146,8 @@ getUsers = query'_ userFields
 
 withUserFields :: Query -> Query
 withUserFields q =
-  "SELECT " <> q <> ", u.name, u.user_email, u.picture, u.default_office, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin"
-    <> "FROM users AS u LEFT JOIN admins ON u.user_email = admins.user_email"
+  "SELECT " <> q <> "u.name, u.user_email, u.picture, u.default_office, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin"
+    <> " FROM users AS u LEFT JOIN admins ON u.user_email = admins.user_email"
 
 userFields :: Query
 userFields = withUserFields ""
@@ -169,17 +169,17 @@ setDefaultOffice :: (MonadIO m, MonadReader Env m) => User -> Text -> m (Maybe U
 setDefaultOffice MkUser {email} office =
   listToMaybe
     <$> query'
-      ( "UPDATE users SET default_office = sub.office_name"
+      ( "UPDATE users SET default_office = sub.office_name "
           <> "FROM ("
           <> sub
-          <> ") sub"
-          <> "WHERE users.user_email = ? AND sub.user_email = users.user_email"
-          <> "RETURNING users.name, users.user_email, users.default_office, sub.is_admin"
+          <> ") sub "
+          <> "WHERE users.user_email = ? AND sub.user_email = users.user_email "
+          <> "RETURNING users.name, users.user_email, users.picture, users.default_office, sub.is_admin"
       )
       (office, email)
   where
     sub =
-      "SELECT u.user_email, offices.name AS office_name, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin"
+      "SELECT u.user_email, offices.name AS office_name, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin "
         <> "FROM users AS u "
         <> "LEFT JOIN admins ON u.user_email = admins.user_email "
         <> "INNER JOIN offices ON offices.name = ?"
@@ -198,7 +198,7 @@ updateAccessToken oldRefreshToken accessToken expireDate idToken =
 logoutUser :: (MonadIO m, MonadReader Env m) => Email -> m (Maybe Text)
 logoutUser userEmail =
   query'
-    "UPDATE users LEFT JOIN admins ON users.user_email = admins.user_email SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ? RETURNING id_token"
+    "UPDATE users SET access_token = NULL, refresh_token = NULL, expire_date = NULL WHERE user_email = ? RETURNING id_token"
     (Only userEmail)
     <&> \case
       [Only token] -> token

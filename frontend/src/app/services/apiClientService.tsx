@@ -146,6 +146,11 @@ export function createAPIClientService(baseUrl: string) {
         fetchJSON<IContactsDto[]>(
           `${baseUrl}/api/admin/registrations/${e(user)}/contacts?${qsStringify({ startDate, endDate })}`
         ),
+
+      getOfficeBookings: ({ office, startDate, endDate }: IOfficeBookingsRequestDto) =>
+        fetchJSON<IContactsDto[]>(
+          `${baseUrl}/api/admin/offices/${e(office)}/bookings?${qsStringify({ startDate, endDate })}`
+        ),
     },
   };
 

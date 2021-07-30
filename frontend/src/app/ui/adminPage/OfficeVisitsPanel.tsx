@@ -111,7 +111,7 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
   const { handleModalClose } = useContext(ModalContext);
 
   const [startDate, setStartDate] = useState(() => today.startOf("week").add(1, "day"));
-  const [endDate, setEndDate] = useState(() => today.startOf("week").add(1, "day"));
+  const [endDate, setEndDate] = useState(() => today.endOf("week").subtract(1, "day"));
   const [currentOffice, setCurrentOffice] = useState("");
   const [rows, setRows] = useState<ITableDataDto[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -143,7 +143,7 @@ export function OfficeVisitsPanel({ offices, users }: IOfficeVisitsPanel) {
 
   const [mutateOfficeBookings, mutateOfficeBookingsRes] = useMutation(
     (req: IOfficeBookingsRequestDto) =>
-      apiClient.getOfficeBookings(req),
+      apiClient.admin.getOfficeBookings(req),
     {
       onSuccess: (data) => {
         const mappedBookings: ITableDataDto[] | undefined =

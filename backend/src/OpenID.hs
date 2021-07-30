@@ -154,7 +154,7 @@ saveUser now token rawIdToken = do
   case (get "name", get "email") of
     (Just n, Just e) -> do
       let pic = fromMaybe "/static/default_picture.png" $ get "picture"
-          user = MkOpenIdUser n (MkEmail e) pic (get "defaultOffice") (Just expireDate) (Just $ accessToken token) (refreshToken token) (Just rawIdToken)
+          user = MkOpenIdUser n (MkEmail e) pic Nothing (Just expireDate) (Just $ accessToken token) (refreshToken token) (Just rawIdToken)
       DB.saveUser user $> Right ()
     _ -> pure $ Left "email and/or name not part of the id token"
 

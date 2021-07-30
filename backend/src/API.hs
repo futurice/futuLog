@@ -120,8 +120,8 @@ type AdminOfficesAPI =
       :> ReqBody '[JSON] Office
       :> Put '[JSON] NoContent
   )
-    :<|> ( Summary "Delete an office"
-             :> ReqBody '[JSON] Text
+    :<|> Capture "office" Text
+    :> ( ( Summary "Delete an office"
              :> UVerb
                   'DELETE
                   '[JSON]
@@ -129,6 +129,13 @@ type AdminOfficesAPI =
                      WithStatus 400 (GenericError "No office with that name exists")
                    ]
          )
+           :<|> ( "bookings"
+                    :> Summary "Get the registrations for the given timespan"
+                    :> QueryParam "startDate" Day
+                    :> QueryParam "endDate" Day
+                    :> Get '[JSON] [Contacts]
+                )
+       )
 
 type AdminRegistrationAPI =
   ( Summary "Delete a given list of registrations"

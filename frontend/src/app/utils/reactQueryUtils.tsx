@@ -5,34 +5,30 @@ import { QueryResult, AnyQueryKey } from "react-query";
 
 // IUserDto
 export const userQueryKey = () => "user";
-// IShiftAssignmentDto
-export const userShiftQueryKey = () => "userShift";
-// IUserWorkmodeDto
-export const userWorkmodeQueryKey = (date: string): AnyQueryKey => ["userWorkmodes", date];
-// IUserWorkmodeDto[]
-export const userWorkmodesQueryKey = (startDate: string, endDate: string): AnyQueryKey => [
-  "userWorkmodes",
+// IRegistrationDto
+export const registrationQueryKey = (date: string): AnyQueryKey => ["registration", date];
+// IRegistrationDto[]
+export const registrationsQueryKey = (startDate: string, endDate: string): AnyQueryKey => [
+  "registrations",
   startDate,
   endDate,
 ];
-// IShiftDto
-export const siteShiftQueryKey = (): AnyQueryKey => ["siteShifts"];
-// IOfficeSpaceDto[]
+// IOfficeDto[]
 export const officesQueryKey = () => "offices";
 // IUserDto[]
 export const usersQueryKey = () => "users";
 // number
-export const officeCapacityQueryKey = (site: string, date: string): AnyQueryKey => [
+/*export const officeCapacityQueryKey = (office: string, date: string): AnyQueryKey => [
   "officeCapacity",
   site,
   date,
-];
-// ICapacityDto
+];*/
+// IUserDto[]
 export const officeBookingsQueryKey = (
-  site: string,
+  office: string,
   startDate: string,
   endDate: string
-): AnyQueryKey => ["officeBookings", site, startDate, endDate];
+): AnyQueryKey => ["officeBookings", office, startDate, endDate];
 
 export const userContactsQueryKey = (
   user: string,
@@ -40,11 +36,11 @@ export const userContactsQueryKey = (
   endDate: string
 ): AnyQueryKey => ["userContacts", user, startDate, endDate];
 
-export const userBookingsQueryKey = (
+/*export const userBookingsQueryKey = (
   user: string,
   startDate: string,
   endDate: string
-): AnyQueryKey => ["userBookings", user, startDate, endDate];
+): AnyQueryKey => ["userBookings", user, startDate, endDate];*/
 
 export function combineQueries<M>(queryMap: { [K in keyof M]: QueryResult<M[K]> }): QueryResult<M> {
   const queries = Object.values(queryMap) as QueryResult<any>[];

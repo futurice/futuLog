@@ -7,7 +7,6 @@ import {
   RenderQuery,
   combineQueries,
   officesQueryKey,
-  userShiftQueryKey,
   userQueryKey,
 } from "app/utils/reactQueryUtils";
 import { HomePage } from "app/ui/homePage/HomePage";
@@ -18,24 +17,13 @@ import { WelcomePage } from "app/ui/welcomePage/WelcomePage";
 import { PlanningPage } from "app/ui/planningPage/PlanningPage";
 import { PlaygroundPage } from "app/ui/playgroundPage/PlaygroundPage";
 import { CenteredSpinner } from "../ux/spinner";
-import { QrBerlin } from "app/ui/QrOffice/QrBerlin";
-import { QrStuttgart } from "app/ui/QrOffice/QrStuttgart";
-import { QrMunich } from "app/ui/QrOffice/QrMunich";
-import { QrStockholm } from "app/ui/QrOffice/QrStockholm";
-import { QrHelsinki } from "app/ui/QrOffice/QrHelsinki";
-import { QrTampere } from "app/ui/QrOffice/QrTampere";
-
+import { QrOffice } from "app/ui/QrOffice";
 
 export enum RoutePaths {
   Home = "/",
   Welcome = "/welcome",
   Info = "/info",
-  QrBerlin = "/qrberlin",
-  QrMunich = "/qrmunich",
-  QrStuttgart = "/qrstuttgart",
-  QrStockholm = "/qrstockholm",
-  QrHelsinki = "/qrhelsinki",
-  QrTampere = "/qrtampere",
+  QrOffice = "/qr/:office",
   Planning = "/planning",
   User = "/user",
   Admin = "/admin",
@@ -44,7 +32,7 @@ export enum RoutePaths {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { apiClient: apiClientService, localStorage: localStorageService, queryCache } = useServices();
+  const { apiClient: apiClientService, localStorage: localStorageService } = useServices();
   const [hasVisitedWelcomePage, setHasVisitedWelcomePage] = useState(
     !!localStorageService.getItem("futulog/started")
   );
@@ -56,14 +44,12 @@ export const AppRoutes: React.FC = () => {
 
   // Fetch all critical non admin data here
   const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
-  const userShiftRes = useQuery(userShiftQueryKey(), () => apiClientService.getUserShift());
   const officesRes = useQuery(officesQueryKey(), () => apiClientService.getOffices());
 
   return (
     <RenderQuery
       query={combineQueries({
         user: userRes,
-        userShift: userShiftRes,
         offices: officesRes,
       })}
       onLoading={() => <CenteredSpinner />}
@@ -77,13 +63,8 @@ export const AppRoutes: React.FC = () => {
               path={RoutePaths.Welcome}
               render={() => <WelcomePage onMount={onVisitWelcomePage} />}
             />
-            <Route exact path={RoutePaths.QrBerlin} component={QrBerlin} />
-            <Route exact path={RoutePaths.QrStuttgart} component={QrStuttgart} />
-            <Route exact path={RoutePaths.QrMunich} component={QrMunich} />
-            <Route exact path={RoutePaths.QrHelsinki} component={QrHelsinki} />
-            <Route exact path={RoutePaths.QrStockholm} component={QrStockholm} />
-            <Route exact path={RoutePaths.QrTampere} component={QrTampere} />
-            {!hasVisitedWelcomePage && <Redirect to={RoutePaths.Welcome} />}
+            <Route exact path={RoutePaths.QrOffice} component={QrOffice} />
+            {(!hasVisitedWelcomePage || !user.defaultOffice) && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
             {user.isAdmin && (

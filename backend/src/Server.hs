@@ -5,10 +5,10 @@ import Auth (contextProxy, mkAuthServerContext)
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.ClientRequest (RegistrationId (..), toRegistration)
+import Data.ClientRequest (Contacts, RegistrationId (..), toRegistration)
 import Data.Errors (GenericError (..), RegistrationError (..))
 import Data.Functor (($>))
-import Data.Maybe (catMaybes, fromMaybe)
+import Data.Maybe (catMaybes)
 import Data.Proxy (Proxy (..))
 import Data.Swagger (Scheme (Http, Https), info, schemes, title, version)
 import Data.Time.Calendar (Day)
@@ -48,17 +48,16 @@ meHandler user = pure user :<|> setDefaultOffice
         Nothing -> respond . WithStatus @400 $ MkGenericError @"No office with this name exists"
 
 officesHandler :: Server OfficesAPI
-officesHandler = DB.getOffices :<|> bookedHandler
+officesHandler = DB.getOffices :<|> bookingsHandler
   where
-    bookedHandler office date = do
+    bookingsHandler office = withDefaultDays $ \startDate endDate -> do
       today <- liftIO $ utctDay <$> getCurrentTime
-      let d = fromMaybe today date
-      if d < today
+      if startDate < today || endDate < today
         then
-          respond @_ @'[WithStatus 200 [User], WithStatus 400 (GenericError "Date may not be in the past")]
+          respond @_ @'[WithStatus 200 [Contacts], WithStatus 400 (GenericError "Date may not be in the past")]
             . WithStatus @400
             $ MkGenericError @"Date may not be in the past"
-        else DB.queryBooked office d >>= respond . WithStatus @200
+        else DB.queryBooked office startDate endDate >>= respond . WithStatus @200
 
 registrationsHandler :: User -> Server RegistrationAPI
 registrationsHandler user@MkUser {email} = register :<|> getRegistrations :<|> confirmRegistration

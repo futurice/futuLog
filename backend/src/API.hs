@@ -48,13 +48,14 @@ type OfficesAPI =
       :> Get '[JSON] [Office]
   )
     :<|> Capture "office" Text
-      :> ( "booked"
-             :> Summary "Get the people that booked for a certain date (default to the current date)"
-             :> QueryParam "date" Day
+      :> ( "bookings"
+             :> Summary "Get the people that booked for a certain timespan (defaults to the current date)"
+             :> QueryParam "startDate" Day
+             :> QueryParam "endDate" Day
              :> UVerb
                   'GET
                   '[JSON]
-                  '[ WithStatus 200 [User],
+                  '[ WithStatus 200 [Contacts],
                      WithStatus 400 (GenericError "Date may not be in the past")
                    ]
          )

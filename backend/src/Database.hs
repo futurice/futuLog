@@ -12,9 +12,9 @@ import Data.ByteString (ByteString)
 import Data.ClientRequest (Contacts (..), Office, Registration (..), RegistrationId (..), UserRegistration (..), registrationDate, registrationOffice)
 import Data.Env (Env (..))
 import Data.Functor (($>), (<&>))
-import Data.List (groupBy, sortOn)
-import Data.List.NonEmpty (NonEmpty ((:|)), nonEmpty, toList)
-import Data.Maybe (listToMaybe, mapMaybe)
+import Data.List (sortOn)
+import Data.List.NonEmpty (NonEmpty ((:|)), groupWith, toList)
+import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -32,11 +32,19 @@ queryRegistrations email start end =
     "SELECT * FROM registrations WHERE user_email = ? AND date >= ? AND date <= ? ORDER BY date DESC"
     (email, start, end)
 
-queryBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> m [User]
-queryBooked office date =
+queryBooked :: (MonadIO m, MonadReader Env m) => Text -> Day -> Day -> m [Contacts]
+queryBooked office start end =
   query'
-    (userFields <> " RIGHT JOIN registrations AS r ON u.user_email = r.user_email WHERE r.office = ? AND r.date = ?")
-    (office, date)
+    ( withUserFields "r.date"
+        <> " RIGHT JOIN registrations AS r ON u.user_email = r.user_email WHERE r.office = ? AND r.date >= ? AND r.date <= ?"
+        <> " ORDER BY r.date DESC"
+    )
+    (office, start, end)
+    <&> fmap toContacts . groupWith fst'
+  where
+    fst' (x, _, _, _, _, _) = x
+    toContacts ys@((d, _, _, _, _, _) :| _) = MkContacts d office . fmap toUser $ toList ys
+    toUser (_, name, email, picture, o, isAdmin) = MkUser name email picture o isAdmin
 
 queryContacts :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Contacts]
 queryContacts email start end =
@@ -64,7 +72,7 @@ tryRegistrations user xs = do
       ys -> pure $ Just ys
   where
     groupRegistrations :: [Registration] -> [NonEmpty Registration]
-    groupRegistrations = mapMaybe nonEmpty . groupBy (\a b -> registrationOffice a == registrationOffice b) . sortOn registrationOffice
+    groupRegistrations = groupWith registrationOffice . sortOn registrationOffice
     queryOffice conns ys@(MkRegistration {office} :| _) =
       fmap fromOnly
         <$> queryIO
@@ -127,10 +135,13 @@ saveUser =
 getUsers :: (MonadIO m, MonadReader Env m) => m [User]
 getUsers = query'_ userFields
 
-userFields :: Query
-userFields =
-  "SELECT u.name, u.user_email, u.picture, u.default_office, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin"
+withUserFields :: Query -> Query
+withUserFields q =
+  "SELECT " <> q <> ", u.name, u.user_email, u.picture, u.default_office, CASE WHEN admins.user_email IS NULL THEN false ELSE true END AS is_admin"
     <> "FROM users AS u LEFT JOIN admins ON u.user_email = admins.user_email"
+
+userFields :: Query
+userFields = withUserFields ""
 
 getAdmins :: (MonadIO m, MonadReader Env m) => Maybe Text -> m [Admin]
 getAdmins = \case

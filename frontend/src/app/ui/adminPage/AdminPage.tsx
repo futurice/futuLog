@@ -11,6 +11,7 @@ import { PersonTrackingPanel } from "./PersonTrackingPanel";
 import { usersQueryKey } from "../../utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import { CenteredSpinner } from "../ux/spinner";
+import { OfficePanel } from "./OfficePanel";
 
 export interface ITabPanelProps {
   children?: React.ReactNode;
@@ -83,6 +84,7 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
             <Tabs value={tab} onChange={handleTabChange} aria-label="Admin page tabs">
               <Tab label="Office visits" {...a11yProps(0)} />
               <Tab label="Person tracking" {...a11yProps(1)} />
+              <Tab label="Offices" {...a11yProps(2)} />
             </Tabs>
             <TabsPanelWrapper bgColor={`${colors["deep-blue-10"]}`}>
               <TabPanel value={tab} index={0}>
@@ -90,6 +92,9 @@ export const AdminPage: React.FC<IAdminPage> = ({ offices }) => {
               </TabPanel>
               <TabPanel value={tab} index={1}>
                 <PersonTrackingPanel users={users || []} offices={offices} />
+              </TabPanel>
+              <TabPanel value={tab} index={2}>
+                <OfficePanel offices={offices} />
               </TabPanel>
             </TabsPanelWrapper>
           </TabsWrapper>

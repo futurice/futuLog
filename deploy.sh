@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -eo pipefail
 
@@ -39,7 +39,7 @@ fi
 
 confirm="yes"
 if [[ "$1" != "cd" ]] && [[ "$2" != "--dry-run" ]]; then
-    read -p "Are you sure you want to deploy to futuEKS (yes/no)" confirm
+    read -p "Are you sure you want to deploy to $NAME (yes/no)" confirm
 fi
 if [[ "$confirm" == "yes" ]]; then
     if [[ "$2" == "--dry-run" ]]; then

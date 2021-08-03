@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { PageMargins, Stack, HR } from "app/ui/ux/containers";
 import { H2, P } from "app/ui/ux/text";
 import { useServices } from "../../services/services";
@@ -7,13 +7,8 @@ import { SiteSelector } from "../siteSelector/SiteSector";
 import { userQueryKey, setDefaultOfficeQueryKey } from "app/utils/reactQueryUtils";
 import { IUserDto } from "app/services/apiClientService";
 
-interface IWelcomePage {
-  onMount: () => void;
-}
-
-export const WelcomePage: React.FC<IWelcomePage> = ({ onMount }) => {
+export const WelcomePage: React.FC<{}> = () => {
   const { apiClient, queryCache } = useServices();
-  useEffect(onMount, []); // eslint-disable-line
 
   //
   // Remote data

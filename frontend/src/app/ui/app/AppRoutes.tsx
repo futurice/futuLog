@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery} from "react-query";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { useServices } from "app/services/services";
@@ -32,15 +32,7 @@ export enum RoutePaths {
 }
 
 export const AppRoutes: React.FC = () => {
-  const { apiClient: apiClientService, localStorage: localStorageService } = useServices();
-  const [hasVisitedWelcomePage, setHasVisitedWelcomePage] = useState(
-    !!localStorageService.getItem("futulog/started")
-  );
-  const onVisitWelcomePage = () => {
-    localStorageService.setItem("futulog/started", "true");
-    setHasVisitedWelcomePage(true);
-  };
-
+  const { apiClient: apiClientService  } = useServices();
 
   // Fetch all critical non admin data here
   const userRes = useQuery(userQueryKey(), () => apiClientService.getUser());
@@ -61,10 +53,10 @@ export const AppRoutes: React.FC = () => {
             <Route
               exact
               path={RoutePaths.Welcome}
-              render={() => <WelcomePage onMount={onVisitWelcomePage} />}
+              render={() => <WelcomePage />}
             />
             <Route exact path={RoutePaths.QrOffice} component={QrOffice} />
-            {(!hasVisitedWelcomePage || !user.defaultOffice) && <Redirect to={RoutePaths.Welcome} />}
+            {!user.defaultOffice && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
             {user.isAdmin && (

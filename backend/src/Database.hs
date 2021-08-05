@@ -9,10 +9,9 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (MonadReader, asks)
 import Control.Retry (RetryStatus (..), exponentialBackoff, recoverAll)
 import Data.ByteString (ByteString)
-import Data.ClientRequest (Contacts (..), Office, Registration (..), RegistrationId (..), UserRegistration (..), registrationDate, registrationOffice)
+import Data.ClientRequest (Contacts (..), Office, Registration (..), RegistrationId (..), UserRegistration (..), registrationDate)
 import Data.Env (Env (..))
 import Data.Functor (($>), (<&>))
-import Data.List (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), groupWith, toList)
 import Data.Maybe (listToMaybe)
 import Data.Pool (Pool, createPool, withResource)
@@ -22,8 +21,7 @@ import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime)
 import Data.User (Admin, Email, OpenIdUser, User (..))
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, close, connectPostgreSQL, execute, executeMany, execute_, query, query_, withTransaction)
-import Database.PostgreSQL.Simple.Types (In (In))
+import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, begin, close, commit, connectPostgreSQL, execute, execute_, query, query_, returning, rollback, withTransaction)
 import System.Environment (lookupEnv)
 
 queryRegistrations :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Registration]
@@ -65,23 +63,35 @@ queryContacts email start end =
 tryRegistrations :: (MonadIO m, MonadReader Env m) => User -> [Registration] -> m (Maybe [Day])
 tryRegistrations user xs = do
   conns <- asks pool
-  withTransaction' do
-    days <- mapM (queryOffice conns) $ groupRegistrations xs
-    case concat days of
-      [] -> executeManyIO conns "INSERT INTO registrations VALUES (?, ?, ?, ?, ?, ?)" (fmap (MkUserRegistration user) xs) $> Nothing
-      ys -> pure $ Just ys
-  where
-    groupRegistrations :: [Registration] -> [NonEmpty Registration]
-    groupRegistrations = groupWith registrationOffice . sortOn registrationOffice
-    queryOffice conns ys@(MkRegistration {office} :| _) =
+  liftIO $ withResource conns \con -> do
+    begin con
+
+    (updatedDays :: [Day]) <-
       fmap fromOnly
-        <$> queryIO
+        <$> returning
+          con
+          ( "INSERT INTO registrations AS r (user_email, office, date, workmode, confirmed, client_name) VALUES (?, ?, ?, ?, ?, ?) "
+              <> "ON CONFLICT (user_email, date) DO UPDATE SET office = EXCLUDED.office, workmode = EXCLUDED.workmode, "
+              <> "confirmed = EXCLUDED.confirmed, client_name = EXCLUDED.client_name "
+              <> "WHERE (r.confirmed IS NULL OR r.confirmed = false) AND EXCLUDED.date >= CURRENT_DATE "
+              <> "RETURNING r.date"
+          )
+          (fmap (MkUserRegistration user) xs)
+
+    (overfullDays :: [Day]) <-
+      fmap fromOnly
+        <$> queryIO_
           conns
-          ("SELECT date FROM (" <> subquery <> ") AS res WHERE res.capacity <= res.x OR res.date < current_date")
-          (office, In (toList $ fmap registrationDate ys))
-    subquery =
-      "SELECT r.date, o.capacity, count(*) AS x FROM registrations AS r LEFT JOIN offices AS o ON r.office = o.name "
-        <> "WHERE r.workmode = 'Office' AND r.office = ? AND r.date IN ? GROUP BY r.date, o.capacity"
+          ( "SELECT date FROM ("
+              <> "SELECT r.date, o.capacity, count(*) AS x FROM registrations AS r LEFT JOIN offices AS o ON r.office = o.name "
+              <> "WHERE r.workmode = 'Office' GROUP BY r.date, o.capacity"
+              <> ") AS res WHERE res.capacity < res.x"
+          )
+
+    let errorDays = overfullDays ++ filter (not . (`elem` updatedDays)) (fmap registrationDate xs)
+    case errorDays of
+      [] -> commit con $> Nothing
+      errs -> rollback con $> Just errs
 
 confirmRegistration :: (MonadIO m, MonadReader Env m) => RegistrationId -> m Bool
 confirmRegistration MkRegistrationId {date, email} =
@@ -234,7 +244,8 @@ initDatabase connectionString = do
           <> "date date not null, "
           <> "workmode text not null, "
           <> "confirmed bool, "
-          <> "client_name text"
+          <> "client_name text, "
+          <> "UNIQUE (user_email, date)"
           <> ")"
       )
   _ <- liftIO . withResource pool $ \conn ->
@@ -273,8 +284,8 @@ exec q r = do
   _ <- liftIO . withResource conns $ \conn -> execute conn q r
   pure ()
 
-executeManyIO :: (ToRow r) => Pool Connection -> Query -> [r] -> IO ()
-executeManyIO conns q rs = withResource conns $ \conn -> executeMany conn q rs $> ()
+executeManyIO :: (ToRow r, FromRow x) => Pool Connection -> Query -> [r] -> IO [x]
+executeManyIO conns q rs = withResource conns $ \conn -> returning conn q rs
 
 query'_ :: (MonadIO m, MonadReader Env m, FromRow r) => Query -> m [r]
 query'_ q = do
@@ -286,7 +297,10 @@ query' q x = do
   conns <- asks pool
   liftIO . withResource conns $ \conn -> query conn q x
 
-queryIO :: (ToRow x, FromRow r) => Pool Connection -> Query -> x -> IO [r]
+queryIO_ :: (FromRow r) => Pool Connection -> Query -> IO [r]
+queryIO_ conns q = withResource conns $ \conn -> query_ conn q
+
+queryIO :: (FromRow r, ToRow x) => Pool Connection -> Query -> x -> IO [r]
 queryIO conns q x = withResource conns $ \conn -> query conn q x
 
 withTransaction' :: (MonadIO m, MonadReader Env m) => IO a -> m a

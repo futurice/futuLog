@@ -56,7 +56,7 @@ export const AppRoutes: React.FC = () => {
               render={() => <WelcomePage />}
             />
             <Route exact path={RoutePaths.QrOffice} component={QrOffice} />
-            {!user.defaultOffice && <Redirect to={RoutePaths.Welcome} />}
+            {!user.defaultOffice && !user.isAdmin && <Redirect to={RoutePaths.Welcome} />}
 
             <Route exact path={RoutePaths.Home} component={HomePage} />
             {user.isAdmin && (

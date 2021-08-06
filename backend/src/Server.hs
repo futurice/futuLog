@@ -5,7 +5,7 @@ import Auth (contextProxy, mkAuthServerContext)
 import Control.Lens ((&), (.~), (?~))
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.ClientRequest (Contacts, Office, RegistrationId (..), toRegistration)
+import Data.ClientRequest (Contacts, Office, RegistrationId (..), toRegistrations)
 import Data.Errors (GenericError (..), RegistrationError (..))
 import Data.Functor (($>))
 import Data.Maybe (catMaybes, fromMaybe)
@@ -60,10 +60,10 @@ officesHandler = DB.getOffices :<|> bookingsHandler
         else DB.queryBooked office startDate endDate >>= respond . WithStatus @200
 
 registrationsHandler :: User -> Server RegistrationAPI
-registrationsHandler user@MkUser {email} = register :<|> getRegistrations :<|> confirmRegistration
+registrationsHandler MkUser {email} = register :<|> getRegistrations :<|> confirmRegistration
   where
     register =
-      DB.tryRegistrations user >=> pure . fmap MkRegistrationError >=> \case
+      DB.tryRegistrations Nothing email >=> pure . fmap MkRegistrationError >=> \case
         Nothing -> respond $ WithStatus @200 NoContent
         Just err -> respond $ WithStatus @400 err
     getRegistrations = withDefaultDays . DB.queryRegistrations $ email
@@ -74,7 +74,7 @@ registrationsHandler user@MkUser {email} = register :<|> getRegistrations :<|> c
         False -> respond . WithStatus @400 $ MkGenericError @"No registration for this day exists"
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler _ = adminsHandler :<|> adminRegistrationsHandler :<|> DB.getUsers :<|> adminOfficesHandler
+adminHandler admin = adminsHandler :<|> adminRegistrationsHandler admin :<|> DB.getUsers :<|> adminOfficesHandler
 
 adminsHandler :: Server AdminsAPI
 adminsHandler = DB.getAdmins :<|> putAdmin :<|> removeAdmin
@@ -85,14 +85,14 @@ adminsHandler = DB.getAdmins :<|> putAdmin :<|> removeAdmin
         Just e -> respond @_ @'[WithStatus 200 Email, WithStatus 400 (GenericError "No admin with that email exists")] $ WithStatus @200 e
         Nothing -> respond . WithStatus @400 $ MkGenericError @"No admin with that email exists"
 
-adminRegistrationsHandler :: Server AdminRegistrationAPI
-adminRegistrationsHandler = deleteRegistrationsHandler :<|> editRegistrationsHandler :<|> adminUserHandler
+adminRegistrationsHandler :: AdminUser -> Server AdminRegistrationAPI
+adminRegistrationsHandler admin = deleteRegistrationsHandler :<|> editRegistrationsHandler :<|> adminUserHandler
   where
     deleteRegistrationsHandler =
       mapM DB.deleteRegistration >=> pure . catMaybes >=> \case
         [] -> respond $ WithStatus @200 NoContent
         xs -> respond $ WithStatus @400 xs
-    editRegistrationsHandler = mapM (uncurry DB.saveRegistration . toRegistration) >$> NoContent
+    editRegistrationsHandler = mapM (uncurry (DB.tryRegistrations (Just admin)) . toRegistrations) >$> NoContent
 
 adminUserHandler :: Email -> Server AdminUserAPI
 adminUserHandler email = userRegistrationsHandler :<|> contactsHandler

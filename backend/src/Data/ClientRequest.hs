@@ -38,8 +38,8 @@ data AdminRegistration = MkAdminRegistration
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema)
 
-toRegistration :: AdminRegistration -> (Email, Registration)
-toRegistration MkAdminRegistration {..} = (email, MkRegistration {..})
+toRegistrations :: AdminRegistration -> (Email, [Registration])
+toRegistrations MkAdminRegistration {..} = (email, [MkRegistration {..}])
 
 data RegistrationId = MkRegistrationId
   { email :: Email,
@@ -63,10 +63,10 @@ data Office = MkOffice
   deriving stock (Generic, Show, Eq)
   deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow, ToRow)
 
-data UserRegistration = MkUserRegistration User Registration
+data UserRegistration = MkUserRegistration Email Registration
 
 instance ToRow UserRegistration where
-  toRow (MkUserRegistration MkUser {email} MkRegistration {office, date, workmode}) =
+  toRow (MkUserRegistration email MkRegistration {office, date, workmode}) =
     [toField email, toField office, toField date] <> case workmode of
       Office b -> [toField ("Office" :: Text), toField b, toField Null]
       Client x -> [toField ("Client" :: Text), toField Null, toField x]

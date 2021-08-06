@@ -19,8 +19,7 @@ import Data.Text (Text)
 import Data.Time (UTCTime)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime)
-import Data.User (Admin, Email, OpenIdUser, User (..))
-import Data.Workmode (Workmode (..))
+import Data.User (Admin, AdminUser, Email, OpenIdUser, User (..))
 import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, begin, close, commit, connectPostgreSQL, execute, execute_, query, query_, returning, rollback, withTransaction)
 import System.Environment (lookupEnv)
 
@@ -60,11 +59,12 @@ queryContacts email start end =
               t
       )
 
-tryRegistrations :: (MonadIO m, MonadReader Env m) => User -> [Registration] -> m (Maybe [Day])
-tryRegistrations user xs = do
+tryRegistrations :: (MonadIO m, MonadReader Env m) => Maybe AdminUser -> Email -> [Registration] -> m (Maybe [Day])
+tryRegistrations admin user xs = do
   conns <- asks pool
   liftIO $ withResource conns \con -> do
     begin con
+    let allowPast = maybe " AND EXCLUDED.date >= CURRENT_DATE " (const " ") admin
 
     (updatedDays :: [Day]) <-
       fmap fromOnly
@@ -73,7 +73,8 @@ tryRegistrations user xs = do
           ( "INSERT INTO registrations AS r (user_email, office, date, workmode, confirmed, client_name) VALUES (?, ?, ?, ?, ?, ?) "
               <> "ON CONFLICT (user_email, date) DO UPDATE SET office = EXCLUDED.office, workmode = EXCLUDED.workmode, "
               <> "confirmed = EXCLUDED.confirmed, client_name = EXCLUDED.client_name "
-              <> "WHERE (r.confirmed IS NULL OR r.confirmed = false) AND EXCLUDED.date >= CURRENT_DATE "
+              <> "WHERE (r.confirmed IS NULL OR r.confirmed = false)"
+              <> allowPast
               <> "RETURNING r.date"
           )
           (fmap (MkUserRegistration user) xs)
@@ -110,26 +111,6 @@ deleteRegistration rid@MkRegistrationId {email, date} =
     <&> \case
       [] -> Just rid
       (_ :: [Only Text]) -> Nothing
-
-saveRegistration :: (MonadIO m, MonadReader Env m) => Email -> Registration -> m ()
-saveRegistration email MkRegistration {office, date, workmode} = do
-  exec "DELETE FROM workmodes WHERE user_email = ? AND date = ?" (email, date)
-  case workmode of
-    Home -> mkSimpleQuery "Home"
-    Leave -> mkSimpleQuery "Leave"
-    (Client name) ->
-      exec
-        "INSERT INTO workmodes (user_email, office, date, workmode, client_name) VALUES (?, ?, ?, ?, ?)"
-        (email, office, date, "Client" :: Text, name)
-    (Office confirmed) ->
-      exec
-        "INSERT INTO workmodes (user_email, office, date, workmode, confirmed) VALUES (?, ?, ?, ?, ?)"
-        (email, office, date, "Office" :: Text, confirmed)
-  where
-    mkSimpleQuery s =
-      exec
-        "INSERT INTO workmodes (user_email, office, date, workmode) VALUES (?, ?, ?, ?)"
-        (email, office, date, s :: Text)
 
 getOffices :: (MonadIO m, MonadReader Env m) => m [Office]
 getOffices = query'_ "SELECT * FROM offices"

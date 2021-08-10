@@ -10,7 +10,10 @@ import {
 import { ITableDataDto, ICollapsibleTableHead } from "./types";
 import { ModalContext } from "app/providers/ModalProvider";
 import { AdminEditContext } from "./AdminEditContext";
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button } from "@material-ui/core";
+import { HorizontalStack } from "../ux/containers";
+import { Checkbox } from "../ux/checkbox";
+import { TextField } from "../ux/inputs";
 
 interface IOfficePanel {
   offices: IOfficeDto[];
@@ -21,8 +24,12 @@ const tableHead = (
   toggleIsEditing: () => void
 ): ICollapsibleTableHead[] => [
     {
+      title: isEditing ? "checkbox" : "",
+      width: "10%",
+    },
+    {
       title: "Name",
-      width: "60%",
+      width: "50%",
     },
     {
       title: "Capacity",
@@ -40,13 +47,23 @@ export function OfficePanel({ offices }: IOfficePanel) {
 
   const { handleModalClose } = useContext(ModalContext);
 
-  const [rows, setRows] = useState<IOfficeDto[]>(offices);
+  const [rows, setRows] = useState<(IOfficeDto & { checked: boolean })[]>(offices as any);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectAll, setSelectAll] = useState(false);
 
   const toggleIsEditing = useCallback(() => {
     setIsEditing(!isEditing);
   }, [isEditing, setIsEditing]);
+
+  const toggleAllRows = () => {
+    const isChecked = rows.reduce((b, { checked }) => b && checked, true);
+    setRows(
+      rows.map(r => ({ ...r, checked: !isChecked }))
+    );
+  };
+
+  const toggleRow = (n: number) => {
+    setRows(rows.map((r, i) => i === n ? { ...r, checked: !r.checked } : r));
+  };
 
   const tableContainerClasses = useTableContainerStyles();
   const tableHeadClasses = useTableHeadCellStyles();
@@ -67,7 +84,7 @@ export function OfficePanel({ offices }: IOfficePanel) {
                 className={onClick ? tableHeadClasses.button : tableHeadClasses.root}
                 align={align}
                 onClick={onClick}
-              >{title}</TableCell>
+              >{title === "checkbox" ? <Checkbox onClick={() => toggleAllRows()} /> : title }</TableCell>
             )}
           </TableRow>
         </TableHead>
@@ -79,12 +96,64 @@ export function OfficePanel({ offices }: IOfficePanel) {
                   className={classes.root}
                   key={i + "1"}
                 >
+                  <TableCell key="checkbox">
+                    {isEditing && <Checkbox checked={Boolean(row.checked)} onClick={() => toggleRow(i)} /> }
+                  </TableCell>
                   <TableCell key="name">{row.name}</TableCell>
-                  <TableCell key="capacity">{row.capacity}</TableCell>
+                  <TableCell key="capacity">
+                    {isEditing ?
+                      <HorizontalStack spacing="0.8rem">
+                        <TextField value={row.capacity} />
+                        <Button variant="contained" color="primary" onClick={() => {}}>Confirm</Button>
+                      </HorizontalStack>
+                      : row.capacity}
+                  </TableCell>
                 </TableRow>
               ))
             )
           }
+          {isEditing ? (
+          <TableRow>
+            <TableCell colSpan={3}>
+              <HorizontalStack spacing="0.8rem" marginTop="1.25rem">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    /*handleModalOpen();
+                    setSelected(
+                      <DeleteEmployeeModalContent
+                        date={row.date}
+                        onDeleteEmployee={onDeleteEmployee}
+                      />
+                    );*/
+                  }}
+                >
+                  Remove offices
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => {
+                    /*handleModalOpen();
+                    setModalState(true);
+                    setSelected(
+                      <AddEmployeeModalContent
+                        users={users}
+                        onAddEmployee={onAddEmployee}
+                        site={row.office}
+                        date={row.date}
+                      />
+                    );*/
+                  }}
+                >
+                  Add an office
+                </Button>
+              </HorizontalStack>
+            </TableCell>
+          </TableRow>
+        ) : null}
+
         </TableBody>
       </Table>
       {

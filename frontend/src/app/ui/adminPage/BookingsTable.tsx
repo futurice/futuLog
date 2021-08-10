@@ -105,7 +105,7 @@ export function BookingsTable({ row, head }: IBookingsTable) {
                     );
                   }}
                 >
-                  Remove People
+                  Remove people
                 </Button>
                 <Button
                   variant="contained"

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useContext } from "react";
 import { useMutation, useQuery } from "react-query";
 
-import { useTableContainerStyles, useTableHeadCellStyles, TableEmptyContainer, useRowStyles } from "./CollapsibleTable";
+import { useTableContainerStyles, useTableHeadCellStyles, TableEmptyContainer } from "./CollapsibleTable";
 import { officeBookingsQueryKey, officesQueryKey, RenderQuery } from "../../utils/reactQueryUtils";
 import { useServices } from "../../services/services";
 import {
@@ -10,11 +10,13 @@ import {
 import { ITableDataDto, ICollapsibleTableHead } from "./types";
 import { ModalContext } from "app/providers/ModalProvider";
 import { AdminEditContext } from "./AdminEditContext";
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, makeStyles } from "@material-ui/core";
 import { HorizontalStack } from "../ux/containers";
 import { Checkbox } from "../ux/checkbox";
 import { TextField } from "../ux/inputs";
 import { Button } from "../ux/buttons";
+import AddOfficeModalContent from "./AddOfficeModalContent";
+import { colors } from "../ux/theme";
 
 interface IOfficePanel {
   offices: IOfficeDto[];
@@ -43,10 +45,22 @@ const tableHead = (
     },
   ];
 
+export const useRowStyles = makeStyles({
+  root: {
+    "& > *": {
+      borderBottom: "none",
+    },
+    "&:nth-child(n+1)": {
+      borderTop: `1px solid ${colors["deep-blue-20"]}`
+    }
+  }
+});
+
+
 export function OfficePanel({ offices: initialOffices }: IOfficePanel) {
   const { apiClient, queryCache } = useServices();
 
-  const { handleModalClose } = useContext(ModalContext);
+  const { handleModalClose, handleModalOpen, setSelected } = useContext(ModalContext);
 
   const [rows, setRows] = useState<(IOfficeDto & { checked: boolean })[]>(initialOffices as any);
   const [isEditing, setIsEditing] = useState(false);
@@ -174,16 +188,16 @@ export function OfficePanel({ offices: initialOffices }: IOfficePanel) {
                   variant="contained"
                   color="secondary"
                   onClick={() => {
-                    /*handleModalOpen();
-                    setModalState(true);
+                    handleModalOpen();
                     setSelected(
-                      <AddEmployeeModalContent
-                        users={users}
-                        onAddEmployee={onAddEmployee}
-                        site={row.office}
-                        date={row.date}
+                      <AddOfficeModalContent
+                        onAdd={(name, capacity) => {
+                          if(!isNaN(capacity)) {
+                            updateCapacity({ name, capacity });
+                          }
+                          }}
                       />
-                    );*/
+                    );
                   }}
                 >
                   Add an office

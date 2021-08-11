@@ -151,6 +151,11 @@ export function createAPIClientService(baseUrl: string) {
         fetchJSON<IContactsDto[]>(
           `${baseUrl}/api/admin/offices/${e(office)}/bookings?${qsStringify({ startDate, endDate })}`
         ),
+
+      setOffice: (request: IOfficeDto) => fetchJSON<void>(`${baseUrl}/api/admin/offices`, {
+        method: "PUT",
+        body: request
+      }),
     },
   };
 

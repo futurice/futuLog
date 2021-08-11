@@ -156,6 +156,10 @@ export function createAPIClientService(baseUrl: string) {
         method: "PUT",
         body: request
       }),
+
+      deleteOffice: (request: string) => fetchJSON<void>(`${baseUrl}/api/admin/offices/${encodeURIComponent(request)}`, {
+        method: "DELETE"
+      })
     },
   };
 

@@ -17,6 +17,7 @@ import { TextField } from "../ux/inputs";
 import { Button } from "../ux/buttons";
 import AddOfficeModalContent from "./AddOfficeModalContent";
 import { colors } from "../ux/theme";
+import DeleteOfficeModalContent from "./DeleteOfficeModalContent";
 
 interface IOfficePanel {
   offices: IOfficeDto[];
@@ -88,6 +89,17 @@ export function OfficePanel({ offices: initialOffices }: IOfficePanel) {
       onSuccess: () => queryCache.refetchQueries(officesQueryKey())
     }
   );
+  const [deleteOffices] = useMutation(
+    async (requests: string[]) => {
+      for(const r of requests) {
+        await apiClient.admin.deleteOffice(r);
+      }
+    },
+    {
+      onSuccess: () => queryCache.refetchQueries(officesQueryKey())
+    }
+  );
+
   const officesRes = useQuery(officesQueryKey(), () =>
     apiClient.getOffices().catch(() => null).then(offices => {
       setRows(offices as any)
@@ -109,6 +121,12 @@ export function OfficePanel({ offices: initialOffices }: IOfficePanel) {
   const tableContainerClasses = useTableContainerStyles();
   const tableHeadClasses = useTableHeadCellStyles();
   const classes = useRowStyles();
+
+  const onDeleteOffices = () => {
+    const names = rows.filter(x => x.checked).map(x => x.name);
+    deleteOffices(names);
+    handleModalClose();
+  };
 
   return (
     <RenderQuery
@@ -173,13 +191,12 @@ export function OfficePanel({ offices: initialOffices }: IOfficePanel) {
                   variant="contained"
                   color="primary"
                   onClick={() => {
-                    /*handleModalOpen();
+                    handleModalOpen();
                     setSelected(
-                      <DeleteEmployeeModalContent
-                        date={row.date}
-                        onDeleteEmployee={onDeleteEmployee}
+                      <DeleteOfficeModalContent
+                        onDelete={onDeleteOffices}
                       />
-                    );*/
+                    );
                   }}
                 >
                   Remove offices

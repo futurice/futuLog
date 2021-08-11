@@ -138,7 +138,7 @@ export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
 
             {user.isAdmin && (
               <LinkButton to={RoutePaths.Admin} component={BarButton} startIcon={<IconTracking />}>
-                Tracking
+                Administration
               </LinkButton>
             )}
 

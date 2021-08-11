@@ -20,7 +20,7 @@ function fetchJSON<T>(url: string, init?: IRequestInit | undefined): Promise<T> 
       // value if the JSON parsing fails
       return res.json().catch(() => null);
     } else if (res.status === 401) {
-        window.location.reload();
+        window.location.href = "/login";
     } else {
       return res.text().then(
         (message) => Promise.reject(Error(message)),
@@ -151,6 +151,15 @@ export function createAPIClientService(baseUrl: string) {
         fetchJSON<IContactsDto[]>(
           `${baseUrl}/api/admin/offices/${e(office)}/bookings?${qsStringify({ startDate, endDate })}`
         ),
+
+      setOffice: (request: IOfficeDto) => fetchJSON<void>(`${baseUrl}/api/admin/offices`, {
+        method: "PUT",
+        body: request
+      }),
+
+      deleteOffice: (request: string) => fetchJSON<void>(`${baseUrl}/api/admin/offices/${encodeURIComponent(request)}`, {
+        method: "DELETE"
+      })
     },
   };
 

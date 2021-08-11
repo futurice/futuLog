@@ -20,7 +20,7 @@ import { ICollapsibleTableHead } from "./types";
 import { mapBookingsForUI } from "./OfficeVisitsPanel";
 
 
-const useRowStyles = makeStyles({
+export const useRowStyles = makeStyles({
   root: {
     "& > *": {
       borderBottom: "none",
@@ -31,7 +31,7 @@ const useRowStyles = makeStyles({
   }
 });
 
-const useTableContainerStyles = makeStyles({
+export const useTableContainerStyles = makeStyles({
   root: {
     borderRadius: "unset",
     boxShadow: "none",
@@ -39,7 +39,7 @@ const useTableContainerStyles = makeStyles({
   }
 });
 
-const useTableHeadCellStyles = makeStyles({
+export const useTableHeadCellStyles = makeStyles({
   root: {
     borderTop: `1px solid ${colors["deep-blue-30"]}`,
     borderBottom: `1px solid ${colors["deep-blue-30"]}`,
@@ -88,7 +88,7 @@ const TableEmpty = styled("div")({
   }
 });
 
-const TableEmptyContainer = ({ empty }: { empty: string | undefined }): JSX.Element => (
+export const TableEmptyContainer = ({ empty }: { empty: string | undefined }): JSX.Element => (
   <TableEmpty>
     <P>{empty}</P>
   </TableEmpty>

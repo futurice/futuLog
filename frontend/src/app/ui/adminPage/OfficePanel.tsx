@@ -57,16 +57,17 @@ export const useRowStyles = makeStyles({
   }
 });
 
-
 export function OfficePanel({ offices: initialOffices }: IOfficePanel) {
   const { apiClient, queryCache } = useServices();
 
   const { handleModalClose, handleModalOpen, setSelected } = useContext(ModalContext);
 
-  const [rows, setRows] = useState<(IOfficeDto & { checked: boolean })[]>(initialOffices as any);
+  const [rows, setRowsRaw] = useState<(IOfficeDto & { checked: boolean })[]>((initialOffices as any).sort((a, b) => a.name.localeCompare(b.name)));
   const [isEditing, setIsEditing] = useState(false);
   const [capacityEditing, setCapacityEditing] = useState<number | undefined>(undefined);
   const [capacity, setCapacity] = useState<string>("");
+
+  const setRows = (offices: any) => setRowsRaw(offices.sort((a, b) => a.name.localeCompare(b.name)));
 
   const toggleIsEditing = useCallback(() => {
     setIsEditing(!isEditing);

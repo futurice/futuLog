@@ -154,7 +154,7 @@ putAdmin :: (MonadIO m, MonadReader Env m) => Email -> m ()
 putAdmin = exec "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_email) DO NOTHING" . Only
 
 removeAdmin :: (MonadIO m, MonadReader Env m) => Email -> m (Maybe Email)
-removeAdmin email = listToMaybe . fmap fromOnly <$> query' "DELETE FROM admins WHERE user_email = ?" (Only email)
+removeAdmin email = listToMaybe . fmap fromOnly <$> query' "DELETE FROM admins WHERE user_email = ? RETURNING user_email" (Only email)
 
 setDefaultOffice :: (MonadIO m, MonadReader Env m) => User -> Text -> m (Maybe User)
 setDefaultOffice MkUser {email} office =
@@ -255,7 +255,7 @@ initDatabase connectionString = do
   admin <- liftIO $ lookupEnv "INITIAL_ADMIN"
   _ <- case admin of
     Just x -> liftIO . withResource pool $ \conn ->
-      execute conn "INSERT INTO admins (user_email) VALUES (?) ON CONFLICT (user_email) DO NOTHING" (Only x)
+      execute conn "INSERT INTO admins (user_email) SELECT ? WHERE NOT EXISTS (SELECT * FROM admins)" (Only x)
     Nothing -> pure 0
   pure pool
 

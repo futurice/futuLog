@@ -111,7 +111,8 @@ type AdminsAPI =
                   'DELETE
                   '[JSON]
                   [ WithStatus 200 Email,
-                    WithStatus 400 (GenericError "No admin with that email exists")
+                    WithStatus 400 (GenericError "No admin with that email exists"),
+                    WithStatus 403 (GenericError "Cannot remove yourself as admin")
                   ]
          )
 

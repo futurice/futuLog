@@ -74,16 +74,25 @@ registrationsHandler MkUser {email} = register :<|> getRegistrations :<|> confir
         False -> respond . WithStatus @400 $ MkGenericError @"No registration for this day exists"
 
 adminHandler :: AdminUser -> Server AdminAPI
-adminHandler admin = adminsHandler :<|> adminRegistrationsHandler admin :<|> DB.getUsers :<|> adminOfficesHandler
+adminHandler admin = adminsHandler admin :<|> adminRegistrationsHandler admin :<|> DB.getUsers :<|> adminOfficesHandler
 
-adminsHandler :: Server AdminsAPI
-adminsHandler = DB.getAdmins :<|> putAdmin :<|> removeAdmin
+adminsHandler :: AdminUser -> Server AdminsAPI
+adminsHandler (MkAdminUser MkUser {email}) = DB.getAdmins :<|> putAdmin :<|> removeAdmin
   where
     putAdmin = DB.putAdmin >$> NoContent
-    removeAdmin email =
-      DB.removeAdmin email >>= \case
-        Just e -> respond @_ @'[WithStatus 200 Email, WithStatus 400 (GenericError "No admin with that email exists")] $ WithStatus @200 e
-        Nothing -> respond . WithStatus @400 $ MkGenericError @"No admin with that email exists"
+    removeAdmin adminEmail =
+      if email == adminEmail
+        then respond . WithStatus @403 $ MkGenericError @"Cannot remove yourself as admin"
+        else
+          DB.removeAdmin adminEmail >>= \case
+            Just e ->
+              respond @_
+                @'[ WithStatus 200 Email,
+                    WithStatus 400 (GenericError "No admin with that email exists"),
+                    WithStatus 403 (GenericError "Cannot remove yourself as admin")
+                  ]
+                $ WithStatus @200 e
+            Nothing -> respond . WithStatus @400 $ MkGenericError @"No admin with that email exists"
 
 adminRegistrationsHandler :: AdminUser -> Server AdminRegistrationAPI
 adminRegistrationsHandler admin = deleteRegistrationsHandler :<|> editRegistrationsHandler :<|> adminUserHandler

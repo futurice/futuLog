@@ -18,6 +18,7 @@ export const registrationsQueryKey = (startDate: string, endDate: string): AnyQu
 export const officesQueryKey = () => "offices";
 // IUserDto[]
 export const usersQueryKey = () => "users";
+export const adminsQueryKey = () => "admins";
 // number
 /*export const officeCapacityQueryKey = (office: string, date: string): AnyQueryKey => [
   "officeCapacity",

@@ -40,6 +40,11 @@ export interface IUserDto {
   isAdmin: boolean;
 }
 
+export interface IAdminDto {
+  email: string;
+  name: string;
+}
+
 export enum Workmode {
   Office = "Office",
   Client = "Client",
@@ -159,6 +164,18 @@ export function createAPIClientService(baseUrl: string) {
 
       deleteOffice: (request: string) => fetchJSON<void>(`${baseUrl}/api/admin/offices/${encodeURIComponent(request)}`, {
         method: "DELETE"
+      }),
+
+      getAdmins: () => fetchJSON<IAdminDto[]>(`${baseUrl}/api/admin/admins`),
+
+      addAdmin: (request: string) => fetchJSON<void>(`${baseUrl}/api/admin/admins`, {
+        method: "PUT",
+        body: `"${request}"`
+      }),
+
+      deleteAdmin: (request: string) => fetchJSON<void>(`${baseUrl}/api/admin/admins`, {
+        method: "DELETE",
+        body: `"${request}"`
       })
     },
   };

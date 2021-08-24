@@ -70,6 +70,8 @@ As the server also needs the identity provider and several environment variables
 DOCKER_BUILDKIT=1 docker-compose build && docker-compose up
 ```
 
+The backend API is fully documented with an OpenAPI spec. After running the container you can explore the API at http://localhost:8000/swagger-ui or import http://localhost:8000/swagger.json with the OpenAPI tooling of your choice.
+
 ### Frontend
 
 The frontend is written in TypeScript with React. To set everything up run:

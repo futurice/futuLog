@@ -1,5 +1,7 @@
 # FutuLog
 
+[![Build](https://github.com/futurice/futuLog/actions/workflows/ci.yml/badge.svg)](https://github.com/futurice/futuLog/actions/workflows/ci.yml)
+
 This is a tool that was born out of two needs at Futurice:
 
 1. To enable proper social distancing, the available spots in the office have to be reduced and it should be easily visible if there is still space left for you

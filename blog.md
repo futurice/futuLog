@@ -26,7 +26,7 @@ The whole page is also responsive and works well on mobile, so you can book a la
 
 # Administration
 
-The whole tool can be managed by HC and office management. In the administration page, it is possible to add/remove offices, change the number of people allowed at the same time and add/remove other administrators. It also features two different modes of contract tracing: The first allows to check who was in the office in a given timespan. The second is for tracing the contacts of a single person. This is what would be used in case of a positive COVID-19 test. The administrator can select the person and a timeframe (for example 14 days) and then see what people were **with** that person in the office in the given timeframe. The results of both pages can be exported to CSV which can be used by Excel:
+The whole tool can be managed by HC and office management. In the administration page, it is possible to add/remove offices, change the number of people allowed at the same time and add/remove other administrators. It also features two different modes of contact tracing: The first allows to check who was in the office in a given timespan. The second is for tracing the contacts of a single person. This is what would be used in case of a positive COVID-19 test. The administrator can select the person and a timeframe (for example 14 days) and then see what people were **with** that person in the office in the given timeframe. The results of both pages can be exported as a CSV file, so the data can be used for other purposes or tools (e.g. Excel):
 
 ![Image of the administration page](./images/admin-section.png)
 

@@ -33,3 +33,5 @@ The whole tool can be managed by HC and office management. In the administration
 # Want to learn more?
 
 In case you think this could be useful to you and/or your company feel free to check out the code on [GitHub](https://github.com/futurice/futuLog). The README contains instructions on how to run futuLog yourself, it uses standard docker containers so it can be deployed almost everywhere. For more specific questions or if you want Futurice to help with the setup, feel free to open an issue on GitHub or contact us [via email](mailto://futulog-group@futurice.com).
+
+We will also publish another article soon that goes more into the design and design research for futuLog as well as an article that explains the tech side in depth.

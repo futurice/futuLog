@@ -20,7 +20,7 @@ import Data.Time (UTCTime)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (getCurrentTime)
 import Data.User (Admin, AdminUser, Email, OpenIdUser, User (..))
-import Database.PostgreSQL.Simple (Connection, FromRow, Only (..), Query, ToRow, begin, close, commit, connectPostgreSQL, execute, execute_, query, query_, returning, rollback, withTransaction)
+import Database.PostgreSQL.Simple (Connection, FromRow, In (..), Only (..), Query, ToRow, begin, close, commit, connectPostgreSQL, execute, execute_, query, query_, returning, rollback, withTransaction)
 import System.Environment (lookupEnv)
 
 queryRegistrations :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Registration]
@@ -81,13 +81,14 @@ tryRegistrations admin user xs = do
 
     (overfullDays :: [Day]) <-
       fmap fromOnly
-        <$> queryIO_
+        <$> queryIO
           conns
           ( "SELECT date FROM ("
               <> "SELECT r.date, o.capacity, count(*) AS x FROM registrations AS r LEFT JOIN offices AS o ON r.office = o.name "
-              <> "WHERE r.workmode = 'Office' GROUP BY r.date, o.capacity"
+              <> "WHERE r.workmode = 'Office' AND r.date IN ? BY r.date, o.capacity"
               <> ") AS res WHERE res.capacity < res.x"
           )
+          (Only . In $ fmap registrationDate xs)
 
     let errorDays = overfullDays ++ filter (not . (`elem` updatedDays)) (fmap registrationDate xs)
     case errorDays of
@@ -277,9 +278,6 @@ query' :: (MonadIO m, MonadReader Env m, ToRow x, FromRow r) => Query -> x -> m 
 query' q x = do
   conns <- asks pool
   liftIO . withResource conns $ \conn -> query conn q x
-
-queryIO_ :: (FromRow r) => Pool Connection -> Query -> IO [r]
-queryIO_ conns q = withResource conns $ \conn -> query_ conn q
 
 queryIO :: (FromRow r, ToRow x) => Pool Connection -> Query -> x -> IO [r]
 queryIO conns q x = withResource conns $ \conn -> query conn q x

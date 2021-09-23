@@ -85,7 +85,7 @@ tryRegistrations admin user xs = do
           conns
           ( "SELECT date FROM ("
               <> "SELECT r.date, o.capacity, count(*) AS x FROM registrations AS r LEFT JOIN offices AS o ON r.office = o.name "
-              <> "WHERE r.workmode = 'Office' AND r.date IN ? BY r.date, o.capacity"
+              <> "WHERE r.workmode = 'Office' AND r.date IN ? GROUP BY r.date, o.capacity"
               <> ") AS res WHERE res.capacity < res.x"
           )
           (Only . In $ fmap registrationDate xs)

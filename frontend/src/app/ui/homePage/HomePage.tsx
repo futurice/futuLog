@@ -145,6 +145,11 @@ export const HomePage: React.FC = () => {
                       <P>
                         You have booked a spot to work from the office today. Please confirm that you
                         are there or that you are going and that you feel healthy.
+                      </P>
+
+                      <P>
+                        <span style={{ fontWeight: "bold" }}>This will make your choice binding, you won't
+                        be able to switch to back to "Home" for example</span>
                         <InlineIconButton
                           aria-label="More information"
                           aria-expanded={isWhyExpanded}

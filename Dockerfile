@@ -22,7 +22,7 @@ RUN npm run build
 
 FROM debian:buster AS service
 
-RUN apt-get update && apt-get install -y libpq5 ca-certificates
+RUN apt-get update && apt-get install -y libpq5 ca-certificates postgresql-client
 
 COPY ./startup.sh ./
 

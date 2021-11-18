@@ -24,7 +24,8 @@ import { H2, H3, P } from "app/ui/ux/text";
 import { IconInfo, IconCheck } from "app/ui/ux/icons";
 import { Stack, HR } from "app/ui/ux/containers";
 import { WorkmodeButtons } from "app/ui/homePage/WorkmodeButtons";
-import { Card } from "app/ui/ux/Card"
+import { Card } from "app/ui/ux/Card";
+import { NAVIGATION_BAR_HEIGHT_PX } from "app/ui/siteLayout/NavigationBar";
 
 
 const InlineIconButton = styled(IconButton)({
@@ -102,6 +103,7 @@ export const HomePage: React.FC = () => {
       mx="auto"
       p={["0.5rem", "1rem", "2.5rem"]}
       spacing={["0.5rem", "1rem", "2.5rem"]}
+      marginTop={`${NAVIGATION_BAR_HEIGHT_PX}px`}
     >
       <RenderQuery
         query={combineQueries({

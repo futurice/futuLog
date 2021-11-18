@@ -40,7 +40,7 @@ export const PlanningPage: React.FC = () => {
   const [month, setMonth] = useState<string>(dayjs().format("MMMM YYYY"));
 
   return (
-    <Page className="PlanningPage">
+    <Page className="PlanningPage" marginTop={`${NAVIGATION_BAR_HEIGHT_PX}px`}>
       {/* Heading element */}
       <HeaderWrapper>
         <Header>

@@ -99,7 +99,7 @@ const AvatarContainer = styled("div")({
 });
 
 export const NavigationBar: React.FC<INavigationBar> = ({ user }) => (
-  <StyledAppBar position="static" className="NavigationBar">
+  <StyledAppBar position="fixed" className="NavigationBar">
     <StyledToolbar>
       <AppTitleLink to={RoutePaths.Home} aria-label="Home">
         <IconLogoLight height="32" width="28" /> <AppTitle>futuLog</AppTitle>

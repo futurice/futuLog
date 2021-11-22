@@ -11,12 +11,11 @@ services:
     environment:
       DB_URL: postgresql://postgres:example_password@db:5432/futuLog
       INITIAL_ADMIN: testuser1@example.org
-      # PUBLIC_URI: http://localhost:8000
-      PUBLIC_URI: http://localhost:3000
+      PUBLIC_URI: http://localhost:8000
+      # PUBLIC_URI: http://localhost:3000
       OPENID_CLIENT_ID: futulog
       OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
       OPENID_CONFIG_URI: http://keycloak:8080/auth/realms/futulog/.well-known/openid-configuration
-    # network_mode: "bridge"
     depends_on:
       - db
 
@@ -34,6 +33,7 @@ services:
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_FRONTEND_URL: http://localhost:8080/auth
       DB_VENDOR: POSTGRES
       DB_ADDR: keycloak_db
       DB_DATABASE: keycloak

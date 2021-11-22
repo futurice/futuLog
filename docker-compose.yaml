@@ -1,51 +1,55 @@
 version: "3.8"
 services:
-    futuLog:
-        build: .
-        image: futurice/futulog:latest
-        tty: true
-        environment:
-            DB_URL: postgresql://postgres:example_password@localhost:5432/futuLog
-            INITIAL_ADMIN: testuser1@example.org
-            PUBLIC_URI: http://localhost:8000
-            #PUBLIC_URI: http://localhost:3000
-            OPENID_CLIENT_ID: futulog
-            OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
-            OPENID_CONFIG_URI: http://localhost:8080/auth/realms/futulog/.well-known/openid-configuration
-        network_mode: "host"
-        depends_on:
-            - db
+  futuLog:
+    build: .
+    image: futurice/futulog:latest
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    tty: true
+    environment:
+      DB_URL: postgresql://postgres:example_password@db:5432/futuLog
+      INITIAL_ADMIN: testuser1@example.org
+      PUBLIC_URI: http://localhost:8000
+      # PUBLIC_URI: http://localhost:3000
+      OPENID_CLIENT_ID: futulog
+      OPENID_SECRET_TEXT: 2a914a74-fcba-491d-8d7c-fcff63b04097
+      OPENID_CONFIG_URI: http://keycloak:8080/auth/realms/futulog/.well-known/openid-configuration
+    depends_on:
+      - db
 
-    db:
-        image: postgres:12.3
-        ports:
-            - "5432:5432"
-        environment:
-            POSTGRES_DB: futuLog
-            POSTGRES_PASSWORD: example_password
+  db:
+    image: postgres:12.3
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: futuLog
+      POSTGRES_PASSWORD: example_password
 
-    keycloak:
-        image: jboss/keycloak:12.0.4
-        command: "-b 0.0.0.0 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/import.json -Dkeycloak.migration.strategy=OVERWRITE_EXISTING -Dkeycloak.profile.feature.upload_scripts=enabled"
-        environment:
-            KEYCLOAK_USER: admin
-            KEYCLOAK_PASSWORD: admin
-            DB_VENDOR: POSTGRES
-            DB_ADDR: keycloak_db
-            DB_DATABASE: keycloak
-            DB_USER: keycloak
-            DB_SCHEMA: public
-            DB_PASSWORD: keycloak
-        ports:
-            - "8080:8080"
-        volumes:
-            - ./keycloak-import.json:/tmp/import.json
-        depends_on:
-            - keycloak_db
+  keycloak:
+    image: jboss/keycloak:12.0.4
+    command: "-b 0.0.0.0 -Dkeycloak.migration.action=import -Dkeycloak.migration.provider=singleFile -Dkeycloak.migration.file=/tmp/import.json -Dkeycloak.migration.strategy=OVERWRITE_EXISTING -Dkeycloak.profile.feature.upload_scripts=enabled"
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_FRONTEND_URL: http://localhost:8080/auth
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak_db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: keycloak
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak-import.json:/tmp/import.json
+    depends_on:
+      - keycloak_db
 
-    keycloak_db:
-        image: postgres:12.3
-        environment:
-            POSTGRES_DB: keycloak
-            POSTGRES_USER: keycloak
-            POSTGRES_PASSWORD: keycloak
+  keycloak_db:
+    image: postgres:12.3
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak

@@ -9,7 +9,8 @@ import Data.Text (Text)
 import Data.Time.Calendar (Day)
 import Data.User (Email, User (..))
 import Data.Workmode (Workmode (..))
-import Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
+import Database.PostgreSQL.Simple.FromField (fromJSONField)
+import Database.PostgreSQL.Simple.FromRow (FromRow (..), field, fieldWith)
 import Database.PostgreSQL.Simple.ToField (ToField (toField))
 import Database.PostgreSQL.Simple.ToRow (ToRow (..))
 import Database.PostgreSQL.Simple.Types (Null (Null))
@@ -64,6 +65,9 @@ data Office = MkOffice
   deriving anyclass (FromJSON, ToJSON, ToSchema, FromRow, ToRow)
 
 data UserRegistration = MkUserRegistration Email Registration
+
+instance FromRow Contacts where
+  fromRow = MkContacts <$> field <*> field <*> fieldWith fromJSONField
 
 instance ToRow UserRegistration where
   toRow (MkUserRegistration email MkRegistration {office, date, workmode}) =

@@ -1,5 +1,4 @@
 {-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE TupleSections #-}
 
 module Database where
 
@@ -46,18 +45,20 @@ queryBooked office start end =
 queryContacts :: (MonadIO m, MonadReader Env m) => Email -> Day -> Day -> m [Contacts]
 queryContacts email start end =
   query'
-    "SELECT office, date FROM registrations WHERE workmode = 'Office' AND user_email = ? AND date >= ? AND date <= ? ORDER BY date DESC"
-    (email, start, end)
-    >>= mapM
-      ( \t@(office, date) ->
-          MkContacts date office
-            <$> query'
-              ( userFields <> " WHERE u.user_email IN ("
-                  <> "SELECT r.user_email FROM registrations AS r WHERE workmode = 'Office' AND office = ? AND date = ?"
-                  <> ")"
-              )
-              t
-      )
+    ( "WITH dates AS ("
+        <> "SELECT date,office FROM registrations WHERE "
+        <> "workmode = 'Office' AND user_email = ? AND date >= ? AND date <= ?),"
+        <> "contacts AS ("
+        <> "SELECT date,office,user_email FROM registrations JOIN dates USING (date,office) "
+        <> "WHERE user_email <> ?),"
+        <> "user_fields AS (SELECT uf.name, uf.user_email AS email, uf.picture AS portrait, uf.default_office AS \"defaultOffice\", uf.is_admin AS \"isAdmin\" FROM ("
+        <> userFields
+        <> ") AS uf) "
+        <> "SELECT date,office,jsonb_agg(to_jsonb(user_fields.*)) AS contacts "
+        <> "FROM contacts JOIN user_fields ON contacts.user_email = user_fields.email "
+        <> "GROUP BY date, office ORDER BY date DESC"
+    )
+    (email, start, end, email)
 
 tryRegistrations :: (MonadIO m, MonadReader Env m) => Maybe AdminUser -> Email -> [Registration] -> m (Maybe [Day])
 tryRegistrations admin user xs = do

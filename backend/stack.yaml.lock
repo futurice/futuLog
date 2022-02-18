@@ -26,23 +26,9 @@ packages:
   original:
     git: https://github.com/haskell-servant/servant-swagger.git
     commit: bb0a84faa073fa9530f60337610d7da3d5b9393c
-- completed:
-    hackage: servant-0.18.3@sha256:0fbf8f9274bdfda6a778d6d7ec714c9f0abd17102af9bc002a93fe3ed284e8ca,5309
-    pantry-tree:
-      size: 2662
-      sha256: 206f6289793fc25e4708e454ebb3e478710e8634017a47f05cff41a20b50a08b
-  original:
-    hackage: servant-0.18.3
-- completed:
-    hackage: servant-server-0.18.3@sha256:8040e38682d936a2c87ad2a787cc65b3bad18c87e9f773cf7bcfc12ce76af96e,5508
-    pantry-tree:
-      size: 2614
-      sha256: 972459941ab4e8f83a44fce6172b61e9126727cb5bdad5d4d21c28907128917a
-  original:
-    hackage: servant-server-0.18.3
 snapshots:
 - completed:
-    size: 585392
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/1.yaml
-    sha256: 4e4c5e435a2f1c6f3c650f282db0f387f806406ed4fe6ef1aa4e6add9035d065
-  original: lts-18.1
+    size: 587393
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/25.yaml
+    sha256: 1b74fb5e970497b5aefae56703f1bd44aa648bd1a5ef95c1eb8c29775087e2bf
+  original: lts-18.25

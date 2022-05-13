@@ -9,6 +9,7 @@ import { userQueryKey, setDefaultOfficeQueryKey } from "app/utils/reactQueryUtil
 import { useMutation } from "react-query";
 import { SiteSelector } from "../siteSelector/SiteSector";
 import { Button } from "../ux/buttons";
+import { NAVIGATION_BAR_HEIGHT_PX } from "app/ui/siteLayout/NavigationBar";
 
 export const UserPage: React.FC = () => {
     const { apiClient, queryCache } = useServices();
@@ -34,7 +35,7 @@ export const UserPage: React.FC = () => {
     };
 
     return (
-        <PageMargins className="UserPage">
+        <PageMargins className="UserPage" marginTop={`${NAVIGATION_BAR_HEIGHT_PX}px`}>
             <Stack spacing="2.5rem" maxWidth="25rem" mx="auto" textAlign="center">
                 <H2>Personal page</H2>
                 <Flex justifyContent="center">
